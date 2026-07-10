@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: helm
+      POSTGRES_PASSWORD: helm
+      POSTGRES_DB: helm
+    ports:
+      - "5432:5432"
+    volumes:
+      - helm_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  helm_postgres_data:
