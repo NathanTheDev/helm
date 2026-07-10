@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getHabits, type Habit } from "@/lib/api";
 import { HabitCard } from "@/components/HabitCard";
+import { NewHabitForm } from "@/components/NewHabitForm";
 
 export default async function HabitsPage() {
   let habits: Habit[] = [];
@@ -34,13 +35,7 @@ export default async function HabitsPage() {
           <HabitCard key={habit.id} habit={habit} />
         ))}
 
-        <button
-          type="button"
-          className="flex min-h-[132px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line text-ink-muted transition-colors hover:border-clay hover:text-clay"
-        >
-          <span className="text-xl leading-none">+</span>
-          <span className="text-sm">New habit</span>
-        </button>
+        <NewHabitForm />
       </div>
     </main>
   );

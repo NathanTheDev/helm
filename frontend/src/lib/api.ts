@@ -35,6 +35,25 @@ export async function getHabits(): Promise<Habit[]> {
   return res.json();
 }
 
+export interface NewHabitInput {
+  name: string;
+  emoji?: string;
+  frequency: "DAILY" | "WEEKLY";
+  quantity: number;
+}
+
+export async function createHabit(input: NewHabitInput): Promise<Habit> {
+  const res = await fetch(apiUrl("/api/habits"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to create habit: ${res.status}`);
+  }
+  return res.json();
+}
+
 // Mark today complete (boolean) or set today's progress (countable).
 export async function completeHabit(
   habitId: string,
