@@ -1,15 +1,20 @@
 import Link from "next/link";
+import { getHabits, type Habit } from "@/lib/api";
 
-const days = ["M", "T", "W", "T", "F", "S", "S"];
+const dayLetters = ["S", "M", "T", "W", "T", "F", "S"];
 
-const habits = [
-  { name: "Reading", streak: 12, pattern: [1, 1, 1, 1, 1, 1, 1] },
-  { name: "Morning walk", streak: 0, pattern: [1, 1, 1, 1, 1, 1, 0] },
-  { name: "Drink water", streak: 5, pattern: [1, 1, 0, 1, 1, 1, 1] },
-  { name: "Meditate", streak: 3, pattern: [0, 0, 1, 1, 1, 1, 1] },
-];
+function dayLetter(date: string): string {
+  return dayLetters[new Date(`${date}T00:00:00`).getDay()];
+}
 
-export default function HabitsPage() {
+export default async function HabitsPage() {
+  let habits: Habit[] = [];
+  try {
+    habits = await getHabits();
+  } catch {
+    habits = [];
+  }
+
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-20">
       <Link
@@ -32,11 +37,16 @@ export default function HabitsPage() {
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
         {habits.map((habit) => (
           <div
-            key={habit.name}
+            key={habit.id}
             className="rounded-2xl border border-line bg-surface p-5"
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium text-ink">{habit.name}</h2>
+              <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
+                {habit.emoji && (
+                  <span className="text-base leading-none">{habit.emoji}</span>
+                )}
+                {habit.name}
+              </h2>
               <span
                 className={`rounded-full px-2.5 py-0.5 font-mono text-xs ${
                   habit.streak > 0
@@ -49,14 +59,17 @@ export default function HabitsPage() {
             </div>
 
             <div className="mt-5 flex justify-between">
-              {habit.pattern.map((done, i) => (
-                <div key={i} className="flex flex-col items-center gap-1.5">
+              {habit.last7Days.map((day) => (
+                <div
+                  key={day.date}
+                  className="flex flex-col items-center gap-1.5"
+                >
                   <span className="font-mono text-[10px] text-ink-muted">
-                    {days[i]}
+                    {dayLetter(day.date)}
                   </span>
                   <span
                     className={`h-2.5 w-2.5 rounded-full ${
-                      done ? "bg-sage" : "border border-line"
+                      day.completed ? "bg-sage" : "border border-line"
                     }`}
                   />
                 </div>

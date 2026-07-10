@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getHabits } from "@/lib/api";
 
 const actions = [
   {
@@ -71,7 +72,18 @@ const kindColor: Record<string, string> = {
   reminder: "bg-ink-muted",
 };
 
-export default function Home() {
+export default async function Home() {
+  let dueToday = 0;
+  try {
+    const habits = await getHabits();
+    dueToday = habits.filter((h) => h.isDueToday && !h.isCompletedToday).length;
+  } catch {
+    dueToday = 0;
+  }
+
+  const actionHint = (label: string, fallback: string) =>
+    label === "Habits" ? `${dueToday} due today` : fallback;
+
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-24">
       <section className="fade-up">
@@ -111,7 +123,9 @@ export default function Home() {
               <span className="text-sm font-medium text-ink">
                 {action.label}
               </span>
-              <span className="text-xs text-ink-muted">{action.hint}</span>
+              <span className="text-xs text-ink-muted">
+                {actionHint(action.label, action.hint)}
+              </span>
             </span>
           </Link>
         ))}
