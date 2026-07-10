@@ -16,6 +16,7 @@ export interface Habit {
   streak: number;
   isCompletedToday: boolean;
   isDueToday: boolean;
+  todayProgress: number;
   last7Days: HabitDay[];
 }
 
@@ -32,4 +33,32 @@ export async function getHabits(): Promise<Habit[]> {
     throw new Error(`Failed to load habits: ${res.status}`);
   }
   return res.json();
+}
+
+// Mark today complete (boolean) or set today's progress (countable).
+export async function completeHabit(
+  habitId: string,
+  quantityProgress?: number,
+): Promise<void> {
+  const res = await fetch(apiUrl(`/api/habits/${habitId}/completions`), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(quantityProgress ? { quantityProgress } : {}),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to update habit: ${res.status}`);
+  }
+}
+
+// Remove today's completion (un-mark). Sends a full timestamp so the
+// backend resolves it to the current local day.
+export async function uncompleteHabit(habitId: string): Promise<void> {
+  const date = encodeURIComponent(new Date().toISOString());
+  const res = await fetch(
+    apiUrl(`/api/habits/${habitId}/completions?date=${date}`),
+    { method: "DELETE" },
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to un-mark habit: ${res.status}`);
+  }
 }

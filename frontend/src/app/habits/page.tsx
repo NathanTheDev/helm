@@ -1,11 +1,6 @@
 import Link from "next/link";
 import { getHabits, type Habit } from "@/lib/api";
-
-const dayLetters = ["S", "M", "T", "W", "T", "F", "S"];
-
-function dayLetter(date: string): string {
-  return dayLetters[new Date(`${date}T00:00:00`).getDay()];
-}
+import { HabitCard } from "@/components/HabitCard";
 
 export default async function HabitsPage() {
   let habits: Habit[] = [];
@@ -36,46 +31,7 @@ export default async function HabitsPage() {
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
         {habits.map((habit) => (
-          <div
-            key={habit.id}
-            className="rounded-2xl border border-line bg-surface p-5"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
-                {habit.emoji && (
-                  <span className="text-base leading-none">{habit.emoji}</span>
-                )}
-                {habit.name}
-              </h2>
-              <span
-                className={`rounded-full px-2.5 py-0.5 font-mono text-xs ${
-                  habit.streak > 0
-                    ? "bg-sage-soft text-sage"
-                    : "bg-paper text-ink-muted"
-                }`}
-              >
-                {habit.streak > 0 ? `${habit.streak} day streak` : "no streak"}
-              </span>
-            </div>
-
-            <div className="mt-5 flex justify-between">
-              {habit.last7Days.map((day) => (
-                <div
-                  key={day.date}
-                  className="flex flex-col items-center gap-1.5"
-                >
-                  <span className="font-mono text-[10px] text-ink-muted">
-                    {dayLetter(day.date)}
-                  </span>
-                  <span
-                    className={`h-2.5 w-2.5 rounded-full ${
-                      day.completed ? "bg-sage" : "border border-line"
-                    }`}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          <HabitCard key={habit.id} habit={habit} />
         ))}
 
         <button

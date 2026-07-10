@@ -1,4 +1,4 @@
-import { addDays, toDayStart, toWeekStart } from "../utils/date";
+import { addDays, toDateKey, toDayStart, toWeekStart } from "../utils/date";
 
 export interface StreakCompletion {
   completedAt: Date;
@@ -14,6 +14,7 @@ export interface HabitStats {
   streak: number;
   isCompletedToday: boolean;
   isDueToday: boolean;
+  todayProgress: number;
   last7Days: { date: string; completed: boolean }[];
 }
 
@@ -50,12 +51,19 @@ export function computeHabitStats(
   }
 
   const today = toDayStart(now);
-  const isCompletedToday = isQualifying(habit, byDay.get(today.getTime()));
+  const todayCompletion = byDay.get(today.getTime());
+  const isCompletedToday = isQualifying(habit, todayCompletion);
+  const todayProgress =
+    habit.quantity <= 1
+      ? todayCompletion
+        ? 1
+        : 0
+      : todayCompletion?.quantityProgress ?? 0;
 
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const date = addDays(today, i - 6);
     return {
-      date: date.toISOString().slice(0, 10),
+      date: toDateKey(date),
       completed: isQualifying(habit, byDay.get(date.getTime())),
     };
   });
@@ -81,6 +89,7 @@ export function computeHabitStats(
       streak,
       isCompletedToday,
       isDueToday: !currentWeekSatisfied,
+      todayProgress,
       last7Days,
     };
   }
@@ -92,5 +101,5 @@ export function computeHabitStats(
     cursor = addDays(cursor, -1);
   }
 
-  return { streak, isCompletedToday, isDueToday: true, last7Days };
+  return { streak, isCompletedToday, isDueToday: true, todayProgress, last7Days };
 }
