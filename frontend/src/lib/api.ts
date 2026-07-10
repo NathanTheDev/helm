@@ -54,6 +54,30 @@ export async function createHabit(input: NewHabitInput): Promise<Habit> {
   return res.json();
 }
 
+export async function updateHabit(
+  habitId: string,
+  input: Partial<NewHabitInput>,
+): Promise<Habit> {
+  const res = await fetch(apiUrl(`/api/habits/${habitId}`), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to update habit: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function deleteHabit(habitId: string): Promise<void> {
+  const res = await fetch(apiUrl(`/api/habits/${habitId}`), {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to delete habit: ${res.status}`);
+  }
+}
+
 // Mark today complete (boolean) or set today's progress (countable).
 export async function completeHabit(
   habitId: string,
