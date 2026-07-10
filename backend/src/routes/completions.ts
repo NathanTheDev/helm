@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { Router } from "express";
 import { prisma } from "../db/client";
+import { toDayStart } from "../utils/date";
 import {
   createCompletionSchema,
   deleteCompletionQuerySchema,
@@ -10,10 +11,6 @@ type CompletionParams = { id: string };
 type CompletionRequest = Request<CompletionParams>;
 
 export const completionsRouter = Router({ mergeParams: true });
-
-function toDayStart(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
 
 async function findOwnedHabit(habitId: string, userId: string) {
   return prisma.habit.findFirst({ where: { id: habitId, userId } });

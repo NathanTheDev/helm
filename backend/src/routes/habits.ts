@@ -1,15 +1,39 @@
 import { Router } from "express";
 import { prisma } from "../db/client";
+import { computeHabitStats } from "../services/streak";
 import { createHabitSchema, updateHabitSchema } from "../validation/habit";
 
 export const habitsRouter = Router();
+
+function serializeHabit<
+  T extends {
+    frequency: string;
+    quantity: number;
+    completions: { completedAt: Date; quantityProgress: number | null }[];
+  },
+>(habit: T) {
+  const { completions, ...rest } = habit;
+  return { ...rest, ...computeHabitStats(habit, completions) };
+}
 
 habitsRouter.get("/", async (req, res) => {
   const habits = await prisma.habit.findMany({
     where: { userId: req.userId },
     orderBy: { createdAt: "asc" },
+    include: { completions: true },
   });
-  res.json(habits);
+  res.json(habits.map(serializeHabit));
+});
+
+habitsRouter.get("/:id", async (req, res) => {
+  const habit = await prisma.habit.findFirst({
+    where: { id: req.params.id, userId: req.userId },
+    include: { completions: true },
+  });
+  if (!habit) {
+    return res.status(404).json({ error: "Habit not found" });
+  }
+  res.json(serializeHabit(habit));
 });
 
 habitsRouter.post("/", async (req, res) => {
