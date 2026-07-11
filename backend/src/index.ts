@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import { currentUser } from "./middleware/currentUser";
 import { habitsRouter } from "./routes/habits";
 import { completionsRouter } from "./routes/completions";
+import { projectsRouter } from "./routes/projects";
+import { projectTasksRouter, tasksRouter } from "./routes/tasks";
 
 dotenv.config();
 
@@ -20,6 +22,9 @@ app.get("/api/health", (_req, res) => {
 
 app.use("/api/habits", habitsRouter);
 app.use("/api/habits/:id/completions", completionsRouter);
+app.use("/api/projects", projectsRouter);
+app.use("/api/projects/:projectId/tasks", projectTasksRouter);
+app.use("/api/tasks", tasksRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
