@@ -7,11 +7,13 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   deleteTask,
   updateTask,
-  formatDuration,
   formatDueDate,
   type Task,
 } from "@/lib/tasksApi";
 import { TaskForm, type TaskFormValues } from "./TaskForm";
+import { TaskTimer } from "./TaskTimer";
+import { TagPicker } from "./TagPicker";
+import { SubTaskEditor } from "./SubTaskEditor";
 
 function toUpdateInput(v: TaskFormValues) {
   return {
@@ -65,7 +67,7 @@ export function TaskCard({ task }: { task: Task }) {
 
   if (editing) {
     return (
-      <div ref={setNodeRef} style={style}>
+      <div ref={setNodeRef} style={style} className="flex flex-col gap-2">
         <TaskForm
           initial={{
             title: task.title,
@@ -78,6 +80,10 @@ export function TaskCard({ task }: { task: Task }) {
           onSubmit={saveEdit}
           onCancel={() => setEditing(false)}
         />
+        <div className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-4">
+          <TagPicker task={task} />
+          <SubTaskEditor task={task} />
+        </div>
       </div>
     );
   }
@@ -145,21 +151,22 @@ export function TaskCard({ task }: { task: Task }) {
         </div>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 pl-6 font-mono text-[11px] text-ink-muted">
-        {task.totalSeconds > 0 && <span>⏱ {formatDuration(task.totalSeconds)}</span>}
-        {task.runningSince && <span className="text-clay">● running</span>}
-        {task.subTasks.length > 0 && (
-          <span>
-            ☑ {doneSubs}/{task.subTasks.length}
-          </span>
-        )}
-        {task.dueDate && (
-          <span className={overdue ? "text-clay" : ""}>
-            ◷ {formatDueDate(task.dueDate)}
-          </span>
-        )}
-        {task.estimateMinutes && <span>~{task.estimateMinutes}m est</span>}
-      </div>
+      <TaskTimer task={task} />
+
+      {(task.subTasks.length > 0 || task.dueDate) && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 pl-6 font-mono text-[11px] text-ink-muted">
+          {task.subTasks.length > 0 && (
+            <span>
+              ☑ {doneSubs}/{task.subTasks.length}
+            </span>
+          )}
+          {task.dueDate && (
+            <span className={overdue ? "text-clay" : ""}>
+              ◷ {formatDueDate(task.dueDate)}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -177,7 +177,107 @@ export async function deleteTask(id: string): Promise<void> {
   if (!res.ok) throw new Error(`Failed to delete task: ${res.status}`);
 }
 
+// ---- timer ----
+
+export async function startTimer(taskId: string): Promise<void> {
+  const res = await fetch(apiUrl(`/api/tasks/${taskId}/timer/start`), {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error(`Failed to start timer: ${res.status}`);
+}
+
+export async function stopTimer(taskId: string): Promise<void> {
+  const res = await fetch(apiUrl(`/api/tasks/${taskId}/timer/stop`), {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error(`Failed to stop timer: ${res.status}`);
+}
+
+// ---- tags ----
+
+export const TAG_COLORS = [
+  "#c9633e",
+  "#6f7d5c",
+  "#4f6d7a",
+  "#8a6d9e",
+  "#b08a3e",
+];
+
+export async function getTags(): Promise<Tag[]> {
+  const res = await fetch(apiUrl("/api/tags"), { cache: "no-store" });
+  if (!res.ok) throw new Error(`Failed to load tags: ${res.status}`);
+  return res.json();
+}
+
+export async function createTag(input: {
+  name: string;
+  color: string;
+}): Promise<Tag> {
+  const res = await fetch(apiUrl("/api/tags"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(`Failed to create tag: ${res.status}`);
+  return res.json();
+}
+
+export async function attachTag(taskId: string, tagId: string): Promise<void> {
+  const res = await fetch(apiUrl(`/api/tasks/${taskId}/tags/${tagId}`), {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error(`Failed to attach tag: ${res.status}`);
+}
+
+export async function detachTag(taskId: string, tagId: string): Promise<void> {
+  const res = await fetch(apiUrl(`/api/tasks/${taskId}/tags/${tagId}`), {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error(`Failed to detach tag: ${res.status}`);
+}
+
+// ---- sub-tasks ----
+
+export async function createSubTask(
+  taskId: string,
+  title: string,
+): Promise<SubTask> {
+  const res = await fetch(apiUrl(`/api/tasks/${taskId}/subtasks`), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
+  });
+  if (!res.ok) throw new Error(`Failed to create sub-task: ${res.status}`);
+  return res.json();
+}
+
+export async function updateSubTask(
+  id: string,
+  input: { title?: string; done?: boolean; position?: number },
+): Promise<SubTask> {
+  const res = await fetch(apiUrl(`/api/subtasks/${id}`), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(`Failed to update sub-task: ${res.status}`);
+  return res.json();
+}
+
+export async function deleteSubTask(id: string): Promise<void> {
+  const res = await fetch(apiUrl(`/api/subtasks/${id}`), { method: "DELETE" });
+  if (!res.ok) throw new Error(`Failed to delete sub-task: ${res.status}`);
+}
+
 // ---- formatting helpers ----
+
+export function formatClock(seconds: number): string {
+  const hh = Math.floor(seconds / 3600);
+  const mm = Math.floor((seconds % 3600) / 60);
+  const ss = seconds % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return hh > 0 ? `${hh}:${pad(mm)}:${pad(ss)}` : `${mm}:${pad(ss)}`;
+}
 
 export function formatDuration(seconds: number): string {
   if (!seconds) return "0m";
