@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { Router } from "express";
 import { prisma } from "../db/client";
 import { createTaskSchema, updateTaskSchema } from "../validation/task";
+import { taskTotals, type TimeEntryLike } from "../services/timeTracking";
 
 // Nested under a project: /api/projects/:projectId/tasks
 export const projectTasksRouter = Router({ mergeParams: true });
@@ -10,9 +11,13 @@ export const tasksRouter = Router();
 
 type ProjectParams = { projectId: string };
 
-// Phase 1: passthrough. Phases 2/3 extend with computed time/tags/subtasks.
-function serializeTask<T>(task: T) {
-  return task;
+// Include this on task reads so serializeTask can compute time rollups.
+const taskInclude = { timeEntries: true } as const;
+
+// Merge computed time fields. Phase 3 extends with tags/subtasks.
+function serializeTask<T extends { timeEntries: TimeEntryLike[] }>(task: T) {
+  const { timeEntries, ...rest } = task;
+  return { ...rest, ...taskTotals(timeEntries) };
 }
 
 async function findOwnedProject(projectId: string, userId: string) {
@@ -34,6 +39,7 @@ projectTasksRouter.get(
     const tasks = await prisma.task.findMany({
       where: { projectId: project.id },
       orderBy: [{ status: "asc" }, { position: "asc" }],
+      include: taskInclude,
     });
     res.json(tasks.map(serializeTask));
   },
@@ -68,13 +74,17 @@ projectTasksRouter.post(
         projectId: project.id,
         userId: req.userId,
       },
+      include: taskInclude,
     });
     res.status(201).json(serializeTask(task));
   },
 );
 
 tasksRouter.get("/:id", async (req, res) => {
-  const task = await findOwnedTask(req.params.id, req.userId);
+  const task = await prisma.task.findFirst({
+    where: { id: req.params.id, userId: req.userId },
+    include: taskInclude,
+  });
   if (!task) {
     return res.status(404).json({ error: "Task not found" });
   }
@@ -95,6 +105,7 @@ tasksRouter.patch("/:id", async (req, res) => {
   const task = await prisma.task.update({
     where: { id: req.params.id },
     data: parsed.data,
+    include: taskInclude,
   });
   res.json(serializeTask(task));
 });

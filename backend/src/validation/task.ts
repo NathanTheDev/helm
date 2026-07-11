@@ -35,3 +35,14 @@ export const updateTaskSchema = z.object({
   estimateMinutes: z.number().int().positive().nullable().optional(),
   dueDate: z.coerce.date().nullable().optional(),
 });
+
+// Manual time-entry (backfilling history).
+export const createTimeEntrySchema = z
+  .object({
+    startedAt: z.coerce.date(),
+    endedAt: z.coerce.date(),
+  })
+  .refine((d) => d.endedAt.getTime() >= d.startedAt.getTime(), {
+    message: "endedAt must be at or after startedAt",
+    path: ["endedAt"],
+  });
