@@ -30,12 +30,22 @@ prod with no code changes.
 cd backend
 cp .env.example .env          # PORT + DATABASE_URL
 npm install
-npm run prisma:migrate        # create/apply tables
-npm run db:seed               # optional: demo habits + completions
+npm run prisma:deploy         # apply committed migrations (fresh DB)
+npm run db:seed               # optional: demo data
 npm run dev                   # http://localhost:4000
 ```
 
-`prisma migrate reset` also re-runs the seed (configured in `prisma.config.ts`).
+Schema changes are tracked as committed migrations under
+`backend/prisma/migrations/`.
+
+- **Fresh DB:** `npm run prisma:deploy` applies all migrations.
+- **Local dev, changing the schema:** `npm run prisma:migrate` (`migrate dev`)
+  creates + applies a new migration.
+- **Reset local DB:** `npm run prisma:reset` drops, re-applies all migrations,
+  and re-runs the seed (`migrations.seed` in `prisma.config.ts`).
+- **Previously used `db push`** (tables already exist)? Run `npm run prisma:reset`
+  once to adopt the committed migrations (this wipes local data; the seed
+  repopulates demo data).
 
 ## Frontend (Next.js)
 
@@ -50,7 +60,7 @@ npm run dev                   # http://localhost:3000
 
 ```
 docker compose up -d
-(cd backend  && cp .env.example .env && npm install && npm run prisma:migrate && npm run db:seed && npm run dev)
+(cd backend  && cp .env.example .env && npm install && npm run prisma:deploy && npm run db:seed && npm run dev)
 (cd frontend && cp .env.example .env.local && npm install && npm run dev)
 ```
 
