@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const links = [{ href: "/habits", label: "Habits" }];
+const links = [
+  { href: "/habits", label: "Habits" },
+  { href: "/projects", label: "Projects" },
+];
 
 export default function NavBar() {
   const pathname = usePathname();

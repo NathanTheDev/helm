@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getHabits } from "@/lib/api";
+import { getProjects, getProjectTasks } from "@/lib/tasksApi";
 
 const actions = [
   {
@@ -21,6 +22,18 @@ const actions = [
       <>
         <path d="M9 12.5l2 2 4.5-5" strokeLinecap="round" strokeLinejoin="round" />
         <circle cx="12" cy="12" r="8.5" />
+      </>
+    ),
+  },
+  {
+    href: "/projects",
+    label: "Projects",
+    hint: "0 open",
+    icon: (
+      <>
+        <rect x="4" y="5" width="4.5" height="14" rx="1.2" />
+        <rect x="9.75" y="5" width="4.5" height="9" rx="1.2" />
+        <rect x="15.5" y="5" width="4.5" height="11" rx="1.2" />
       </>
     ),
   },
@@ -81,8 +94,22 @@ export default async function Home() {
     dueToday = 0;
   }
 
-  const actionHint = (label: string, fallback: string) =>
-    label === "Habits" ? `${dueToday} due today` : fallback;
+  let openTasks = 0;
+  try {
+    const projects = await getProjects();
+    const taskLists = await Promise.all(
+      projects.filter((p) => !p.archived).map((p) => getProjectTasks(p.id)),
+    );
+    openTasks = taskLists.flat().filter((t) => t.status !== "DONE").length;
+  } catch {
+    openTasks = 0;
+  }
+
+  const actionHint = (label: string, fallback: string) => {
+    if (label === "Habits") return `${dueToday} due today`;
+    if (label === "Projects") return `${openTasks} open`;
+    return fallback;
+  };
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-24">
