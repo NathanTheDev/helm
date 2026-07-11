@@ -127,6 +127,56 @@ export async function deleteProject(id: string): Promise<void> {
   if (!res.ok) throw new Error(`Failed to delete project: ${res.status}`);
 }
 
+// ---- task mutations ----
+
+export interface NewTaskInput {
+  title: string;
+  status?: TaskStatus;
+  description?: string;
+  estimateMinutes?: number;
+  dueDate?: string;
+}
+
+export interface UpdateTaskInput {
+  title?: string;
+  description?: string | null;
+  status?: TaskStatus;
+  position?: number;
+  estimateMinutes?: number | null;
+  dueDate?: string | null;
+}
+
+export async function createTask(
+  projectId: string,
+  input: NewTaskInput,
+): Promise<Task> {
+  const res = await fetch(apiUrl(`/api/projects/${projectId}/tasks`), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(`Failed to create task: ${res.status}`);
+  return res.json();
+}
+
+export async function updateTask(
+  id: string,
+  input: UpdateTaskInput,
+): Promise<Task> {
+  const res = await fetch(apiUrl(`/api/tasks/${id}`), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(`Failed to update task: ${res.status}`);
+  return res.json();
+}
+
+export async function deleteTask(id: string): Promise<void> {
+  const res = await fetch(apiUrl(`/api/tasks/${id}`), { method: "DELETE" });
+  if (!res.ok) throw new Error(`Failed to delete task: ${res.status}`);
+}
+
 // ---- formatting helpers ----
 
 export function formatDuration(seconds: number): string {
