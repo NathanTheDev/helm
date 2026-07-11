@@ -36,6 +36,26 @@ export const updateTaskSchema = z.object({
   dueDate: z.coerce.date().nullable().optional(),
 });
 
+export const createTagSchema = z.object({
+  name: z.string().min(1),
+  color: z.string().min(1),
+});
+
+export const updateTagSchema = z.object({
+  name: z.string().min(1).optional(),
+  color: z.string().min(1).optional(),
+});
+
+export const createSubTaskSchema = z.object({
+  title: z.string().min(1),
+});
+
+export const updateSubTaskSchema = z.object({
+  title: z.string().min(1).optional(),
+  done: z.boolean().optional(),
+  position: z.number().optional(),
+});
+
 // Manual time-entry (backfilling history).
 export const createTimeEntrySchema = z
   .object({

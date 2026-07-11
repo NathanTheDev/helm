@@ -8,6 +8,8 @@ import { projectsRouter } from "./routes/projects";
 import { projectTasksRouter, tasksRouter } from "./routes/tasks";
 import { taskTimeRouter } from "./routes/timeEntries";
 import { worklogRouter } from "./routes/worklog";
+import { tagsRouter, taskTagsRouter } from "./routes/tags";
+import { subTasksNestedRouter, subTasksRouter } from "./routes/subTasks";
 
 dotenv.config();
 
@@ -28,6 +30,10 @@ app.use("/api/projects", projectsRouter);
 app.use("/api/projects/:projectId/tasks", projectTasksRouter);
 app.use("/api/tasks", tasksRouter);
 app.use("/api/tasks/:id", taskTimeRouter);
+app.use("/api/tasks/:id", taskTagsRouter);
+app.use("/api/tasks/:id", subTasksNestedRouter);
+app.use("/api/tags", tagsRouter);
+app.use("/api/subtasks", subTasksRouter);
 app.use("/api/worklog", worklogRouter);
 
 app.listen(PORT, () => {

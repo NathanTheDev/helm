@@ -11,13 +11,29 @@ export const tasksRouter = Router();
 
 type ProjectParams = { projectId: string };
 
-// Include this on task reads so serializeTask can compute time rollups.
-const taskInclude = { timeEntries: true } as const;
+// Include this on task reads so serializeTask can compute/flatten relations.
+const taskInclude = {
+  timeEntries: true,
+  subTasks: { orderBy: { position: "asc" } },
+  tags: { include: { tag: true } },
+} as const;
 
-// Merge computed time fields. Phase 3 extends with tags/subtasks.
-function serializeTask<T extends { timeEntries: TimeEntryLike[] }>(task: T) {
-  const { timeEntries, ...rest } = task;
-  return { ...rest, ...taskTotals(timeEntries) };
+// Merge computed time fields, flatten tags, and surface sub-tasks. Estimate/
+// due-date are plain columns already carried through in ...rest.
+function serializeTask<
+  T extends {
+    timeEntries: TimeEntryLike[];
+    tags: { tag: unknown }[];
+    subTasks: unknown[];
+  },
+>(task: T) {
+  const { timeEntries, tags, subTasks, ...rest } = task;
+  return {
+    ...rest,
+    ...taskTotals(timeEntries),
+    tags: tags.map((t) => t.tag),
+    subTasks,
+  };
 }
 
 async function findOwnedProject(projectId: string, userId: string) {
