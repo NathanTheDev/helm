@@ -127,6 +127,12 @@ export async function deleteProject(id: string): Promise<void> {
   if (!res.ok) throw new Error(`Failed to delete project: ${res.status}`);
 }
 
+export async function getWorklog(): Promise<Worklog> {
+  const res = await fetch(apiUrl("/api/worklog"), { cache: "no-store" });
+  if (!res.ok) throw new Error(`Failed to load worklog: ${res.status}`);
+  return res.json();
+}
+
 // ---- task mutations ----
 
 export interface NewTaskInput {

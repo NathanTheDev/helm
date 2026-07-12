@@ -1,12 +1,32 @@
 # helm
 
-A small personal dashboard. The `/habits` area is a full-stack habit tracker:
-an Express + Prisma + Postgres backend and a Next.js frontend.
+A small personal dashboard on an Express + Prisma + Postgres backend and a
+Next.js frontend. Two full-stack features:
+
+- **`/habits`** — habit tracker with streaks and daily/weekly completions.
+- **`/projects`** — project-based **kanban board** (Backlog / Todo / In Progress
+  / Done) with drag-and-drop, per-task **time tracking** (start/stop timer,
+  estimates), tags, due dates, and sub-tasks. **`/worklog`** aggregates tracked
+  time per day/week.
 
 > **Single-user, no auth by design.** Every request runs as one hardcoded user
-> (`DEFAULT_USER_ID`) via a `currentUser` middleware stub. `Habit.userId` is a
-> plain indexed string, so real auth can be dropped in later without a schema
-> rewrite.
+> (`DEFAULT_USER_ID`) via a `currentUser` middleware stub. Every owned model
+> carries a plain indexed `userId`, so real auth can be dropped in later without
+> a schema rewrite.
+
+## API overview
+
+- Habits: `GET/POST /api/habits`, `PATCH/DELETE /api/habits/:id`,
+  `.../:id/completions`.
+- Projects: `GET/POST /api/projects`, `PATCH/DELETE /api/projects/:id`.
+- Tasks: `GET/POST /api/projects/:projectId/tasks`,
+  `GET/PATCH/DELETE /api/tasks/:id` (PATCH moves status/position).
+- Time: `POST /api/tasks/:id/timer/{start,stop}`,
+  `GET/POST/DELETE /api/tasks/:id/time-entries[/:entryId]`, `GET /api/worklog`.
+- Tags: `GET/POST /api/tags`, `PATCH/DELETE /api/tags/:id`,
+  attach/detach via `POST/DELETE /api/tasks/:id/tags/:tagId`.
+- Sub-tasks: `GET/POST /api/tasks/:id/subtasks`,
+  `PATCH/DELETE /api/subtasks/:id`.
 
 ## Prerequisites
 
@@ -64,4 +84,6 @@ docker compose up -d
 (cd frontend && cp .env.example .env.local && npm install && npm run dev)
 ```
 
-Then open the frontend and visit `/habits`.
+Then open the frontend and visit `/habits`, `/projects`, or `/worklog`. The
+seed populates demo habits plus two projects with tasks, tags, sub-tasks, and
+tracked time (including one running timer).
