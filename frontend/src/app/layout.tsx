@@ -3,7 +3,8 @@ import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
 import NavBar from "@/components/NavBar";
 import AuthGate from "@/components/auth/AuthGate";
 import { AuthProvider } from "@/lib/auth-context";
-import { ThemeProvider, THEME_STORAGE_KEY } from "@/lib/theme-context";
+import { ThemeProvider } from "@/lib/theme-context";
+import { THEME_STORAGE_KEY } from "@/lib/theme-constants";
 import "./globals.css";
 
 // Runs before first paint so the stored (or system-preferred) theme is
@@ -41,6 +42,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${fraunces.variable} ${inter.variable} ${plexMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
