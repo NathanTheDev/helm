@@ -1,28 +1,50 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { getProjects, getProjectTasks, type Project } from "@/lib/tasksApi";
 import { ProjectCard } from "@/components/ProjectCard";
 import { NewProjectForm } from "@/components/NewProjectForm";
 import { JumpBackIn } from "@/components/JumpBackIn";
 
-export default async function ProjectsPage() {
-  let projects: Project[] = [];
-  let failed = false;
-  try {
-    projects = await getProjects();
-  } catch {
-    failed = true;
-  }
+export default function ProjectsPage() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [counts, setCounts] = useState<Map<string, number>>(new Map());
+  const [failed, setFailed] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Task counts per project (parallel; tolerate individual failures).
-  const counts = new Map<string, number>();
-  if (!failed && projects.length) {
-    const results = await Promise.allSettled(
-      projects.map((p) => getProjectTasks(p.id)),
-    );
-    results.forEach((r, i) => {
-      if (r.status === "fulfilled") counts.set(projects[i].id, r.value.length);
-    });
-  }
+  useEffect(() => {
+    let cancelled = false;
+
+    getProjects()
+      .then(async (loaded) => {
+        if (cancelled) return;
+        setProjects(loaded);
+
+        // Task counts per project (parallel; tolerate individual failures).
+        if (loaded.length) {
+          const results = await Promise.allSettled(
+            loaded.map((p) => getProjectTasks(p.id)),
+          );
+          if (cancelled) return;
+          const next = new Map<string, number>();
+          results.forEach((r, i) => {
+            if (r.status === "fulfilled") next.set(loaded[i].id, r.value.length);
+          });
+          setCounts(next);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const active = projects.filter((p) => !p.archived);
   const archived = projects.filter((p) => p.archived);
@@ -40,14 +62,14 @@ export default async function ProjectsPage() {
       <div className="mt-6 flex items-baseline justify-between">
         <h1 className="font-display text-3xl text-ink sm:text-4xl">Projects</h1>
         <span className="font-mono text-xs text-ink-muted">
-          {failed ? "—" : `${active.length} active`}
+          {loading || failed ? "—" : `${active.length} active`}
         </span>
       </div>
       <p className="mt-2 max-w-md text-ink-muted">
         Each project is a board. Pick one to plan and track your work.
       </p>
 
-      {failed ? (
+      {loading ? null : failed ? (
         <div className="mt-10 rounded-2xl border border-line bg-surface p-8 text-center">
           <p className="text-sm text-ink">Couldn&rsquo;t reach the server.</p>
           <p className="mt-1 text-sm text-ink-muted">

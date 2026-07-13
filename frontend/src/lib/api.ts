@@ -1,3 +1,15 @@
+import { auth } from "./firebase";
+
+// Attaches a fresh Firebase ID token when signed in. All these calls now
+// happen client-side (see AuthGate) so auth.currentUser is populated by the
+// time a page's data fetch runs.
+export async function authHeaders(): Promise<HeadersInit> {
+  const user = auth.currentUser;
+  if (!user) return {};
+  const token = await user.getIdToken();
+  return { Authorization: `Bearer ${token}` };
+}
+
 export interface HabitDay {
   date: string; // YYYY-MM-DD
   completed: boolean;
@@ -28,7 +40,10 @@ export function apiUrl(path: string): string {
 }
 
 export async function getHabits(): Promise<Habit[]> {
-  const res = await fetch(apiUrl("/api/habits"), { cache: "no-store" });
+  const res = await fetch(apiUrl("/api/habits"), {
+    cache: "no-store",
+    headers: await authHeaders(),
+  });
   if (!res.ok) {
     throw new Error(`Failed to load habits: ${res.status}`);
   }
@@ -45,7 +60,7 @@ export interface NewHabitInput {
 export async function createHabit(input: NewHabitInput): Promise<Habit> {
   const res = await fetch(apiUrl("/api/habits"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify(input),
   });
   if (!res.ok) {
@@ -60,7 +75,7 @@ export async function updateHabit(
 ): Promise<Habit> {
   const res = await fetch(apiUrl(`/api/habits/${habitId}`), {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify(input),
   });
   if (!res.ok) {
@@ -72,6 +87,7 @@ export async function updateHabit(
 export async function deleteHabit(habitId: string): Promise<void> {
   const res = await fetch(apiUrl(`/api/habits/${habitId}`), {
     method: "DELETE",
+    headers: await authHeaders(),
   });
   if (!res.ok) {
     throw new Error(`Failed to delete habit: ${res.status}`);
@@ -85,7 +101,7 @@ export async function completeHabit(
 ): Promise<void> {
   const res = await fetch(apiUrl(`/api/habits/${habitId}/completions`), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify(quantityProgress ? { quantityProgress } : {}),
   });
   if (!res.ok) {
@@ -99,7 +115,7 @@ export async function uncompleteHabit(habitId: string): Promise<void> {
   const date = encodeURIComponent(new Date().toISOString());
   const res = await fetch(
     apiUrl(`/api/habits/${habitId}/completions?date=${date}`),
-    { method: "DELETE" },
+    { method: "DELETE", headers: await authHeaders() },
   );
   if (!res.ok) {
     throw new Error(`Failed to un-mark habit: ${res.status}`);

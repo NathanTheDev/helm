@@ -1,6 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-import { DEFAULT_USER_ID } from "../src/middleware/currentUser";
+import { DEFAULT_USER_ID } from "../src/constants";
 import { addDays, toDayStart } from "../src/utils/date";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });

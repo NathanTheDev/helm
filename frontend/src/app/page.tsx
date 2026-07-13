@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { getHabits } from "@/lib/api";
 import { getProjects, getProjectTasks } from "@/lib/tasksApi";
+import { useAuth } from "@/lib/auth-context";
 
 const actions = [
   {
@@ -85,31 +89,35 @@ const kindColor: Record<string, string> = {
   reminder: "bg-ink-muted",
 };
 
-export default async function Home() {
-  let dueToday = 0;
-  try {
-    const habits = await getHabits();
-    dueToday = habits.filter((h) => h.isDueToday && !h.isCompletedToday).length;
-  } catch {
-    dueToday = 0;
-  }
+export default function Home() {
+  const { user } = useAuth();
+  const [dueToday, setDueToday] = useState(0);
+  const [openTasks, setOpenTasks] = useState(0);
 
-  let openTasks = 0;
-  try {
-    const projects = await getProjects();
-    const taskLists = await Promise.all(
-      projects.filter((p) => !p.archived).map((p) => getProjectTasks(p.id)),
-    );
-    openTasks = taskLists.flat().filter((t) => t.status !== "DONE").length;
-  } catch {
-    openTasks = 0;
-  }
+  useEffect(() => {
+    getHabits()
+      .then((habits) => {
+        setDueToday(habits.filter((h) => h.isDueToday && !h.isCompletedToday).length);
+      })
+      .catch(() => setDueToday(0));
+
+    getProjects()
+      .then(async (projects) => {
+        const taskLists = await Promise.all(
+          projects.filter((p) => !p.archived).map((p) => getProjectTasks(p.id)),
+        );
+        setOpenTasks(taskLists.flat().filter((t) => t.status !== "DONE").length);
+      })
+      .catch(() => setOpenTasks(0));
+  }, []);
 
   const actionHint = (label: string, fallback: string) => {
     if (label === "Habits") return `${dueToday} due today`;
     if (label === "Projects") return `${openTasks} open`;
     return fallback;
   };
+
+  const firstName = user?.displayName?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "there";
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-24">
@@ -118,7 +126,7 @@ export default async function Home() {
           Friday
         </p>
         <h1 className="mt-3 font-display text-4xl italic text-ink sm:text-5xl">
-          Good morning, Nathan.
+          Good morning, {firstName}.
         </h1>
         <p className="mt-3 max-w-md text-ink-muted">
           Here&rsquo;s what&rsquo;s waiting for you.

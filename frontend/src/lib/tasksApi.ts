@@ -1,4 +1,4 @@
-import { apiUrl } from "./api";
+import { apiUrl, authHeaders } from "./api";
 
 export type TaskStatus = "BACKLOG" | "TODO" | "IN_PROGRESS" | "DONE";
 
@@ -73,13 +73,19 @@ export interface Worklog {
 // ---- reads ----
 
 export async function getProjects(): Promise<Project[]> {
-  const res = await fetch(apiUrl("/api/projects"), { cache: "no-store" });
+  const res = await fetch(apiUrl("/api/projects"), {
+    cache: "no-store",
+    headers: await authHeaders(),
+  });
   if (!res.ok) throw new Error(`Failed to load projects: ${res.status}`);
   return res.json();
 }
 
 export async function getProject(id: string): Promise<Project> {
-  const res = await fetch(apiUrl(`/api/projects/${id}`), { cache: "no-store" });
+  const res = await fetch(apiUrl(`/api/projects/${id}`), {
+    cache: "no-store",
+    headers: await authHeaders(),
+  });
   if (!res.ok) throw new Error(`Failed to load project: ${res.status}`);
   return res.json();
 }
@@ -87,6 +93,7 @@ export async function getProject(id: string): Promise<Project> {
 export async function getProjectTasks(projectId: string): Promise<Task[]> {
   const res = await fetch(apiUrl(`/api/projects/${projectId}/tasks`), {
     cache: "no-store",
+    headers: await authHeaders(),
   });
   if (!res.ok) throw new Error(`Failed to load tasks: ${res.status}`);
   return res.json();
@@ -102,7 +109,7 @@ export interface NewProjectInput {
 export async function createProject(input: NewProjectInput): Promise<Project> {
   const res = await fetch(apiUrl("/api/projects"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify(input),
   });
   if (!res.ok) throw new Error(`Failed to create project: ${res.status}`);
@@ -115,7 +122,7 @@ export async function updateProject(
 ): Promise<Project> {
   const res = await fetch(apiUrl(`/api/projects/${id}`), {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify(input),
   });
   if (!res.ok) throw new Error(`Failed to update project: ${res.status}`);
@@ -123,12 +130,18 @@ export async function updateProject(
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  const res = await fetch(apiUrl(`/api/projects/${id}`), { method: "DELETE" });
+  const res = await fetch(apiUrl(`/api/projects/${id}`), {
+    method: "DELETE",
+    headers: await authHeaders(),
+  });
   if (!res.ok) throw new Error(`Failed to delete project: ${res.status}`);
 }
 
 export async function getWorklog(): Promise<Worklog> {
-  const res = await fetch(apiUrl("/api/worklog"), { cache: "no-store" });
+  const res = await fetch(apiUrl("/api/worklog"), {
+    cache: "no-store",
+    headers: await authHeaders(),
+  });
   if (!res.ok) throw new Error(`Failed to load worklog: ${res.status}`);
   return res.json();
 }
@@ -158,7 +171,7 @@ export async function createTask(
 ): Promise<Task> {
   const res = await fetch(apiUrl(`/api/projects/${projectId}/tasks`), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify(input),
   });
   if (!res.ok) throw new Error(`Failed to create task: ${res.status}`);
@@ -171,7 +184,7 @@ export async function updateTask(
 ): Promise<Task> {
   const res = await fetch(apiUrl(`/api/tasks/${id}`), {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify(input),
   });
   if (!res.ok) throw new Error(`Failed to update task: ${res.status}`);
@@ -179,7 +192,10 @@ export async function updateTask(
 }
 
 export async function deleteTask(id: string): Promise<void> {
-  const res = await fetch(apiUrl(`/api/tasks/${id}`), { method: "DELETE" });
+  const res = await fetch(apiUrl(`/api/tasks/${id}`), {
+    method: "DELETE",
+    headers: await authHeaders(),
+  });
   if (!res.ok) throw new Error(`Failed to delete task: ${res.status}`);
 }
 
@@ -188,6 +204,7 @@ export async function deleteTask(id: string): Promise<void> {
 export async function startTimer(taskId: string): Promise<void> {
   const res = await fetch(apiUrl(`/api/tasks/${taskId}/timer/start`), {
     method: "POST",
+    headers: await authHeaders(),
   });
   if (!res.ok) throw new Error(`Failed to start timer: ${res.status}`);
 }
@@ -195,6 +212,7 @@ export async function startTimer(taskId: string): Promise<void> {
 export async function stopTimer(taskId: string): Promise<void> {
   const res = await fetch(apiUrl(`/api/tasks/${taskId}/timer/stop`), {
     method: "POST",
+    headers: await authHeaders(),
   });
   if (!res.ok) throw new Error(`Failed to stop timer: ${res.status}`);
 }
@@ -210,7 +228,10 @@ export const TAG_COLORS = [
 ];
 
 export async function getTags(): Promise<Tag[]> {
-  const res = await fetch(apiUrl("/api/tags"), { cache: "no-store" });
+  const res = await fetch(apiUrl("/api/tags"), {
+    cache: "no-store",
+    headers: await authHeaders(),
+  });
   if (!res.ok) throw new Error(`Failed to load tags: ${res.status}`);
   return res.json();
 }
@@ -221,7 +242,7 @@ export async function createTag(input: {
 }): Promise<Tag> {
   const res = await fetch(apiUrl("/api/tags"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify(input),
   });
   if (!res.ok) throw new Error(`Failed to create tag: ${res.status}`);
@@ -231,6 +252,7 @@ export async function createTag(input: {
 export async function attachTag(taskId: string, tagId: string): Promise<void> {
   const res = await fetch(apiUrl(`/api/tasks/${taskId}/tags/${tagId}`), {
     method: "POST",
+    headers: await authHeaders(),
   });
   if (!res.ok) throw new Error(`Failed to attach tag: ${res.status}`);
 }
@@ -238,6 +260,7 @@ export async function attachTag(taskId: string, tagId: string): Promise<void> {
 export async function detachTag(taskId: string, tagId: string): Promise<void> {
   const res = await fetch(apiUrl(`/api/tasks/${taskId}/tags/${tagId}`), {
     method: "DELETE",
+    headers: await authHeaders(),
   });
   if (!res.ok) throw new Error(`Failed to detach tag: ${res.status}`);
 }
@@ -250,7 +273,7 @@ export async function createSubTask(
 ): Promise<SubTask> {
   const res = await fetch(apiUrl(`/api/tasks/${taskId}/subtasks`), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify({ title }),
   });
   if (!res.ok) throw new Error(`Failed to create sub-task: ${res.status}`);
@@ -263,7 +286,7 @@ export async function updateSubTask(
 ): Promise<SubTask> {
   const res = await fetch(apiUrl(`/api/subtasks/${id}`), {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify(input),
   });
   if (!res.ok) throw new Error(`Failed to update sub-task: ${res.status}`);
@@ -271,7 +294,10 @@ export async function updateSubTask(
 }
 
 export async function deleteSubTask(id: string): Promise<void> {
-  const res = await fetch(apiUrl(`/api/subtasks/${id}`), { method: "DELETE" });
+  const res = await fetch(apiUrl(`/api/subtasks/${id}`), {
+    method: "DELETE",
+    headers: await authHeaders(),
+  });
   if (!res.ok) throw new Error(`Failed to delete sub-task: ${res.status}`);
 }
 

@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   getProject,
   getProjectTasks,
@@ -8,24 +12,38 @@ import {
 import { RememberProject } from "@/components/RememberProject";
 import { Board } from "@/components/Board";
 
-export default async function BoardPage({
-  params,
-}: {
-  params: Promise<{ projectId: string }>;
-}) {
-  const { projectId } = await params;
+export default function BoardPage() {
+  const { projectId } = useParams<{ projectId: string }>();
 
-  let project: Project | null = null;
-  let tasks: Task[] = [];
-  let failed = false;
-  try {
-    [project, tasks] = await Promise.all([
-      getProject(projectId),
-      getProjectTasks(projectId),
-    ]);
-  } catch {
-    failed = true;
-  }
+  const [project, setProject] = useState<Project | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [failed, setFailed] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setFailed(false);
+
+    Promise.all([getProject(projectId), getProjectTasks(projectId)])
+      .then(([loadedProject, loadedTasks]) => {
+        if (cancelled) return;
+        setProject(loadedProject);
+        setTasks(loadedTasks);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  if (loading) return null;
 
   if (failed || !project) {
     return (

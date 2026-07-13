@@ -9,10 +9,11 @@ Next.js frontend. Two full-stack features:
   estimates), tags, due dates, and sub-tasks. **`/worklog`** aggregates tracked
   time per day/week.
 
-> **Single-user, no auth by design.** Every request runs as one hardcoded user
-> (`DEFAULT_USER_ID`) via a `currentUser` middleware stub. Every owned model
-> carries a plain indexed `userId`, so real auth can be dropped in later without
-> a schema rewrite.
+> **Firebase Auth required.** Every API route except `/api/health` requires a
+> valid Firebase ID token (`Authorization: Bearer <token>`); the frontend
+> attaches it automatically once signed in. `userId` on every owned model is
+> the Firebase UID — no local `users` table. See **Auth** below for local dev
+> (no real Firebase project needed, just the Auth Emulator).
 
 ## API overview
 
@@ -27,6 +28,29 @@ Next.js frontend. Two full-stack features:
   attach/detach via `POST/DELETE /api/tasks/:id/tags/:tagId`.
 - Sub-tasks: `GET/POST /api/tasks/:id/subtasks`,
   `PATCH/DELETE /api/subtasks/:id`.
+
+## Auth
+
+No real Firebase project exists yet. Local dev runs entirely against the
+**Firebase Auth Emulator** instead:
+
+```
+npx firebase-tools emulators:start --only auth   # http://localhost:9099
+```
+
+`backend/.env` and `frontend/.env.local` already point at it
+(`FIREBASE_AUTH_EMULATOR_HOST` / `NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST`).
+Sign up with any email/password at `/signup` — the emulator accepts anything
+and doesn't send real email. Emulator accounts/data reset every time the
+emulator restarts.
+
+Note: seeded demo data (`npm run db:seed`) is attached to a placeholder
+`DEFAULT_USER_ID`, not a real Firebase UID, so it won't show up under any
+account you sign up with — it's only useful for direct DB inspection right
+now.
+
+Swapping in a real Firebase project later is env-only (`FIREBASE_PROJECT_ID`,
+`NEXT_PUBLIC_FIREBASE_*` client config) — no code changes.
 
 ## Prerequisites
 

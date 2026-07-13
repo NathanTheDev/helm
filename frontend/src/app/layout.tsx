@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
 import NavBar from "@/components/NavBar";
+import AuthGate from "@/components/auth/AuthGate";
+import { AuthProvider } from "@/lib/auth-context";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -36,8 +38,12 @@ export default function RootLayout({
       className={`${fraunces.variable} ${inter.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
-        <NavBar />
-        <div className="flex-1 flex flex-col">{children}</div>
+        <AuthProvider>
+          <NavBar />
+          <AuthGate>
+            <div className="flex-1 flex flex-col">{children}</div>
+          </AuthGate>
+        </AuthProvider>
       </body>
     </html>
   );
