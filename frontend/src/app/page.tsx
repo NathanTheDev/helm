@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getHabits } from "@/lib/api";
 import { getProjects, getProjectTasks } from "@/lib/tasksApi";
+import { getNotes } from "@/lib/notesApi";
 import { useAuth } from "@/lib/auth-context";
 
 const actions = [
@@ -55,16 +56,11 @@ const actions = [
   },
 ];
 
-const glance = [
+const staticGlance = [
   {
     kind: "habit",
     text: "Reading streak — 12 days running",
     time: "2h",
-  },
-  {
-    kind: "note",
-    text: "“Q3 planning” hasn’t been touched in a week",
-    time: "5h",
   },
   {
     kind: "habit",
@@ -72,16 +68,18 @@ const glance = [
     time: "1d",
   },
   {
-    kind: "note",
-    text: "3 notes were shared with you",
-    time: "2d",
-  },
-  {
     kind: "reminder",
     text: "Weekly review is due tomorrow",
     time: "2d",
   },
 ];
+
+function formatRelative(iso: string): string {
+  const hours = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000);
+  if (hours < 1) return "now";
+  if (hours < 24) return `${hours}h`;
+  return `${Math.floor(hours / 24)}d`;
+}
 
 const kindColor: Record<string, string> = {
   habit: "bg-sage",
@@ -93,6 +91,9 @@ export default function Home() {
   const { user } = useAuth();
   const [dueToday, setDueToday] = useState(0);
   const [openTasks, setOpenTasks] = useState(0);
+  const [notesGlance, setNotesGlance] = useState<{ kind: string; text: string; time: string }[]>(
+    [],
+  );
 
   useEffect(() => {
     getHabits()
@@ -109,6 +110,34 @@ export default function Home() {
         setOpenTasks(taskLists.flat().filter((t) => t.status !== "DONE").length);
       })
       .catch(() => setOpenTasks(0));
+
+    getNotes()
+      .then((notes) => {
+        const items: { kind: string; text: string; time: string }[] = [];
+
+        if (notes.length > 0) {
+          const stalest = [...notes].sort(
+            (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
+          )[0];
+          items.push({
+            kind: "note",
+            text: `“${stalest.title || "Untitled note"}” hasn’t been touched in ${formatRelative(stalest.updatedAt)}`,
+            time: formatRelative(stalest.updatedAt),
+          });
+        }
+
+        const publishedCount = notes.filter((n) => n.published).length;
+        if (publishedCount > 0) {
+          items.push({
+            kind: "note",
+            text: `${publishedCount} ${publishedCount === 1 ? "note is" : "notes are"} published and shareable`,
+            time: "",
+          });
+        }
+
+        setNotesGlance(items);
+      })
+      .catch(() => setNotesGlance([]));
   }, []);
 
   const actionHint = (label: string, fallback: string) => {
@@ -116,6 +145,8 @@ export default function Home() {
     if (label === "Projects") return `${openTasks} open`;
     return fallback;
   };
+
+  const glance = [...staticGlance, ...notesGlance];
 
   const firstName = user?.displayName?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "there";
 

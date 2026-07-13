@@ -7,6 +7,7 @@ import { auth } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 
 const links = [
+  { href: "/notes", label: "Notes" },
   { href: "/habits", label: "Habits" },
   { href: "/projects", label: "Projects" },
   { href: "/worklog", label: "Worklog" },
