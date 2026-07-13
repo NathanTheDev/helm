@@ -10,6 +10,7 @@ import { taskTimeRouter } from "./routes/timeEntries";
 import { worklogRouter } from "./routes/worklog";
 import { tagsRouter, taskTagsRouter } from "./routes/tags";
 import { subTasksNestedRouter, subTasksRouter } from "./routes/subTasks";
+import { notesRouter } from "./routes/notes";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -34,6 +35,7 @@ app.use("/api/tasks/:id", subTasksNestedRouter);
 app.use("/api/tags", tagsRouter);
 app.use("/api/subtasks", subTasksRouter);
 app.use("/api/worklog", worklogRouter);
+app.use("/api/notes", notesRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

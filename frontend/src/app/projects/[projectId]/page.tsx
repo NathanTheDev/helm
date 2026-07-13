@@ -22,6 +22,11 @@ export default function BoardPage() {
 
   useEffect(() => {
     let cancelled = false;
+    // Resets loading/error state when navigating between projects (same
+    // page component instance, different projectId) - unavoidable as a
+    // synchronous effect-body setState here since there's no natural key to
+    // remount by instead.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setFailed(false);
 
