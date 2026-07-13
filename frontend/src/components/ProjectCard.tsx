@@ -9,6 +9,11 @@ import {
   type Project,
 } from "@/lib/tasksApi";
 import { PROJECT_COLORS } from "./NewProjectForm";
+import { Card, CardForm } from "@/components/ui/Card";
+import { Button, IconButton } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Badge } from "@/components/ui/Badge";
+import { PencilIcon, ArchiveIcon, TrashIcon } from "@/components/ui/Icon";
 
 export function ProjectCard({
   project,
@@ -58,16 +63,12 @@ export function ProjectCard({
 
   if (editing) {
     return (
-      <form
-        onSubmit={saveEdit}
-        className="flex flex-col gap-3 rounded-2xl border border-clay bg-surface p-5"
-      >
-        <input
+      <CardForm onSubmit={saveEdit} className="flex flex-col gap-3">
+        <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           aria-label="Project name"
           autoFocus
-          className="rounded-lg border border-line bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-clay"
         />
         <div className="flex items-center gap-2">
           {PROJECT_COLORS.map((c) => (
@@ -86,32 +87,19 @@ export function ProjectCard({
           ))}
         </div>
         <div className="mt-1 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => setEditing(false)}
-            disabled={pending}
-            className="rounded-full px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
-          >
+          <Button type="button" variant="ghost" size="sm" onClick={() => setEditing(false)} disabled={pending}>
             Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={pending || !name.trim()}
-            className="rounded-full bg-clay px-4 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-clay/90 disabled:opacity-50"
-          >
+          </Button>
+          <Button type="submit" size="sm" disabled={pending || !name.trim()}>
             Save
-          </button>
+          </Button>
         </div>
-      </form>
+      </CardForm>
     );
   }
 
   return (
-    <div
-      className={`flex flex-col rounded-2xl border border-line bg-surface p-5 ${
-        project.archived ? "opacity-60" : ""
-      }`}
-    >
+    <Card className={`flex flex-col ${project.archived ? "opacity-60" : ""}`}>
       <div className="flex items-start justify-between gap-2">
         <Link
           href={`/projects/${project.id}`}
@@ -125,41 +113,23 @@ export function ProjectCard({
           <span className="truncate text-sm font-medium text-ink transition-colors group-hover:text-clay">
             {project.name}
           </span>
-          {project.archived && (
-            <span className="shrink-0 rounded-full bg-paper px-2 py-0.5 font-mono text-[10px] text-ink-muted">
-              archived
-            </span>
-          )}
+          {project.archived && <Badge size="xs">archived</Badge>}
         </Link>
 
         <div className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            disabled={pending}
-            aria-label="Edit project"
-            className="text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
-          >
+          <IconButton onClick={() => setEditing(true)} disabled={pending} aria-label="Edit project">
             <PencilIcon />
-          </button>
-          <button
-            type="button"
+          </IconButton>
+          <IconButton
             onClick={toggleArchive}
             disabled={pending}
             aria-label={project.archived ? "Unarchive project" : "Archive project"}
-            className="text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
           >
             <ArchiveIcon />
-          </button>
-          <button
-            type="button"
-            onClick={remove}
-            disabled={pending}
-            aria-label="Delete project"
-            className="text-ink-muted transition-colors hover:text-clay disabled:opacity-50"
-          >
+          </IconButton>
+          <IconButton tone="danger" onClick={remove} disabled={pending} aria-label="Delete project">
             <TrashIcon />
-          </button>
+          </IconButton>
         </div>
       </div>
 
@@ -169,30 +139,6 @@ export function ProjectCard({
       >
         {taskCount ?? 0} {taskCount === 1 ? "task" : "tasks"} →
       </Link>
-    </div>
-  );
-}
-
-function PencilIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-3.5 w-3.5">
-      <path d="M4 20.5v-3.6L15.4 5.5a1.5 1.5 0 0 1 2.1 0l1.6 1.6a1.5 1.5 0 0 1 0 2.1L7.7 20.6H4Z" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function ArchiveIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-3.5 w-3.5">
-      <path d="M4 7h16M5 7l.7 11a1.5 1.5 0 0 0 1.5 1.4h9.6a1.5 1.5 0 0 0 1.5-1.4L19 7M4 7l1.2-2.4A1.5 1.5 0 0 1 6.5 4h11a1.5 1.5 0 0 1 1.3.6L20 7M10 11h4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function TrashIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-3.5 w-3.5">
-      <path d="M5 7h14M10 7V5.5A1.5 1.5 0 0 1 11.5 4h1A1.5 1.5 0 0 1 14 5.5V7m-7 0 .8 11a1.5 1.5 0 0 0 1.5 1.4h3.4a1.5 1.5 0 0 0 1.5-1.4L17 7" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    </Card>
   );
 }

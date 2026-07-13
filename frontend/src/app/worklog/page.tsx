@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getWorklog, formatDuration, type Worklog } from "@/lib/tasksApi";
+import { Card, cardClasses } from "@/components/ui/Card";
 
 const dayLetters = ["S", "M", "T", "W", "T", "F", "S"];
 function dayLetter(date: string): string {
@@ -38,12 +39,12 @@ export default function WorklogPage() {
       </p>
 
       {loading ? null : failed ? (
-        <div className="mt-10 rounded-2xl border border-line bg-surface p-8 text-center">
+        <Card padding="lg" className="mt-10 text-center">
           <p className="text-sm text-ink">Couldn&rsquo;t reach the server.</p>
           <p className="mt-1 text-sm text-ink-muted">
             Make sure the backend is running, then refresh.
           </p>
-        </div>
+        </Card>
       ) : worklog && worklog.totalSeconds === 0 ? (
         <p className="mt-10 text-sm text-ink-muted">
           No time tracked yet — start a timer on a task to see it here.
@@ -68,7 +69,7 @@ function WorklogContent({ worklog }: { worklog: Worklog }) {
 
       <section className="mt-10">
         <h2 className="font-display text-xl text-ink">Last 7 days</h2>
-        <div className="mt-5 flex items-end justify-between gap-3 rounded-2xl border border-line bg-surface p-5">
+        <Card className="mt-5 flex items-end justify-between gap-3">
           {worklog.last7Days.map((day) => {
             const h = Math.round((day.seconds / max) * 96);
             return (
@@ -91,13 +92,13 @@ function WorklogContent({ worklog }: { worklog: Worklog }) {
               </div>
             );
           })}
-        </div>
+        </Card>
       </section>
 
       {worklog.days.length > 0 && (
         <section className="mt-10">
           <h2 className="font-display text-xl text-ink">By day</h2>
-          <ul className="mt-4 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
+          <ul className={cardClasses("default", "none", "mt-4 divide-y divide-line overflow-hidden")}>
             {worklog.days.map((day) => (
               <li
                 key={day.date}
@@ -120,13 +121,13 @@ function WorklogContent({ worklog }: { worklog: Worklog }) {
 
 function Stat({ label, seconds }: { label: string; seconds: number }) {
   return (
-    <div className="rounded-2xl border border-line bg-surface p-5">
+    <Card>
       <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-muted">
         {label}
       </p>
       <p className="mt-2 font-display text-2xl text-ink">
         {formatDuration(seconds)}
       </p>
-    </div>
+    </Card>
   );
 }

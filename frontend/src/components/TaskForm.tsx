@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { CardForm } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input, Textarea } from "@/components/ui/Input";
 
 export interface TaskFormValues {
   title: string;
@@ -36,67 +39,53 @@ export function TaskForm({
   };
 
   return (
-    <form
-      onSubmit={submit}
-      className="flex flex-col gap-2 rounded-2xl border border-clay bg-surface p-4"
-    >
-      <input
+    <CardForm onSubmit={submit} padding="sm" className="flex flex-col gap-2">
+      <Input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Task title"
         aria-label="Task title"
         autoFocus={autoFocus}
-        className="rounded-lg border border-line bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-clay"
       />
-      <textarea
+      <Textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Notes (optional)"
         aria-label="Description"
         rows={2}
-        className="resize-none rounded-lg border border-line bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-clay"
+        className="resize-none"
       />
       <div className="flex items-center gap-2">
         <label className="flex items-center gap-1.5 text-xs text-ink-muted">
           Est
-          <input
+          <Input
             type="number"
             min={1}
             value={estimateMinutes}
             onChange={(e) => setEstimate(e.target.value)}
             placeholder="min"
             aria-label="Estimate minutes"
-            className="w-16 rounded-lg border border-line bg-paper px-2 py-1.5 text-sm text-ink outline-none focus:border-clay"
+            className="w-16"
           />
         </label>
         <label className="ml-auto flex items-center gap-1.5 text-xs text-ink-muted">
           Due
-          <input
+          <Input
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
             aria-label="Due date"
-            className="rounded-lg border border-line bg-paper px-2 py-1.5 text-sm text-ink outline-none focus:border-clay"
           />
         </label>
       </div>
       <div className="mt-1 flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={pending}
-          className="rounded-full px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={pending}>
           Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={pending || !title.trim()}
-          className="rounded-full bg-clay px-4 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-clay/90 disabled:opacity-50"
-        >
+        </Button>
+        <Button type="submit" size="sm" disabled={pending || !title.trim()}>
           {pending ? "Saving…" : submitLabel}
-        </button>
+        </Button>
       </div>
-    </form>
+    </CardForm>
   );
 }

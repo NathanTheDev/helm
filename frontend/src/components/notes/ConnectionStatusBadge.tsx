@@ -1,10 +1,11 @@
 import type { ConnectionStatus } from "@/hooks/useYjsEditor";
+import { Badge, type BadgeTone } from "@/components/ui/Badge";
 
-const STYLES: Record<ConnectionStatus, string> = {
-  connected: "bg-sage-soft text-sage",
-  connecting: "bg-clay-soft text-clay",
-  reconnecting: "bg-clay-soft text-clay animate-pulse",
-  offline: "bg-clay-soft text-clay",
+const TONES: Record<ConnectionStatus, BadgeTone> = {
+  connected: "success",
+  connecting: "accent",
+  reconnecting: "accent",
+  offline: "accent",
 };
 
 const LABELS: Record<ConnectionStatus, string> = {
@@ -16,11 +17,8 @@ const LABELS: Record<ConnectionStatus, string> = {
 
 export function ConnectionStatusBadge({ status }: { status: ConnectionStatus }) {
   return (
-    <span
-      className={`rounded-full px-2 py-0.5 text-xs font-medium ${STYLES[status]}`}
-      title={`Connection: ${LABELS[status]}`}
-    >
+    <Badge tone={TONES[status]} pulse={status === "reconnecting"} title={`Connection: ${LABELS[status]}`}>
       {LABELS[status]}
-    </span>
+    </Badge>
   );
 }

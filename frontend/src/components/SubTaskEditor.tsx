@@ -8,6 +8,8 @@ import {
   deleteSubTask,
   type Task,
 } from "@/lib/tasksApi";
+import { Button, IconButton } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 export function SubTaskEditor({ task }: { task: Task }) {
   const router = useRouter();
@@ -57,33 +59,29 @@ export function SubTaskEditor({ task }: { task: Task }) {
           >
             {sub.title}
           </span>
-          <button
-            type="button"
+          <IconButton
+            tone="danger"
             onClick={() => run(() => deleteSubTask(sub.id))}
             disabled={pending}
             aria-label={`Delete ${sub.title}`}
-            className="text-ink-muted transition-colors hover:text-clay disabled:opacity-50"
           >
             ×
-          </button>
+          </IconButton>
         </div>
       ))}
 
       <form onSubmit={add} className="flex gap-2">
-        <input
+        <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Add sub-task"
           aria-label="Add sub-task"
-          className="flex-1 rounded-lg border border-line bg-paper px-2 py-1 text-xs text-ink outline-none focus:border-clay"
+          size="xs"
+          className="flex-1"
         />
-        <button
-          type="submit"
-          disabled={pending || !title.trim()}
-          className="rounded-full bg-clay-soft/60 px-3 py-1 text-xs font-medium text-clay transition-colors hover:bg-clay-soft disabled:opacity-50"
-        >
+        <Button type="submit" variant="subtle" size="xs" disabled={pending || !title.trim()}>
           Add
-        </button>
+        </Button>
       </form>
     </div>
   );

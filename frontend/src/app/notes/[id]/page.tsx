@@ -8,6 +8,8 @@ import { useAuth } from "@/lib/auth-context";
 import { MarkdownEditor } from "@/components/notes/MarkdownEditor";
 import { MarkdownPreview } from "@/components/notes/MarkdownPreview";
 import { CollabEditor } from "@/components/notes/CollabEditor";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 
 const AUTOSAVE_DELAY_MS = 800;
 const NOTES_WS_URL = process.env.NEXT_PUBLIC_NOTES_WS_URL ?? "ws://localhost:1234";
@@ -108,12 +110,12 @@ export default function NotePage() {
         <Link href="/" className="w-fit text-sm text-ink-muted transition-colors hover:text-ink">
           ← Back home
         </Link>
-        <div className="mt-10 rounded-2xl border border-line bg-surface p-8 text-center">
+        <Card padding="lg" className="mt-10 text-center">
           <p className="text-sm text-ink">Couldn&rsquo;t load this note.</p>
           <p className="mt-1 text-sm text-ink-muted">
             It may not exist, or the backend is unreachable.
           </p>
-        </div>
+        </Card>
       </main>
     );
   }
@@ -162,14 +164,9 @@ export default function NotePage() {
           )}
 
           {isOwner && !note.published && (
-            <button
-              type="button"
-              onClick={handlePublish}
-              disabled={publishing}
-              className="rounded-full bg-clay px-4 py-1.5 text-sm font-medium text-surface transition-colors hover:bg-clay/90 disabled:opacity-50"
-            >
+            <Button size="md" onClick={handlePublish} disabled={publishing}>
               {publishing ? "Publishing…" : "Publish"}
-            </button>
+            </Button>
           )}
 
           <div className="flex overflow-hidden rounded-full border border-line text-sm">

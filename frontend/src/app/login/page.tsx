@@ -7,6 +7,8 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { mapSignInError } from "@/lib/auth-errors";
 import { SocialSignInButtons } from "@/components/auth/SocialSignInButtons";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,29 +36,27 @@ export default function LoginPage() {
       <h1 className="font-display text-3xl italic text-ink">Sign in</h1>
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-3">
         {error && <p className="text-sm text-clay">{error}</p>}
-        <input
+        <Input
           type="email"
           placeholder="Email"
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink placeholder:text-ink-muted/60 focus:outline-none focus:ring-1 focus:ring-clay"
+          size="md"
+          tone="surface"
         />
-        <input
+        <Input
           type="password"
           placeholder="Password"
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink placeholder:text-ink-muted/60 focus:outline-none focus:ring-1 focus:ring-clay"
+          size="md"
+          tone="surface"
         />
-        <button
-          type="submit"
-          disabled={submitting}
-          className="mt-1 rounded-full bg-clay px-4 py-2.5 text-sm font-medium text-surface transition-colors hover:bg-clay/90 disabled:opacity-50"
-        >
+        <Button type="submit" size="lg" className="mt-1" disabled={submitting}>
           {submitting ? "Signing in…" : "Sign in"}
-        </button>
+        </Button>
         <SocialSignInButtons onError={setError} />
         <p className="mt-2 text-sm text-ink-muted">
           Don&rsquo;t have an account?{" "}

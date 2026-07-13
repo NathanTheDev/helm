@@ -9,6 +9,7 @@ import {
   formatDuration,
   type Task,
 } from "@/lib/tasksApi";
+import { Button } from "@/components/ui/Button";
 
 export function TaskTimer({ task }: { task: Task }) {
   const router = useRouter();
@@ -53,18 +54,9 @@ export function TaskTimer({ task }: { task: Task }) {
   return (
     <div className="mt-3 pl-6">
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={toggle}
-          disabled={pending}
-          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors disabled:opacity-50 ${
-            running
-              ? "bg-clay text-paper hover:bg-clay/90"
-              : "bg-clay-soft/60 text-clay hover:bg-clay-soft"
-          }`}
-        >
+        <Button variant={running ? "primary" : "subtle"} size="xs" onClick={toggle} disabled={pending}>
           {running ? "■ Stop" : "▶ Start"}
-        </button>
+        </Button>
         <span className="font-mono text-[11px] text-ink-muted">
           {running && (
             <span className="mr-1 text-clay">{formatClock(liveElapsed)}</span>
@@ -80,7 +72,7 @@ export function TaskTimer({ task }: { task: Task }) {
               className="h-full rounded-full transition-all"
               style={{
                 width: `${pct}%`,
-                backgroundColor: over ? "#c9633e" : "#6f7d5c",
+                backgroundColor: over ? "var(--clay)" : "var(--sage)",
               }}
             />
           </div>

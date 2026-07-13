@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getHabits, type Habit } from "@/lib/api";
 import { HabitCard } from "@/components/HabitCard";
 import { NewHabitForm } from "@/components/NewHabitForm";
+import { Card } from "@/components/ui/Card";
 
 export default function HabitsPage() {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -38,12 +39,12 @@ export default function HabitsPage() {
       </p>
 
       {loading ? null : failed ? (
-        <div className="mt-10 rounded-2xl border border-line bg-surface p-8 text-center">
+        <Card padding="lg" className="mt-10 text-center">
           <p className="text-sm text-ink">Couldn&rsquo;t reach the server.</p>
           <p className="mt-1 text-sm text-ink-muted">
             Make sure the backend is running, then refresh.
           </p>
-        </div>
+        </Card>
       ) : (
         <>
           {habits.length === 0 && (

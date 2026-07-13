@@ -14,6 +14,9 @@ import { TaskForm, type TaskFormValues } from "./TaskForm";
 import { TaskTimer } from "./TaskTimer";
 import { TagPicker } from "./TagPicker";
 import { SubTaskEditor } from "./SubTaskEditor";
+import { cardClasses } from "@/components/ui/Card";
+import { IconButton } from "@/components/ui/Button";
+import { GripIcon, PencilIcon, TrashIcon } from "@/components/ui/Icon";
 
 function toUpdateInput(v: TaskFormValues) {
   return {
@@ -80,7 +83,7 @@ export function TaskCard({ task }: { task: Task }) {
           onSubmit={saveEdit}
           onCancel={() => setEditing(false)}
         />
-        <div className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-4">
+        <div className={cardClasses("default", "sm", "flex flex-col gap-4")}>
           <TagPicker task={task} />
           <SubTaskEditor task={task} />
         </div>
@@ -98,7 +101,7 @@ export function TaskCard({ task }: { task: Task }) {
     <div
       ref={setNodeRef}
       style={style}
-      className="group rounded-2xl border border-line bg-surface p-4"
+      className={cardClasses("default", "sm", "group")}
     >
       <div className="flex items-start gap-2">
         <button
@@ -116,24 +119,12 @@ export function TaskCard({ task }: { task: Task }) {
         </h3>
 
         <div className="flex shrink-0 items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            disabled={pending}
-            aria-label="Edit task"
-            className="text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
-          >
+          <IconButton onClick={() => setEditing(true)} disabled={pending} aria-label="Edit task">
             <PencilIcon />
-          </button>
-          <button
-            type="button"
-            onClick={remove}
-            disabled={pending}
-            aria-label="Delete task"
-            className="text-ink-muted transition-colors hover:text-clay disabled:opacity-50"
-          >
+          </IconButton>
+          <IconButton tone="danger" onClick={remove} disabled={pending} aria-label="Delete task">
             <TrashIcon />
-          </button>
+          </IconButton>
         </div>
       </div>
 
@@ -168,34 +159,5 @@ export function TaskCard({ task }: { task: Task }) {
         </div>
       )}
     </div>
-  );
-}
-
-function GripIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-      <circle cx="9" cy="6" r="1.4" />
-      <circle cx="15" cy="6" r="1.4" />
-      <circle cx="9" cy="12" r="1.4" />
-      <circle cx="15" cy="12" r="1.4" />
-      <circle cx="9" cy="18" r="1.4" />
-      <circle cx="15" cy="18" r="1.4" />
-    </svg>
-  );
-}
-
-function PencilIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-3.5 w-3.5">
-      <path d="M4 20.5v-3.6L15.4 5.5a1.5 1.5 0 0 1 2.1 0l1.6 1.6a1.5 1.5 0 0 1 0 2.1L7.7 20.6H4Z" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function TrashIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-3.5 w-3.5">
-      <path d="M5 7h14M10 7V5.5A1.5 1.5 0 0 1 11.5 4h1A1.5 1.5 0 0 1 14 5.5V7m-7 0 .8 11a1.5 1.5 0 0 0 1.5 1.4h3.4a1.5 1.5 0 0 0 1.5-1.4L17 7" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }

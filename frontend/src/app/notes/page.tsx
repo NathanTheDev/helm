@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getNotes, type Note } from "@/lib/notesApi";
+import { Card, cardClasses } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 
 function formatUpdated(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -41,21 +43,21 @@ export default function NotesPage() {
       </p>
 
       {loading ? null : failed ? (
-        <div className="mt-10 rounded-2xl border border-line bg-surface p-8 text-center">
+        <Card padding="lg" className="mt-10 text-center">
           <p className="text-sm text-ink">Couldn&rsquo;t reach the server.</p>
           <p className="mt-1 text-sm text-ink-muted">
             Make sure the backend is running, then refresh.
           </p>
-        </div>
+        </Card>
       ) : notes.length === 0 ? (
-        <div className="mt-10 rounded-2xl border border-line bg-surface p-8 text-center">
+        <Card padding="lg" className="mt-10 text-center">
           <p className="text-sm text-ink">No notes yet.</p>
           <Link href="/notes/new" className="mt-3 inline-block text-sm text-clay hover:underline">
             Start writing →
           </Link>
-        </div>
+        </Card>
       ) : (
-        <ul className="mt-6 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
+        <ul className={cardClasses("default", "none", "mt-6 divide-y divide-line overflow-hidden")}>
           {notes.map((note) => (
             <li key={note.id}>
               <Link
@@ -65,11 +67,7 @@ export default function NotesPage() {
                 <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">
                   {note.title || "Untitled note"}
                 </span>
-                {note.published && (
-                  <span className="shrink-0 rounded-full bg-clay-soft px-2 py-0.5 font-mono text-[10px] text-clay">
-                    published
-                  </span>
-                )}
+                {note.published && <Badge tone="accent" size="xs">published</Badge>}
                 <span className="shrink-0 font-mono text-xs text-ink-muted">
                   {formatUpdated(note.updatedAt)}
                 </span>

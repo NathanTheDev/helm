@@ -11,6 +11,7 @@ import {
 } from "@/lib/tasksApi";
 import { RememberProject } from "@/components/RememberProject";
 import { Board } from "@/components/Board";
+import { Card } from "@/components/ui/Card";
 
 export default function BoardPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -59,12 +60,12 @@ export default function BoardPage() {
         >
           ← All projects
         </Link>
-        <div className="mt-10 rounded-2xl border border-line bg-surface p-8 text-center">
+        <Card padding="lg" className="mt-10 text-center">
           <p className="text-sm text-ink">Couldn&rsquo;t load this project.</p>
           <p className="mt-1 text-sm text-ink-muted">
             It may not exist, or the backend is unreachable.
           </p>
-        </div>
+        </Card>
       </main>
     );
   }

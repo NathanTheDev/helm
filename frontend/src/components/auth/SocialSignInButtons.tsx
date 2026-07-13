@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { GoogleAuthProvider, GithubAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { isDismissedPopupError, mapSocialSignInError } from "@/lib/auth-errors";
+import { Button } from "@/components/ui/Button";
 
 export function SocialSignInButtons({ onError }: { onError: (message: string) => void }) {
   const router = useRouter();
@@ -35,22 +36,22 @@ export function SocialSignInButtons({ onError }: { onError: (message: string) =>
         or
         <div className="h-px flex-1 bg-line" />
       </div>
-      <button
-        type="button"
+      <Button
+        variant="outline"
+        size="lg"
         disabled={pending !== null}
         onClick={() => handleSignIn(new GoogleAuthProvider(), "google")}
-        className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-clay-soft/40 disabled:opacity-50"
       >
         {pending === "google" ? "Continuing…" : "Continue with Google"}
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        variant="outline"
+        size="lg"
         disabled={pending !== null}
         onClick={() => handleSignIn(new GithubAuthProvider(), "github")}
-        className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-clay-soft/40 disabled:opacity-50"
       >
         {pending === "github" ? "Continuing…" : "Continue with GitHub"}
-      </button>
+      </Button>
     </div>
   );
 }

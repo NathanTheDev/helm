@@ -28,6 +28,7 @@ import {
 } from "@/lib/tasksApi";
 import { TaskCard } from "./TaskCard";
 import { TaskForm, type TaskFormValues } from "./TaskForm";
+import { Card, cardClasses } from "@/components/ui/Card";
 
 type Columns = Record<TaskStatus, Task[]>;
 
@@ -154,9 +155,9 @@ export function Board({
 
       <DragOverlay>
         {activeTask ? (
-          <div className="rounded-2xl border border-clay bg-surface p-4 shadow-lg">
+          <Card variant="form" padding="sm" className="shadow-lg">
             <h3 className="text-sm font-medium text-ink">{activeTask.title}</h3>
-          </div>
+          </Card>
         ) : null}
       </DragOverlay>
     </DndContext>
@@ -218,7 +219,7 @@ function Column({
         </SortableContext>
 
         {tasks.length === 0 && !adding && (
-          <div className="rounded-2xl border border-dashed border-line/70 px-4 py-6 text-center font-mono text-[11px] text-ink-muted">
+          <div className={cardClasses("dashed", "none", "px-4 py-6 text-center font-mono text-[11px] text-ink-muted")}>
             empty
           </div>
         )}
@@ -237,7 +238,7 @@ function Column({
         <button
           type="button"
           onClick={() => setAdding(true)}
-          className="mt-3 rounded-2xl border border-dashed border-line px-4 py-2 text-xs text-ink-muted transition-colors hover:border-clay hover:text-clay"
+          className={cardClasses("dashed", "none", "mt-3 px-4 py-2 text-xs text-ink-muted transition-colors hover:border-clay hover:text-clay")}
         >
           + Add task
         </button>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createNote } from "@/lib/notesApi";
+import { Button } from "@/components/ui/Button";
 
 export default function NewNotePage() {
   const router = useRouter();
@@ -40,14 +41,9 @@ export default function NewNotePage() {
           >
             Discard
           </Link>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="rounded-full bg-clay px-4 py-1.5 text-sm font-medium text-surface transition-colors hover:bg-clay/90 disabled:opacity-50"
-          >
+          <Button size="md" onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : "Save"}
-          </button>
+          </Button>
         </div>
       </div>
 

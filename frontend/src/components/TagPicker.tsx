@@ -11,6 +11,8 @@ import {
   type Tag,
   type Task,
 } from "@/lib/tasksApi";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 export function TagPicker({ task }: { task: Task }) {
   const router = useRouter();
@@ -87,20 +89,17 @@ export function TagPicker({ task }: { task: Task }) {
         })}
       </div>
       <form onSubmit={addTag} className="flex gap-2">
-        <input
+        <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="New tag"
           aria-label="New tag"
-          className="flex-1 rounded-lg border border-line bg-paper px-2 py-1 text-xs text-ink outline-none focus:border-clay"
+          size="xs"
+          className="flex-1"
         />
-        <button
-          type="submit"
-          disabled={pending || !name.trim()}
-          className="rounded-full bg-clay-soft/60 px-3 py-1 text-xs font-medium text-clay transition-colors hover:bg-clay-soft disabled:opacity-50"
-        >
+        <Button type="submit" variant="subtle" size="xs" disabled={pending || !name.trim()}>
           Add
-        </button>
+        </Button>
       </form>
     </div>
   );
