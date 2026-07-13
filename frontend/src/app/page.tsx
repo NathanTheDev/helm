@@ -7,6 +7,7 @@ import { getProjects, getProjectTasks } from "@/lib/tasksApi";
 import { getNotes } from "@/lib/notesApi";
 import { useAuth } from "@/lib/auth-context";
 import { cardClasses } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const actions = [
   {
@@ -48,8 +49,8 @@ const actions = [
   },
   {
     href: "#at-a-glance",
-    label: "Notifications",
-    hint: "5 new",
+    label: "At a glance",
+    hint: "Jump to updates",
     tint: "bg-ochre-soft text-ochre",
     icon: (
       <path
@@ -61,23 +62,7 @@ const actions = [
   },
 ];
 
-const staticGlance = [
-  {
-    kind: "habit",
-    text: "Reading streak — 12 days running",
-    time: "2h",
-  },
-  {
-    kind: "habit",
-    text: "Morning walk — missed yesterday",
-    time: "1d",
-  },
-  {
-    kind: "reminder",
-    text: "Weekly review is due tomorrow",
-    time: "2d",
-  },
-];
+type GlanceItem = { kind: string; text: string; time: string };
 
 function formatRelative(iso: string): string {
   const hours = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000);
@@ -89,36 +74,73 @@ function formatRelative(iso: string): string {
 const kindColor: Record<string, string> = {
   habit: "bg-sage",
   note: "bg-clay",
-  reminder: "bg-ochre",
+  project: "bg-slate",
 };
 
 export default function Home() {
   const { user } = useAuth();
   const [dueToday, setDueToday] = useState(0);
   const [openTasks, setOpenTasks] = useState(0);
-  const [notesGlance, setNotesGlance] = useState<{ kind: string; text: string; time: string }[]>(
-    [],
-  );
+  const [habitsGlance, setHabitsGlance] = useState<GlanceItem[]>([]);
+  const [projectsGlance, setProjectsGlance] = useState<GlanceItem[]>([]);
+  const [notesGlance, setNotesGlance] = useState<GlanceItem[]>([]);
 
   useEffect(() => {
     getHabits()
       .then((habits) => {
-        setDueToday(habits.filter((h) => h.isDueToday && !h.isCompletedToday).length);
+        const due = habits.filter((h) => h.isDueToday && !h.isCompletedToday);
+        setDueToday(due.length);
+
+        const items: GlanceItem[] = [];
+        if (due.length > 0) {
+          items.push({
+            kind: "habit",
+            text: `${due.length} ${due.length === 1 ? "habit is" : "habits are"} due today`,
+            time: "",
+          });
+        }
+        const topStreak = [...habits].sort((a, b) => b.streak - a.streak)[0];
+        if (topStreak && topStreak.streak > 0) {
+          items.push({
+            kind: "habit",
+            text: `${topStreak.name} — ${topStreak.streak} day streak`,
+            time: "",
+          });
+        }
+        setHabitsGlance(items);
       })
-      .catch(() => setDueToday(0));
+      .catch(() => {
+        setDueToday(0);
+        setHabitsGlance([]);
+      });
 
     getProjects()
       .then(async (projects) => {
-        const taskLists = await Promise.all(
-          projects.filter((p) => !p.archived).map((p) => getProjectTasks(p.id)),
-        );
-        setOpenTasks(taskLists.flat().filter((t) => t.status !== "DONE").length);
+        const active = projects.filter((p) => !p.archived);
+        const taskLists = await Promise.all(active.map((p) => getProjectTasks(p.id)));
+        const open = taskLists.flat().filter((t) => t.status !== "DONE").length;
+        setOpenTasks(open);
+
+        const items: GlanceItem[] = [];
+        if (open > 0) {
+          items.push({
+            kind: "project",
+            text: `${open} open ${open === 1 ? "task" : "tasks"} across ${active.length} ${
+              active.length === 1 ? "project" : "projects"
+            }`,
+            time: "",
+          });
+        }
+        setProjectsGlance(items);
       })
-      .catch(() => setOpenTasks(0));
+      .catch(() => {
+        setOpenTasks(0);
+        setProjectsGlance([]);
+      });
 
     getNotes()
       .then((notes) => {
-        const items: { kind: string; text: string; time: string }[] = [];
+        const items: GlanceItem[] = [];
 
         if (notes.length > 0) {
           const stalest = [...notes].sort(
@@ -148,21 +170,25 @@ export default function Home() {
   const actionHint = (label: string, fallback: string) => {
     if (label === "Habits") return `${dueToday} due today`;
     if (label === "Projects") return `${openTasks} open`;
+    if (label === "At a glance") return `${glance.length} ${glance.length === 1 ? "update" : "updates"}`;
     return fallback;
   };
 
-  const glance = [...staticGlance, ...notesGlance];
+  const glance = [...habitsGlance, ...projectsGlance, ...notesGlance];
 
   const firstName = user?.displayName?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "there";
+  const now = new Date();
+  const dayLabel = now.toLocaleDateString(undefined, { weekday: "long" });
+  const greeting = now.getHours() < 12 ? "Good morning" : now.getHours() < 18 ? "Good afternoon" : "Good evening";
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-24">
       <section className="fade-up">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-muted">
-          Friday
+          {dayLabel}
         </p>
         <h1 className="mt-3 font-display text-4xl italic text-ink sm:text-5xl">
-          Good morning, {firstName}.
+          {greeting}, {firstName}.
         </h1>
         <p className="mt-3 max-w-md text-ink-muted">
           Here&rsquo;s what&rsquo;s waiting for you.
@@ -210,23 +236,31 @@ export default function Home() {
           </span>
         </div>
 
-        <ul className={cardClasses({ padding: "none", className: "mt-4 divide-y divide-line overflow-hidden" })}>
-          {glance.map((item) => (
-            <li
-              key={item.text}
-              className="flex items-center gap-3 px-5 py-4 transition-colors hover:bg-paper/60"
-            >
-              <span
-                className={`h-1.5 w-1.5 shrink-0 rounded-full ${kindColor[item.kind]}`}
-                aria-hidden
-              />
-              <span className="flex-1 text-sm text-ink">{item.text}</span>
-              <span className="font-mono text-xs text-ink-muted">
-                {item.time}
-              </span>
-            </li>
-          ))}
-        </ul>
+        {glance.length === 0 ? (
+          <EmptyState
+            className="mt-4"
+            title="All caught up."
+            description="Nothing new across your habits, projects, or notes."
+          />
+        ) : (
+          <ul className={cardClasses({ padding: "none", className: "mt-4 divide-y divide-line overflow-hidden" })}>
+            {glance.map((item) => (
+              <li
+                key={item.text}
+                className="flex items-center gap-3 px-5 py-4 transition-colors hover:bg-paper/60"
+              >
+                <span
+                  className={`h-1.5 w-1.5 shrink-0 rounded-full ${kindColor[item.kind]}`}
+                  aria-hidden
+                />
+                <span className="flex-1 text-sm text-ink">{item.text}</span>
+                <span className="font-mono text-xs text-ink-muted">
+                  {item.time}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </main>
   );

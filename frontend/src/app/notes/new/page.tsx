@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createNote } from "@/lib/notesApi";
 import { Button } from "@/components/ui/Button";
+import { MarkdownEditor } from "@/components/notes/MarkdownEditor";
 
 export default function NewNotePage() {
   const router = useRouter();
@@ -55,13 +56,7 @@ export default function NewNotePage() {
         className="mt-10 w-full bg-transparent font-display text-3xl italic text-ink placeholder:text-ink-muted/60 focus:outline-none sm:text-4xl"
       />
 
-      <textarea
-        placeholder="Start writing…"
-        rows={16}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        className="mt-6 w-full flex-1 resize-none bg-transparent text-ink placeholder:text-ink-muted/60 focus:outline-none"
-      />
+      <MarkdownEditor initialContent={content} onChange={setContent} />
     </main>
   );
 }
