@@ -3,16 +3,20 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { getNote, updateNote, type Note } from "@/lib/notesApi";
+import { getNote, updateNote, publishNote, type Note } from "@/lib/notesApi";
+import { useAuth } from "@/lib/auth-context";
 import { MarkdownEditor } from "@/components/notes/MarkdownEditor";
 import { MarkdownPreview } from "@/components/notes/MarkdownPreview";
+import { CollabEditor } from "@/components/notes/CollabEditor";
 
 const AUTOSAVE_DELAY_MS = 800;
+const NOTES_WS_URL = process.env.NEXT_PUBLIC_NOTES_WS_URL ?? "ws://localhost:1234";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
 export default function NotePage() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
 
   const [note, setNote] = useState<Note | null>(null);
   const [failed, setFailed] = useState(false);
@@ -20,6 +24,8 @@ export default function NotePage() {
   const [content, setContent] = useState("");
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [publishing, setPublishing] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latest = useRef({ title: "", content: "" });
@@ -35,6 +41,10 @@ export default function NotePage() {
       .catch(() => setFailed(true));
   }, [id]);
 
+  // Once published, content flows through Yjs/CollabEditor instead - the
+  // plain editor (the only thing that calls scheduleSave with `content`)
+  // unmounts at that point, so this keeps saving titles for both modes and
+  // content only pre-publish, without needing a branch here.
   function scheduleSave(next: Partial<{ title: string; content: string }>) {
     latest.current = { ...latest.current, ...next };
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -55,6 +65,25 @@ export default function NotePage() {
     };
   }, []);
 
+  async function handlePublish() {
+    setPublishing(true);
+    try {
+      const updated = await publishNote(id);
+      setNote(updated);
+    } catch {
+      // Save-state indicator already shows failures for title edits; a
+      // failed publish just leaves the button clickable to retry.
+    } finally {
+      setPublishing(false);
+    }
+  }
+
+  async function handleCopyLink() {
+    await navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   if (failed) {
     return (
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-20">
@@ -73,6 +102,8 @@ export default function NotePage() {
 
   if (!note) return null;
 
+  const isOwner = note.userId === user?.uid;
+
   const saveLabel =
     saveState === "saving"
       ? "Saving…"
@@ -89,7 +120,29 @@ export default function NotePage() {
           ← Back home
         </Link>
         <div className="flex items-center gap-4">
-          <span className="font-mono text-xs text-ink-muted">{saveLabel}</span>
+          {isOwner && <span className="font-mono text-xs text-ink-muted">{saveLabel}</span>}
+
+          {isOwner && note.published && (
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              className="text-sm text-ink-muted transition-colors hover:text-ink"
+            >
+              {copied ? "Copied!" : "Copy link"}
+            </button>
+          )}
+
+          {isOwner && !note.published && (
+            <button
+              type="button"
+              onClick={handlePublish}
+              disabled={publishing}
+              className="rounded-full bg-clay px-4 py-1.5 text-sm font-medium text-surface transition-colors hover:bg-clay/90 disabled:opacity-50"
+            >
+              {publishing ? "Publishing…" : "Publish"}
+            </button>
+          )}
+
           <div className="flex overflow-hidden rounded-full border border-line text-sm">
             <button
               type="button"
@@ -117,14 +170,17 @@ export default function NotePage() {
         type="text"
         placeholder="Untitled note"
         value={title}
+        disabled={!isOwner}
         onChange={(e) => {
           setTitle(e.target.value);
           scheduleSave({ title: e.target.value });
         }}
-        className="mt-10 w-full bg-transparent font-display text-3xl italic text-ink placeholder:text-ink-muted/60 focus:outline-none sm:text-4xl"
+        className="mt-10 w-full bg-transparent font-display text-3xl italic text-ink placeholder:text-ink-muted/60 focus:outline-none disabled:cursor-default sm:text-4xl"
       />
 
-      {mode === "edit" ? (
+      {note.published && note.externalDocId ? (
+        <CollabEditor wsUrl={NOTES_WS_URL} room={note.externalDocId} user={user} mode={mode} />
+      ) : mode === "edit" ? (
         <MarkdownEditor
           initialContent={content}
           onChange={(next) => {
