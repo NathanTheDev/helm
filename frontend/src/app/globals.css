@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-:root {
+:root,
+[data-theme="paper"] {
   --paper: #f3efe6;
   --surface: #fdfbf6;
   --ink: #26221c;
@@ -10,6 +11,32 @@
   --line: #e3dbc9;
   --sage: #6f7d5c;
   --sage-soft: #e2e6d8;
+  --slate: #4f6d7a;
+  --slate-soft: #dbe4e6;
+  --plum: #8a6d9e;
+  --plum-soft: #e7ddee;
+  --ochre: #b08a3e;
+  --ochre-soft: #ede1c5;
+  --shadow-color: rgba(38, 34, 28, 0.1);
+}
+
+[data-theme="dark"] {
+  --paper: #1c1a16;
+  --surface: #262320;
+  --ink: #f3efe6;
+  --ink-muted: #a89f8f;
+  --clay: #e0855a;
+  --clay-soft: #3a2a20;
+  --line: #3a352c;
+  --sage: #93a97e;
+  --sage-soft: #2a3123;
+  --slate: #85aabb;
+  --slate-soft: #22323a;
+  --plum: #bb98cf;
+  --plum-soft: #2f2636;
+  --ochre: #d3a95d;
+  --ochre-soft: #362b19;
+  --shadow-color: rgba(0, 0, 0, 0.45);
 }
 
 @theme inline {
@@ -22,14 +49,31 @@
   --color-line: var(--line);
   --color-sage: var(--sage);
   --color-sage-soft: var(--sage-soft);
+  --color-slate: var(--slate);
+  --color-slate-soft: var(--slate-soft);
+  --color-plum: var(--plum);
+  --color-plum-soft: var(--plum-soft);
+  --color-ochre: var(--ochre);
+  --color-ochre-soft: var(--ochre-soft);
 
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-plex-mono);
+
+  --radius-control: 0.75rem;
+  --radius-card: 1.25rem;
+  --radius-pill: 9999px;
+
+  --shadow-sm: 0 1px 2px var(--shadow-color);
+  --shadow-md: 0 6px 16px -4px var(--shadow-color);
+  --shadow-lg: 0 16px 40px -8px var(--shadow-color);
 }
 
 body {
+  background-color: var(--paper);
+  color: var(--ink);
   font-feature-settings: "ss01" 1;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 @media (prefers-reduced-motion: no-preference) {
