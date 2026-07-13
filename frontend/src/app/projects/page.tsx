@@ -6,7 +6,7 @@ import { getProjects, getProjectTasks, type Project } from "@/lib/tasksApi";
 import { ProjectCard } from "@/components/ProjectCard";
 import { NewProjectForm } from "@/components/NewProjectForm";
 import { JumpBackIn } from "@/components/JumpBackIn";
-import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -71,12 +71,12 @@ export default function ProjectsPage() {
       </p>
 
       {loading ? null : failed ? (
-        <Card padding="lg" className="mt-10 text-center">
-          <p className="text-sm text-ink">Couldn&rsquo;t reach the server.</p>
-          <p className="mt-1 text-sm text-ink-muted">
-            Make sure the backend is running, then refresh.
-          </p>
-        </Card>
+        <EmptyState
+          tone="error"
+          className="mt-10"
+          title="Couldn’t reach the server."
+          description="Make sure the backend is running, then refresh."
+        />
       ) : (
         <>
           <JumpBackIn projects={projects} />

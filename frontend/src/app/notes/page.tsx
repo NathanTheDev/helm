@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getNotes, type Note } from "@/lib/notesApi";
-import { Card, cardClasses } from "@/components/ui/Card";
+import { cardClasses } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { LinkButton } from "@/components/ui/Button";
 
 function formatUpdated(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -43,21 +45,20 @@ export default function NotesPage() {
       </p>
 
       {loading ? null : failed ? (
-        <Card padding="lg" className="mt-10 text-center">
-          <p className="text-sm text-ink">Couldn&rsquo;t reach the server.</p>
-          <p className="mt-1 text-sm text-ink-muted">
-            Make sure the backend is running, then refresh.
-          </p>
-        </Card>
+        <EmptyState
+          tone="error"
+          className="mt-10"
+          title="Couldn’t reach the server."
+          description="Make sure the backend is running, then refresh."
+        />
       ) : notes.length === 0 ? (
-        <Card padding="lg" className="mt-10 text-center">
-          <p className="text-sm text-ink">No notes yet.</p>
-          <Link href="/notes/new" className="mt-3 inline-block text-sm text-clay hover:underline">
-            Start writing →
-          </Link>
-        </Card>
+        <EmptyState
+          className="mt-10"
+          title="No notes yet."
+          action={<LinkButton href="/notes/new" size="sm">Start writing →</LinkButton>}
+        />
       ) : (
-        <ul className={cardClasses("default", "none", "mt-6 divide-y divide-line overflow-hidden")}>
+        <ul className={cardClasses({ padding: "none", className: "mt-6 divide-y divide-line overflow-hidden" })}>
           {notes.map((note) => (
             <li key={note.id}>
               <Link

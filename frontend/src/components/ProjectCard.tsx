@@ -99,7 +99,7 @@ export function ProjectCard({
   }
 
   return (
-    <Card className={`flex flex-col ${project.archived ? "opacity-60" : ""}`}>
+    <Card interactive className={`flex flex-col ${project.archived ? "opacity-60" : ""}`}>
       <div className="flex items-start justify-between gap-2">
         <Link
           href={`/projects/${project.id}`}

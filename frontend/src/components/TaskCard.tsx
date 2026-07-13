@@ -83,7 +83,7 @@ export function TaskCard({ task }: { task: Task }) {
           onSubmit={saveEdit}
           onCancel={() => setEditing(false)}
         />
-        <div className={cardClasses("default", "sm", "flex flex-col gap-4")}>
+        <div className={cardClasses({ padding: "sm", shadow: "none", className: "flex flex-col gap-4" })}>
           <TagPicker task={task} />
           <SubTaskEditor task={task} />
         </div>
@@ -101,7 +101,7 @@ export function TaskCard({ task }: { task: Task }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={cardClasses("default", "sm", "group")}
+      className={cardClasses({ padding: "sm", interactive: true, className: "group" })}
     >
       <div className="flex items-start gap-2">
         <button

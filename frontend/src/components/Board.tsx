@@ -219,7 +219,14 @@ function Column({
         </SortableContext>
 
         {tasks.length === 0 && !adding && (
-          <div className={cardClasses("dashed", "none", "px-4 py-6 text-center font-mono text-[11px] text-ink-muted")}>
+          <div
+            className={cardClasses({
+              variant: "dashed",
+              padding: "none",
+              shadow: "none",
+              className: "px-4 py-6 text-center font-mono text-[11px] text-ink-muted",
+            })}
+          >
             empty
           </div>
         )}
@@ -238,7 +245,12 @@ function Column({
         <button
           type="button"
           onClick={() => setAdding(true)}
-          className={cardClasses("dashed", "none", "mt-3 px-4 py-2 text-xs text-ink-muted transition-colors hover:border-clay hover:text-clay")}
+          className={cardClasses({
+            variant: "dashed",
+            padding: "none",
+            shadow: "none",
+            className: "mt-3 px-4 py-2 text-xs text-ink-muted transition-colors hover:border-clay hover:text-clay",
+          })}
         >
           + Add task
         </button>

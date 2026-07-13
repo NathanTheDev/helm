@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getWorklog, formatDuration, type Worklog } from "@/lib/tasksApi";
 import { Card, cardClasses } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const dayLetters = ["S", "M", "T", "W", "T", "F", "S"];
 function dayLetter(date: string): string {
@@ -39,16 +40,18 @@ export default function WorklogPage() {
       </p>
 
       {loading ? null : failed ? (
-        <Card padding="lg" className="mt-10 text-center">
-          <p className="text-sm text-ink">Couldn&rsquo;t reach the server.</p>
-          <p className="mt-1 text-sm text-ink-muted">
-            Make sure the backend is running, then refresh.
-          </p>
-        </Card>
+        <EmptyState
+          tone="error"
+          className="mt-10"
+          title="Couldn’t reach the server."
+          description="Make sure the backend is running, then refresh."
+        />
       ) : worklog && worklog.totalSeconds === 0 ? (
-        <p className="mt-10 text-sm text-ink-muted">
-          No time tracked yet — start a timer on a task to see it here.
-        </p>
+        <EmptyState
+          className="mt-10"
+          title="No time tracked yet."
+          description="Start a timer on a task to see it here."
+        />
       ) : (
         worklog && <WorklogContent worklog={worklog} />
       )}
@@ -98,7 +101,7 @@ function WorklogContent({ worklog }: { worklog: Worklog }) {
       {worklog.days.length > 0 && (
         <section className="mt-10">
           <h2 className="font-display text-xl text-ink">By day</h2>
-          <ul className={cardClasses("default", "none", "mt-4 divide-y divide-line overflow-hidden")}>
+          <ul className={cardClasses({ padding: "none", className: "mt-4 divide-y divide-line overflow-hidden" })}>
             {worklog.days.map((day) => (
               <li
                 key={day.date}

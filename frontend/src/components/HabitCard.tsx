@@ -72,7 +72,7 @@ export function HabitCard({ habit }: { habit: Habit }) {
   }
 
   return (
-    <Card className="flex flex-col">
+    <Card interactive className="flex flex-col">
       <div className="flex items-center justify-between gap-2">
         <h2 className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink">
           {habit.emoji && (

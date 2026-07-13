@@ -24,7 +24,7 @@ export function buttonClasses(
   size: ButtonSize = "md",
   className = "",
 ) {
-  return `rounded-pill font-medium transition-colors disabled:opacity-50 ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`.trim();
+  return `rounded-pill font-medium transition-[background-color,color,transform] active:scale-[0.97] disabled:opacity-50 disabled:active:scale-100 ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`.trim();
 }
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -64,7 +64,7 @@ export function IconButton({ tone = "muted", className = "", ...props }: IconBut
     <button
       type="button"
       {...props}
-      className={`transition-colors disabled:opacity-50 ${ICON_TONE_CLASSES[tone]} ${className}`.trim()}
+      className={`transition-[color,transform] active:scale-90 disabled:opacity-50 disabled:active:scale-100 ${ICON_TONE_CLASSES[tone]} ${className}`.trim()}
     />
   );
 }

@@ -11,7 +11,7 @@ import {
 } from "@/lib/tasksApi";
 import { RememberProject } from "@/components/RememberProject";
 import { Board } from "@/components/Board";
-import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function BoardPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -60,12 +60,12 @@ export default function BoardPage() {
         >
           ← All projects
         </Link>
-        <Card padding="lg" className="mt-10 text-center">
-          <p className="text-sm text-ink">Couldn&rsquo;t load this project.</p>
-          <p className="mt-1 text-sm text-ink-muted">
-            It may not exist, or the backend is unreachable.
-          </p>
-        </Card>
+        <EmptyState
+          tone="error"
+          className="mt-10"
+          title="Couldn’t load this project."
+          description="It may not exist, or the backend is unreachable."
+        />
       </main>
     );
   }

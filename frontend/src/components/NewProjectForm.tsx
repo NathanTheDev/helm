@@ -48,11 +48,13 @@ export function NewProjectForm() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={cardClasses(
-          "dashed",
-          "none",
-          "flex min-h-[92px] flex-col items-center justify-center gap-2 text-ink-muted transition-colors hover:border-clay hover:text-clay",
-        )}
+        className={cardClasses({
+          variant: "dashed",
+          padding: "none",
+          shadow: "none",
+          className:
+            "flex min-h-[92px] flex-col items-center justify-center gap-2 text-ink-muted transition-colors hover:border-clay hover:text-clay",
+        })}
       >
         <span className="text-xl leading-none">+</span>
         <span className="text-sm">New project</span>

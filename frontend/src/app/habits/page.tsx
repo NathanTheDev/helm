@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getHabits, type Habit } from "@/lib/api";
 import { HabitCard } from "@/components/HabitCard";
 import { NewHabitForm } from "@/components/NewHabitForm";
-import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function HabitsPage() {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -39,12 +39,12 @@ export default function HabitsPage() {
       </p>
 
       {loading ? null : failed ? (
-        <Card padding="lg" className="mt-10 text-center">
-          <p className="text-sm text-ink">Couldn&rsquo;t reach the server.</p>
-          <p className="mt-1 text-sm text-ink-muted">
-            Make sure the backend is running, then refresh.
-          </p>
-        </Card>
+        <EmptyState
+          tone="error"
+          className="mt-10"
+          title="Couldn’t reach the server."
+          description="Make sure the backend is running, then refresh."
+        />
       ) : (
         <>
           {habits.length === 0 && (

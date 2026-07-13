@@ -6,12 +6,14 @@ import { getHabits } from "@/lib/api";
 import { getProjects, getProjectTasks } from "@/lib/tasksApi";
 import { getNotes } from "@/lib/notesApi";
 import { useAuth } from "@/lib/auth-context";
+import { cardClasses } from "@/components/ui/Card";
 
 const actions = [
   {
     href: "/notes/new",
     label: "New note",
     hint: "Start writing",
+    tint: "bg-clay-soft text-clay",
     icon: (
       <path
         d="M4 20.5v-3.6L15.4 5.5a1.5 1.5 0 0 1 2.1 0l1.6 1.6a1.5 1.5 0 0 1 0 2.1L7.7 20.6H4Z"
@@ -23,6 +25,7 @@ const actions = [
     href: "/habits",
     label: "Habits",
     hint: "3 due today",
+    tint: "bg-sage-soft text-sage",
     icon: (
       <>
         <path d="M9 12.5l2 2 4.5-5" strokeLinecap="round" strokeLinejoin="round" />
@@ -34,6 +37,7 @@ const actions = [
     href: "/projects",
     label: "Projects",
     hint: "0 open",
+    tint: "bg-slate-soft text-slate",
     icon: (
       <>
         <rect x="4" y="5" width="4.5" height="14" rx="1.2" />
@@ -46,6 +50,7 @@ const actions = [
     href: "#at-a-glance",
     label: "Notifications",
     hint: "5 new",
+    tint: "bg-ochre-soft text-ochre",
     icon: (
       <path
         d="M12 4.5c-2.5 0-4.3 1.9-4.3 4.5v2.6c0 .7-.3 1.4-.8 1.9l-.9.9c-.5.5-.2 1.4.5 1.4h11c.7 0 1-.9.5-1.4l-.9-.9a2.7 2.7 0 0 1-.8-1.9V9c0-2.6-1.8-4.5-4.3-4.5Z M10.2 19a1.9 1.9 0 0 0 3.6 0"
@@ -84,7 +89,7 @@ function formatRelative(iso: string): string {
 const kindColor: Record<string, string> = {
   habit: "bg-sage",
   note: "bg-clay",
-  reminder: "bg-ink-muted",
+  reminder: "bg-ochre",
 };
 
 export default function Home() {
@@ -165,7 +170,7 @@ export default function Home() {
       </section>
 
       <section
-        className="fade-up mt-10 flex flex-col overflow-hidden rounded-[28px] border border-line bg-surface shadow-[0_1px_2px_rgba(38,34,28,0.04)] sm:flex-row"
+        className="fade-up mt-10 flex flex-col overflow-hidden rounded-[28px] border border-line bg-surface shadow-sm sm:flex-row"
         style={{ animationDelay: "80ms" }}
       >
         {actions.map((action, i) => (
@@ -176,15 +181,11 @@ export default function Home() {
               i > 0 ? "border-t border-line sm:border-t-0 sm:border-l" : ""
             }`}
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              className="h-5 w-5 shrink-0 text-clay"
-            >
-              {action.icon}
-            </svg>
+            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${action.tint}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5">
+                {action.icon}
+              </svg>
+            </span>
             <span className="flex flex-col">
               <span className="text-sm font-medium text-ink">
                 {action.label}
@@ -209,7 +210,7 @@ export default function Home() {
           </span>
         </div>
 
-        <ul className="mt-4 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
+        <ul className={cardClasses({ padding: "none", className: "mt-4 divide-y divide-line overflow-hidden" })}>
           {glance.map((item) => (
             <li
               key={item.text}

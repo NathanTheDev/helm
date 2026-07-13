@@ -8,8 +8,8 @@ import { useAuth } from "@/lib/auth-context";
 import { MarkdownEditor } from "@/components/notes/MarkdownEditor";
 import { MarkdownPreview } from "@/components/notes/MarkdownPreview";
 import { CollabEditor } from "@/components/notes/CollabEditor";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const AUTOSAVE_DELAY_MS = 800;
 const NOTES_WS_URL = process.env.NEXT_PUBLIC_NOTES_WS_URL ?? "ws://localhost:1234";
@@ -110,12 +110,12 @@ export default function NotePage() {
         <Link href="/" className="w-fit text-sm text-ink-muted transition-colors hover:text-ink">
           ← Back home
         </Link>
-        <Card padding="lg" className="mt-10 text-center">
-          <p className="text-sm text-ink">Couldn&rsquo;t load this note.</p>
-          <p className="mt-1 text-sm text-ink-muted">
-            It may not exist, or the backend is unreachable.
-          </p>
-        </Card>
+        <EmptyState
+          tone="error"
+          className="mt-10"
+          title="Couldn’t load this note."
+          description="It may not exist, or the backend is unreachable."
+        />
       </main>
     );
   }
