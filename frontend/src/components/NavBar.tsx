@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 const links = [
   { href: "/notes", label: "Notes" },
@@ -45,6 +46,7 @@ export default function NavBar() {
               </Link>
             );
           })}
+          <ThemeSwitcher />
           {!loading &&
             (user ? (
               <div className="flex items-center gap-3">

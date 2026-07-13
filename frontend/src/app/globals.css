@@ -20,6 +20,25 @@
   --shadow-color: rgba(38, 34, 28, 0.1);
 }
 
+[data-theme="meadow"] {
+  --paper: #eef2e4;
+  --surface: #f9fbf4;
+  --ink: #23281d;
+  --ink-muted: #69735c;
+  --clay: #b5502e;
+  --clay-soft: #ecd9c8;
+  --line: #dbe3cc;
+  --sage: #4f7a44;
+  --sage-soft: #d8e6cd;
+  --slate: #46707a;
+  --slate-soft: #d3e2e0;
+  --plum: #7a5f8f;
+  --plum-soft: #e2d9ea;
+  --ochre: #a3822f;
+  --ochre-soft: #ece0bf;
+  --shadow-color: rgba(35, 40, 29, 0.12);
+}
+
 [data-theme="dark"] {
   --paper: #1c1a16;
   --surface: #262320;

@@ -3,7 +3,12 @@ import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
 import NavBar from "@/components/NavBar";
 import AuthGate from "@/components/auth/AuthGate";
 import { AuthProvider } from "@/lib/auth-context";
+import { ThemeProvider, THEME_STORAGE_KEY } from "@/lib/theme-context";
 import "./globals.css";
+
+// Runs before first paint so the stored (or system-preferred) theme is
+// applied without a flash of the default palette.
+const THEME_INIT_SCRIPT = `(function(){try{var k=${JSON.stringify(THEME_STORAGE_KEY)};var s=localStorage.getItem(k);var t=s||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"paper");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();`;
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -38,12 +43,15 @@ export default function RootLayout({
       className={`${fraunces.variable} ${inter.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
-        <AuthProvider>
-          <NavBar />
-          <AuthGate>
-            <div className="flex-1 flex flex-col">{children}</div>
-          </AuthGate>
-        </AuthProvider>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <ThemeProvider>
+          <AuthProvider>
+            <NavBar />
+            <AuthGate>
+              <div className="flex-1 flex flex-col">{children}</div>
+            </AuthGate>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
