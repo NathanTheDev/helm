@@ -137,3 +137,46 @@ model Note {
 
   @@index([userId])
 }
+
+model CustomTable {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  position  Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fields CustomField[]
+  rows   CustomRow[]
+
+  @@index([userId])
+}
+
+model CustomField {
+  id           String   @id @default(cuid())
+  tableId      String
+  name         String
+  type         String // TEXT | NUMBER | DATE | CHECKBOX | SELECT
+  position     Float
+  config       Json?
+  defaultValue Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  table CustomTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  @@index([tableId])
+}
+
+model CustomRow {
+  id        String   @id @default(cuid())
+  tableId   String
+  values    Json
+  position  Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  table CustomTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  @@index([tableId])
+}
