@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { getNote, updateNote, publishNote, type Note } from "@/lib/notesApi";
+import { getNote, updateNote, publishNote, closeNote, type Note } from "@/lib/notesApi";
 import { useAuth } from "@/lib/auth-context";
 import { MarkdownEditor } from "@/components/notes/MarkdownEditor";
 import { MarkdownPreview } from "@/components/notes/MarkdownPreview";
@@ -25,6 +25,7 @@ export default function NotePage() {
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [publishing, setPublishing] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -75,6 +76,23 @@ export default function NotePage() {
       // failed publish just leaves the button clickable to retry.
     } finally {
       setPublishing(false);
+    }
+  }
+
+  async function handleClose() {
+    setClosing(true);
+    try {
+      const updated = await closeNote(id);
+      setNote(updated);
+      // Folds the collaboratively-edited content back into the plain editor,
+      // which remounts fresh (with this as its initialContent) now that
+      // note.published is false.
+      setContent(updated.content);
+      latest.current = { ...latest.current, content: updated.content };
+    } catch {
+      // Leaves the button clickable to retry.
+    } finally {
+      setClosing(false);
     }
   }
 
@@ -129,6 +147,17 @@ export default function NotePage() {
               className="text-sm text-ink-muted transition-colors hover:text-ink"
             >
               {copied ? "Copied!" : "Copy link"}
+            </button>
+          )}
+
+          {isOwner && note.published && (
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={closing}
+              className="text-sm text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
+            >
+              {closing ? "Closing…" : "Close link"}
             </button>
           )}
 

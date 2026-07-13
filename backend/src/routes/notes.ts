@@ -2,7 +2,7 @@ import { Router } from "express";
 import crypto from "crypto";
 import { prisma } from "../db/client";
 import { createNoteSchema, updateNoteSchema } from "../validation/note";
-import { createExternalNote } from "../services/notesCollab";
+import { createExternalNote, closeExternalNote, decodeYjsContent } from "../services/notesCollab";
 
 export const notesRouter = Router();
 
@@ -91,6 +91,42 @@ notesRouter.post("/:id/publish", async (req, res) => {
       shareToken: crypto.randomBytes(16).toString("hex"),
       externalDocId: externalNote.id,
       publishedAt: new Date(),
+    },
+  });
+  res.json(note);
+});
+
+// Owner-only. Idempotent: closing an already-closed (or never-published)
+// note just returns it as-is. Folds the collaboratively-edited content back
+// into helm's own storage - LiveCode's row for the note is left inactive/
+// orphaned rather than deleted (cheap to leave; a cleanup sweep is future
+// work, not core to closing a link).
+notesRouter.post("/:id/close", async (req, res) => {
+  const existing = await prisma.note.findFirst({
+    where: { id: req.params.id, userId: req.userId },
+  });
+  if (!existing) {
+    return res.status(404).json({ error: "Note not found" });
+  }
+  if (!existing.published || !existing.externalDocId) {
+    return res.json(existing);
+  }
+
+  let bytes;
+  try {
+    bytes = await closeExternalNote(existing.externalDocId);
+  } catch (err) {
+    console.error(`Failed to close note ${existing.id}:`, err);
+    return res.status(502).json({ error: "Failed to reach the notes collaboration service" });
+  }
+
+  const note = await prisma.note.update({
+    where: { id: existing.id },
+    data: {
+      content: decodeYjsContent(bytes),
+      published: false,
+      shareToken: null,
+      externalDocId: null,
     },
   });
   res.json(note);

@@ -44,3 +44,30 @@ export async function createExternalNote(content: string): Promise<ExternalNote>
   }
   return (await res.json()) as ExternalNote;
 }
+
+// Closes a note's link: deactivates the room (so ysocket rejects any
+// further join/reconnect attempts, live or not - see LiveCode's ysocket
+// active-check) and reads back its final raw ydoc bytes so the caller can
+// decode them into plain content via decodeYjsContent. Called once, when
+// closing.
+export async function closeExternalNote(externalDocId: string): Promise<Buffer> {
+  const patchRes = await fetch(`${NOTES_BACKEND_URL}/notes/${externalDocId}/active`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Internal-Key": NOTES_INTERNAL_API_KEY,
+    },
+    body: JSON.stringify({ active: false }),
+  });
+  if (!patchRes.ok) {
+    throw new Error(`Failed to deactivate collaborative note: ${patchRes.status}`);
+  }
+
+  const getRes = await fetch(`${NOTES_BACKEND_URL}/notes/${externalDocId}`, {
+    headers: { "X-Internal-Key": NOTES_INTERNAL_API_KEY },
+  });
+  if (!getRes.ok) {
+    throw new Error(`Failed to fetch collaborative note content: ${getRes.status}`);
+  }
+  return Buffer.from(await getRes.arrayBuffer());
+}
