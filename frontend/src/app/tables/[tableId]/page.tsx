@@ -5,13 +5,17 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   getTable,
+  getRows,
   deleteTable,
   deleteField,
+  deleteRow,
   type CustomTableWithFields,
   type CustomField,
+  type CustomRow,
 } from "@/lib/tablesApi";
 import { TableGrid } from "@/components/TableGrid";
 import { FieldForm } from "@/components/FieldForm";
+import { RowForm } from "@/components/RowForm";
 import { Button, IconButton } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { TrashIcon } from "@/components/ui/Icon";
@@ -21,10 +25,12 @@ export default function TableDetailPage() {
   const router = useRouter();
 
   const [table, setTable] = useState<CustomTableWithFields | null>(null);
+  const [rows, setRows] = useState<CustomRow[]>([]);
   const [failed, setFailed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [addingField, setAddingField] = useState(false);
   const [editingField, setEditingField] = useState<CustomField | null>(null);
+  const [editingRowId, setEditingRowId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -34,9 +40,11 @@ export default function TableDetailPage() {
     setLoading(true);
     setFailed(false);
 
-    getTable(tableId)
-      .then((loaded) => {
-        if (!cancelled) setTable(loaded);
+    Promise.all([getTable(tableId), getRows(tableId)])
+      .then(([loadedTable, loadedRows]) => {
+        if (cancelled) return;
+        setTable(loadedTable);
+        setRows(loadedRows);
       })
       .catch(() => {
         if (!cancelled) setFailed(true);
@@ -56,6 +64,12 @@ export default function TableDetailPage() {
       .catch(() => setFailed(true));
   };
 
+  const refreshRows = () => {
+    getRows(tableId)
+      .then(setRows)
+      .catch(() => setFailed(true));
+  };
+
   const removeTable = () => {
     if (!table) return;
     if (!confirm(`Delete "${table.name}"? This can't be undone.`)) return;
@@ -67,13 +81,32 @@ export default function TableDetailPage() {
   const removeField = (field: CustomField) => {
     if (!confirm(`Delete field "${field.name}"? Existing row data for it will be dropped.`)) return;
     deleteField(field.id)
-      .then(refresh)
+      .then(() => {
+        refresh();
+        refreshRows();
+      })
       .catch(() => {});
   };
 
   const closeFieldForm = () => {
     setAddingField(false);
     setEditingField(null);
+  };
+
+  const handleRowCreated = (row: CustomRow) => {
+    setRows((prev) => [...prev, row]);
+  };
+
+  const handleRowSaved = (row: CustomRow) => {
+    setRows((prev) => prev.map((r) => (r.id === row.id ? row : r)));
+    setEditingRowId(null);
+  };
+
+  const removeRow = (row: CustomRow) => {
+    if (!confirm("Delete this row? This can't be undone.")) return;
+    deleteRow(row.id)
+      .then(() => setRows((prev) => prev.filter((r) => r.id !== row.id)))
+      .catch(() => {});
   };
 
   if (loading) return null;
@@ -119,12 +152,21 @@ export default function TableDetailPage() {
             }
           />
         ) : (
-          <TableGrid
-            fields={table.fields}
-            onAddField={() => setAddingField(true)}
-            onEditField={setEditingField}
-            onDeleteField={removeField}
-          />
+          <>
+            <TableGrid
+              fields={table.fields}
+              rows={rows}
+              editingRowId={editingRowId}
+              onAddField={() => setAddingField(true)}
+              onEditField={setEditingField}
+              onDeleteField={removeField}
+              onEditRow={(row) => setEditingRowId(row.id)}
+              onRowSaved={handleRowSaved}
+              onCancelEditRow={() => setEditingRowId(null)}
+              onDeleteRow={removeRow}
+            />
+            <RowForm mode="create" tableId={table.id} fields={table.fields} onCreated={handleRowCreated} />
+          </>
         )}
 
         {(addingField || editingField) && (
