@@ -35,6 +35,7 @@ function renderCell(field: CustomField, value: unknown) {
 type TableGridProps = {
   fields: CustomField[];
   rows: CustomRow[];
+  isFiltered?: boolean;
   editingRowId: string | null;
   onAddField: () => void;
   onEditField: (field: CustomField) => void;
@@ -48,6 +49,7 @@ type TableGridProps = {
 export function TableGrid({
   fields,
   rows,
+  isFiltered = false,
   editingRowId,
   onAddField,
   onEditField,
@@ -136,9 +138,12 @@ export function TableGrid({
         </table>
       </Card>
 
-      {rows.length === 0 && (
-        <EmptyState title="No rows yet." description="Add your first row below." />
-      )}
+      {rows.length === 0 &&
+        (isFiltered ? (
+          <EmptyState title="No rows match this filter." description="Try a different value, or clear the filter." />
+        ) : (
+          <EmptyState title="No rows yet." description="Add your first row below." />
+        ))}
     </div>
   );
 }

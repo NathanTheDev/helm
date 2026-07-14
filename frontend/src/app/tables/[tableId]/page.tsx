@@ -9,11 +9,17 @@ import {
   deleteTable,
   deleteField,
   deleteRow,
+  sortRows,
+  filterRows,
+  FILTER_OPERATORS_BY_TYPE,
   type CustomTableWithFields,
   type CustomField,
   type CustomRow,
+  type SortDirection,
+  type FilterOperator,
 } from "@/lib/tablesApi";
 import { TableGrid } from "@/components/TableGrid";
+import { TableSortFilterBar } from "@/components/TableSortFilterBar";
 import { FieldForm } from "@/components/FieldForm";
 import { RowForm } from "@/components/RowForm";
 import { Button, IconButton } from "@/components/ui/Button";
@@ -31,6 +37,11 @@ export default function TableDetailPage() {
   const [addingField, setAddingField] = useState(false);
   const [editingField, setEditingField] = useState<CustomField | null>(null);
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
+  const [sortFieldId, setSortFieldId] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [filterFieldId, setFilterFieldId] = useState<string | null>(null);
+  const [filterOperator, setFilterOperator] = useState<FilterOperator | null>(null);
+  const [filterValue, setFilterValue] = useState<unknown>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,6 +120,19 @@ export default function TableDetailPage() {
       .catch(() => {});
   };
 
+  const handleFilterFieldChange = (fieldId: string | null) => {
+    setFilterFieldId(fieldId);
+    const field = fieldId ? (table?.fields.find((f) => f.id === fieldId) ?? null) : null;
+    setFilterOperator(field ? FILTER_OPERATORS_BY_TYPE[field.type][0].value : null);
+    setFilterValue(field?.type === "CHECKBOX" ? false : null);
+  };
+
+  const clearFilter = () => {
+    setFilterFieldId(null);
+    setFilterOperator(null);
+    setFilterValue(null);
+  };
+
   if (loading) return null;
 
   if (failed || !table) {
@@ -125,6 +149,17 @@ export default function TableDetailPage() {
         />
       </main>
     );
+  }
+
+  const sortField = table.fields.find((f) => f.id === sortFieldId) ?? null;
+  const filterField = table.fields.find((f) => f.id === filterFieldId) ?? null;
+
+  let displayedRows = rows;
+  if (filterField && filterOperator) {
+    displayedRows = filterRows(displayedRows, filterField, filterOperator, filterValue);
+  }
+  if (sortField) {
+    displayedRows = sortRows(displayedRows, sortField, sortDirection);
   }
 
   return (
@@ -153,9 +188,24 @@ export default function TableDetailPage() {
           />
         ) : (
           <>
+            <TableSortFilterBar
+              fields={table.fields}
+              sortFieldId={sortFieldId}
+              sortDirection={sortDirection}
+              onSortFieldChange={setSortFieldId}
+              onToggleSortDirection={() => setSortDirection((d) => (d === "asc" ? "desc" : "asc"))}
+              filterFieldId={filterFieldId}
+              filterOperator={filterOperator}
+              filterValue={filterValue}
+              onFilterFieldChange={handleFilterFieldChange}
+              onFilterOperatorChange={setFilterOperator}
+              onFilterValueChange={setFilterValue}
+              onClearFilter={clearFilter}
+            />
             <TableGrid
               fields={table.fields}
-              rows={rows}
+              rows={displayedRows}
+              isFiltered={Boolean(filterField && filterOperator)}
               editingRowId={editingRowId}
               onAddField={() => setAddingField(true)}
               onEditField={setEditingField}
