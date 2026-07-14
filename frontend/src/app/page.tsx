@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 import { getHabits } from "@/lib/api";
 import { getProjects, getProjectTasks } from "@/lib/tasksApi";
 import { getNotes } from "@/lib/notesApi";
+import { getCalendarEvents, type CalendarEvent } from "@/lib/calendarApi";
 import { useAuth } from "@/lib/auth-context";
 import { cardClasses } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { CalendarWidget } from "@/components/CalendarWidget";
 
 const actions = [
   {
@@ -96,6 +98,7 @@ export default function Home() {
   const [habitsGlance, setHabitsGlance] = useState<GlanceItem[]>([]);
   const [projectsGlance, setProjectsGlance] = useState<GlanceItem[]>([]);
   const [notesGlance, setNotesGlance] = useState<GlanceItem[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
     getHabits()
@@ -177,6 +180,10 @@ export default function Home() {
         setNotesGlance(items);
       })
       .catch(() => setNotesGlance([]));
+
+    getCalendarEvents()
+      .then(setCalendarEvents)
+      .catch(() => setCalendarEvents([]));
   }, []);
 
   const actionHint = (label: string, fallback: string) => {
@@ -274,6 +281,8 @@ export default function Home() {
           </ul>
         )}
       </section>
+
+      <CalendarWidget events={calendarEvents} />
     </main>
   );
 }
