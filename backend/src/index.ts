@@ -11,6 +11,7 @@ import { worklogRouter } from "./routes/worklog";
 import { tagsRouter, taskTagsRouter } from "./routes/tags";
 import { subTasksNestedRouter, subTasksRouter } from "./routes/subTasks";
 import { notesRouter } from "./routes/notes";
+import { calendarRouter } from "./routes/calendar";
 import {
   tablesRouter,
   tableFieldsRouter,
@@ -43,6 +44,7 @@ app.use("/api/tags", tagsRouter);
 app.use("/api/subtasks", subTasksRouter);
 app.use("/api/worklog", worklogRouter);
 app.use("/api/notes", notesRouter);
+app.use("/api/calendar", calendarRouter);
 app.use("/api/tables", tablesRouter);
 app.use("/api/tables/:tableId/fields", tableFieldsRouter);
 app.use("/api/fields", fieldsRouter);
