@@ -6,7 +6,7 @@ export default function Loading() {
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-20">
       <span className="w-fit text-sm text-ink-muted">← All projects</span>
       <div className="mt-6 h-9 w-48 animate-pulse rounded-control bg-surface" />
-      <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-4">
         {STATUS_COLUMNS.map(({ status, label }) => (
           <section key={status} className="flex flex-col">
             <div className="mb-3 px-1">

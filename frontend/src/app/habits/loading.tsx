@@ -12,7 +12,7 @@ export default function Loading() {
         A quiet place to keep the streaks you care about.
       </p>
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className={cardClasses({ padding: "none", className: "h-[168px] animate-pulse" })} />
         ))}

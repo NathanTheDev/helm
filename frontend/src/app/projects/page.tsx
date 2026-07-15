@@ -87,7 +87,7 @@ export default function ProjectsPage() {
             </p>
           )}
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
             {ordered.map((project) => (
               <ProjectCard
                 key={project.id}

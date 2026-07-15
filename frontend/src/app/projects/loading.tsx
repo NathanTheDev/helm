@@ -10,7 +10,7 @@ export default function Loading() {
       <p className="mt-2 max-w-md text-ink-muted">
         Each project is a board. Pick one to plan and track your work.
       </p>
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className={cardClasses({ padding: "none", className: "h-[104px] animate-pulse" })} />
         ))}

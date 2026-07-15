@@ -52,7 +52,7 @@ export default function HabitsPage() {
               No habits yet — add your first one below.
             </p>
           )}
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
             {habits.map((habit) => (
               <HabitCard key={habit.id} habit={habit} />
             ))}
