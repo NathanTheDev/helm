@@ -65,12 +65,17 @@ export function TableGrid({
         <table className="w-full min-w-full border-collapse text-left text-sm">
           <thead>
             <tr className="divide-x divide-line border-b border-line">
-              {fields.map((field) => (
-                <th key={field.id} className="whitespace-nowrap px-4 py-3 align-middle font-medium text-ink">
+              {fields.map((field, i) => (
+                <th
+                  key={field.id}
+                  className={`group whitespace-nowrap px-4 py-3 align-middle font-medium text-ink ${
+                    i === 0 ? "sticky left-0 z-10 bg-surface" : ""
+                  }`}
+                >
                   <div className="flex items-center gap-2">
                     <span className="truncate">{field.name}</span>
                     <Badge size="xs">{FIELD_TYPE_LABELS[field.type]}</Badge>
-                    <span className="ml-auto flex items-center gap-1">
+                    <span className="ml-auto flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                       <IconButton onClick={() => onEditField(field)} aria-label={`Edit field ${field.name}`}>
                         <PencilIcon />
                       </IconButton>
@@ -96,19 +101,19 @@ export function TableGrid({
             <tbody>
               {rows.map((row) => (
                 <Fragment key={row.id}>
-                  <tr className="divide-x divide-line border-b border-line">
-                    {fields.map((field) => (
+                  <tr className="group divide-x divide-line border-b border-line transition-colors hover:bg-paper/40">
+                    {fields.map((field, i) => (
                       <td
                         key={field.id}
                         className={`px-4 py-3 align-middle text-ink ${
                           field.type === "NUMBER" ? "text-right font-mono" : ""
-                        }`}
+                        } ${i === 0 ? "sticky left-0 z-10 bg-surface group-hover:bg-paper/40" : ""}`}
                       >
                         {renderCell(field, row.values[field.id])}
                       </td>
                     ))}
                     <td className="px-2 py-3 text-right">
-                      <span className="flex items-center justify-end gap-1">
+                      <span className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                         <IconButton onClick={() => onEditRow(row)} aria-label="Edit row">
                           <PencilIcon />
                         </IconButton>
