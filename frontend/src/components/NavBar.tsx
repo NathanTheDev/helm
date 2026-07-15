@@ -16,7 +16,6 @@ const links = [
   { href: "/habits", label: "Habits" },
   { href: "/projects", label: "Projects" },
   { href: "/tables", label: "Tables" },
-  { href: "/worklog", label: "Worklog" },
 ];
 
 export default function NavBar() {

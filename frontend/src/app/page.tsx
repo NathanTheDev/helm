@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getHabits } from "@/lib/api";
-import { getProjects, getProjectTasks } from "@/lib/tasksApi";
+import { getProjects, getProjectTasks, getWorklog, formatDuration } from "@/lib/tasksApi";
 import { getNotes } from "@/lib/notesApi";
 import { getCalendarEvents, type CalendarEvent } from "@/lib/calendarApi";
 import { useAuth } from "@/lib/auth-context";
@@ -74,6 +74,18 @@ const actions = [
       />
     ),
   },
+  {
+    href: "/worklog",
+    label: "Worklog",
+    hint: "—",
+    tint: "bg-sage-soft text-sage",
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M12 7.5V12l3 2" strokeLinecap="round" strokeLinejoin="round" />
+      </>
+    ),
+  },
 ];
 
 type GlanceItem = { kind: string; text: string; time: string };
@@ -95,6 +107,7 @@ export default function Home() {
   const { user } = useAuth();
   const [dueToday, setDueToday] = useState(0);
   const [openTasks, setOpenTasks] = useState(0);
+  const [todaySeconds, setTodaySeconds] = useState(0);
   const [habitsGlance, setHabitsGlance] = useState<GlanceItem[]>([]);
   const [projectsGlance, setProjectsGlance] = useState<GlanceItem[]>([]);
   const [notesGlance, setNotesGlance] = useState<GlanceItem[]>([]);
@@ -184,12 +197,17 @@ export default function Home() {
     getCalendarEvents()
       .then(setCalendarEvents)
       .catch(() => setCalendarEvents([]));
+
+    getWorklog()
+      .then((worklog) => setTodaySeconds(worklog.todaySeconds))
+      .catch(() => setTodaySeconds(0));
   }, []);
 
   const actionHint = (label: string, fallback: string) => {
     if (label === "Habits") return `${dueToday} due today`;
     if (label === "Projects") return `${openTasks} open`;
     if (label === "At a glance") return `${glance.length} ${glance.length === 1 ? "update" : "updates"}`;
+    if (label === "Worklog") return `${formatDuration(todaySeconds)} today`;
     return fallback;
   };
 
