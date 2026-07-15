@@ -24,7 +24,7 @@ export default function NotePage() {
   const [failed, setFailed] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [mode, setMode] = useState<"edit" | "preview">("edit");
+  const [mode, setMode] = useState<"edit" | "preview" | "split">("edit");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [publishing, setPublishing] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -134,7 +134,11 @@ export default function NotePage() {
           : "";
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-20">
+    <main
+      className={`mx-auto flex w-full flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-20 ${
+        mode === "split" ? "max-w-5xl" : "max-w-3xl"
+      }`}
+    >
       <div className="flex items-center justify-between">
         <Link href="/" className="text-sm text-ink-muted transition-colors hover:text-ink">
           ← Back home
@@ -188,6 +192,15 @@ export default function NotePage() {
             >
               Preview
             </button>
+            <button
+              type="button"
+              onClick={() => setMode("split")}
+              className={`hidden px-3 py-1 transition-colors sm:block ${
+                mode === "split" ? "bg-clay text-surface" : "text-ink-muted hover:text-ink"
+              }`}
+            >
+              Split
+            </button>
           </div>
         </div>
       </div>
@@ -206,16 +219,19 @@ export default function NotePage() {
 
       {note.published && note.externalDocId ? (
         <CollabEditor wsUrl={NOTES_WS_URL} room={note.externalDocId} user={user} mode={mode} />
-      ) : mode === "edit" ? (
-        <MarkdownEditor
-          initialContent={content}
-          onChange={(next) => {
-            setContent(next);
-            scheduleSave({ content: next });
-          }}
-        />
       ) : (
-        <MarkdownPreview content={content} />
+        <div className={mode === "split" ? "grid flex-1 grid-cols-1 gap-6 md:grid-cols-2" : "flex flex-1 flex-col"}>
+          {mode !== "preview" && (
+            <MarkdownEditor
+              initialContent={content}
+              onChange={(next) => {
+                setContent(next);
+                scheduleSave({ content: next });
+              }}
+            />
+          )}
+          {mode !== "edit" && <MarkdownPreview content={content} />}
+        </div>
       )}
     </main>
   );

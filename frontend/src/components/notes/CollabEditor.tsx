@@ -15,7 +15,7 @@ export function CollabEditor({
   wsUrl: string;
   room: string;
   user: User | null;
-  mode: "edit" | "preview";
+  mode: "edit" | "preview" | "split";
 }) {
   const { editorContainerRef, content, status, synced, peers } = useYjsEditor(wsUrl, room, user);
 
@@ -29,11 +29,10 @@ export function CollabEditor({
         </div>
       </div>
 
-      {mode === "edit" ? (
-        <div ref={editorContainerRef} className="min-h-[16rem] flex-1" />
-      ) : (
-        <MarkdownPreview content={content} />
-      )}
+      <div className={mode === "split" ? "grid flex-1 grid-cols-1 gap-6 md:grid-cols-2" : "flex flex-1 flex-col"}>
+        {mode !== "preview" && <div ref={editorContainerRef} className="min-h-[16rem] flex-1" />}
+        {mode !== "edit" && <MarkdownPreview content={content} />}
+      </div>
     </div>
   );
 }
