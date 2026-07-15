@@ -27,7 +27,7 @@ const actions = [
   {
     href: "/habits",
     label: "Habits",
-    hint: "3 due today",
+    hint: "—",
     tint: "bg-sage-soft text-sage",
     icon: (
       <>
@@ -39,7 +39,7 @@ const actions = [
   {
     href: "/projects",
     label: "Projects",
-    hint: "0 open",
+    hint: "—",
     tint: "bg-slate-soft text-slate",
     icon: (
       <>
