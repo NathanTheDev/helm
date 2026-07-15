@@ -75,9 +75,6 @@ export function HabitCard({ habit }: { habit: Habit }) {
     <Card interactive className="flex flex-col">
       <div className="flex items-center justify-between gap-2">
         <h2 className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink">
-          {habit.emoji && (
-            <span className="text-base leading-none">{habit.emoji}</span>
-          )}
           <span className="truncate">{habit.name}</span>
         </h2>
         <div className="flex shrink-0 items-center gap-2">
@@ -151,7 +148,6 @@ function EditHabit({
 }) {
   const [pending, startTransition] = useTransition();
   const [name, setName] = useState(habit.name);
-  const [emoji, setEmoji] = useState(habit.emoji ?? "");
   const [frequency, setFrequency] = useState<Frequency>(habit.frequency);
   const [quantity, setQuantity] = useState(habit.quantity);
 
@@ -163,7 +159,6 @@ function EditHabit({
       try {
         await updateHabit(habit.id, {
           name: trimmed,
-          emoji: emoji.trim() || undefined,
           frequency,
           quantity: Math.max(1, quantity),
         });
@@ -176,23 +171,12 @@ function EditHabit({
 
   return (
     <CardForm onSubmit={submit} className="flex flex-col gap-3">
-      <div className="flex gap-2">
-        <Input
-          value={emoji}
-          onChange={(e) => setEmoji(e.target.value)}
-          placeholder="🙂"
-          aria-label="Emoji"
-          maxLength={2}
-          className="w-12 shrink-0 text-center"
-        />
-        <Input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Habit name"
-          aria-label="Habit name"
-          className="flex-1"
-        />
-      </div>
+      <Input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Habit name"
+        aria-label="Habit name"
+      />
 
       <div className="flex items-center gap-2">
         <div className="flex overflow-hidden rounded-control border border-line">

@@ -34,9 +34,6 @@ export default function HabitsPage() {
           {loading || failed ? "—" : `${habits.length} tracked`}
         </span>
       </div>
-      <p className="mt-2 max-w-md text-ink-muted">
-        A quiet place to keep the streaks you care about.
-      </p>
 
       {loading ? null : failed ? (
         <EmptyState

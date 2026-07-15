@@ -15,13 +15,11 @@ export function NewHabitForm() {
   const [open, setOpen] = useState(false);
 
   const [name, setName] = useState("");
-  const [emoji, setEmoji] = useState("");
   const [frequency, setFrequency] = useState<Frequency>("DAILY");
   const [quantity, setQuantity] = useState(1);
 
   const reset = () => {
     setName("");
-    setEmoji("");
     setFrequency("DAILY");
     setQuantity(1);
   };
@@ -39,7 +37,6 @@ export function NewHabitForm() {
       try {
         await createHabit({
           name: trimmed,
-          emoji: emoji.trim() || undefined,
           frequency,
           quantity: Math.max(1, quantity),
         });
@@ -72,24 +69,13 @@ export function NewHabitForm() {
 
   return (
     <CardForm onSubmit={submit} className="flex flex-col gap-3">
-      <div className="flex gap-2">
-        <Input
-          value={emoji}
-          onChange={(e) => setEmoji(e.target.value)}
-          placeholder="🙂"
-          aria-label="Emoji"
-          maxLength={2}
-          className="w-12 shrink-0 text-center"
-        />
-        <Input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Habit name"
-          aria-label="Habit name"
-          autoFocus
-          className="flex-1"
-        />
-      </div>
+      <Input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Habit name"
+        aria-label="Habit name"
+        autoFocus
+      />
 
       <div className="flex items-center gap-2">
         <div className="flex overflow-hidden rounded-control border border-line">
