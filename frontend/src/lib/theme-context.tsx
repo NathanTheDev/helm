@@ -91,12 +91,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
 
   // Editing a swatch always activates the custom theme, applying just the
-  // changed var immediately (not the whole `customTheme` snapshot, which
-  // would still be stale from before this update lands in state).
+  // changed var immediately. Uses the functional updater form - React 18
+  // batches same-tick setState calls, so two swatches edited back-to-back
+  // (e.g. programmatically) would otherwise both read the same stale
+  // `customTheme` closure and the second call's spread would clobber the
+  // first's change.
   const setCustomColor = (key: CustomThemeVar, value: string) => {
-    const next = { ...customTheme, [key]: value };
-    setCustomThemeState(next);
-    localStorage.setItem(CUSTOM_THEME_STORAGE_KEY, JSON.stringify(next));
+    setCustomThemeState((prev) => {
+      const next = { ...prev, [key]: value };
+      localStorage.setItem(CUSTOM_THEME_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
     document.documentElement.style.setProperty(`--${key}`, value);
     if (theme !== "custom") {
       setThemeState("custom");

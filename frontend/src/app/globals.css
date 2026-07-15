@@ -75,10 +75,6 @@
   --color-ochre: var(--ochre);
   --color-ochre-soft: var(--ochre-soft);
 
-  --font-display: var(--font-fraunces);
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-plex-mono);
-
   --radius-control: 0.75rem;
   --radius-card: 1.25rem;
   --radius-pill: 9999px;
@@ -86,6 +82,15 @@
   --shadow-sm: 0 1px 2px var(--shadow-color);
   --shadow-md: 0 6px 16px -4px var(--shadow-color);
   --shadow-lg: 0 16px 40px -8px var(--shadow-color);
+}
+
+/* Not `inline`: font utilities (font-display/font-sans/font-mono) need to
+   keep referencing these vars at runtime (var(--font-display), not the
+   resolved font stack baked in at build time) so [data-font] can swap them. */
+@theme {
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-plex-mono);
 }
 
 [data-font="modern"] {
