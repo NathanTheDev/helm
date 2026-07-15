@@ -58,6 +58,17 @@
   --shadow-color: rgba(0, 0, 0, 0.45);
 }
 
+/* Custom theme only sets 5 base colors (paper/surface/ink/clay/sage) - these
+   derive the muted-text/border/badge-background tokens from them instead of
+   leaving them stuck at paper theme's fixed values, so the whole UI actually
+   follows the user's palette instead of just backgrounds + primary text. */
+[data-theme="custom"] {
+  --ink-muted: color-mix(in srgb, var(--ink) 60%, var(--paper));
+  --line: color-mix(in srgb, var(--ink) 15%, var(--paper));
+  --clay-soft: color-mix(in srgb, var(--clay) 20%, var(--paper));
+  --sage-soft: color-mix(in srgb, var(--sage) 20%, var(--paper));
+}
+
 @theme inline {
   --color-paper: var(--paper);
   --color-surface: var(--surface);
