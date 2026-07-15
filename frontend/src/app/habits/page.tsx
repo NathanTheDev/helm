@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getHabits, type Habit } from "@/lib/api";
 import { HabitCard } from "@/components/HabitCard";
 import { NewHabitForm } from "@/components/NewHabitForm";
+import { HabitsChart } from "@/components/HabitsChart";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function HabitsPage() {
@@ -33,6 +34,10 @@ export default function HabitsPage() {
         <span className="font-mono text-xs text-ink-muted">
           {loading || failed ? "—" : `${habits.length} tracked`}
         </span>
+      </div>
+
+      <div className="mt-6">
+        <HabitsChart />
       </div>
 
       {loading ? null : failed ? (

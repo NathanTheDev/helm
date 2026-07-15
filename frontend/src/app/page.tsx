@@ -1,15 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { getHabits } from "@/lib/api";
 import { getProjects, getProjectTasks, getWorklog, formatDuration } from "@/lib/tasksApi";
 import { getNotes } from "@/lib/notesApi";
 import { getCalendarEvents, type CalendarEvent } from "@/lib/calendarApi";
 import { useAuth } from "@/lib/auth-context";
+import {
+  DEFAULT_WIDGET_ORDER,
+  HOME_WIDGET_LABELS,
+  readHomeLayout,
+  writeHomeLayout,
+  type HomeLayout,
+  type HomeWidgetId,
+} from "@/lib/home-layout";
 import { cardClasses } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { IconButton } from "@/components/ui/Button";
+import { EyeOffIcon, GripIcon, SlidersIcon } from "@/components/ui/Icon";
 import { CalendarWidget } from "@/components/CalendarWidget";
+import { HabitsChart } from "@/components/HabitsChart";
 
 const actions = [
   {
@@ -103,6 +124,50 @@ const kindColor: Record<string, string> = {
   project: "bg-slate",
 };
 
+function WidgetShell({
+  id,
+  editing,
+  onHide,
+  children,
+}: {
+  id: HomeWidgetId;
+  editing: boolean;
+  onHide: () => void;
+  children: ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+    disabled: !editing,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className={editing ? "relative rounded-[28px] ring-1 ring-line" : ""}>
+      {editing && (
+        <div className="absolute -top-3.5 right-4 z-10 flex items-center gap-1 rounded-full border border-line bg-surface px-1.5 py-1 shadow-md">
+          <button
+            {...attributes}
+            {...listeners}
+            aria-label={`Drag to reorder ${HOME_WIDGET_LABELS[id]}`}
+            className="flex h-6 w-6 cursor-grab items-center justify-center text-ink-muted transition-colors hover:text-ink active:cursor-grabbing"
+          >
+            <GripIcon className="h-3.5 w-3.5" />
+          </button>
+          <IconButton tone="danger" onClick={onHide} aria-label={`Hide ${HOME_WIDGET_LABELS[id]}`}>
+            <EyeOffIcon />
+          </IconButton>
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
 export default function Home() {
   const { user } = useAuth();
   const [dueToday, setDueToday] = useState(0);
@@ -112,6 +177,12 @@ export default function Home() {
   const [projectsGlance, setProjectsGlance] = useState<GlanceItem[]>([]);
   const [notesGlance, setNotesGlance] = useState<GlanceItem[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [layout, setLayout] = useState<HomeLayout>({ order: DEFAULT_WIDGET_ORDER, hidden: [] });
+  const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    setLayout(readHomeLayout());
+  }, []);
 
   useEffect(() => {
     getHabits()
@@ -218,24 +289,33 @@ export default function Home() {
   const dayLabel = now.toLocaleDateString(undefined, { weekday: "long" });
   const greeting = now.getHours() < 12 ? "Good morning" : now.getHours() < 18 ? "Good afternoon" : "Good evening";
 
-  return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-24">
-      <section className="fade-up">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-muted">
-          {dayLabel}
-        </p>
-        <h1 className="mt-3 font-display text-4xl italic text-ink sm:text-5xl">
-          {greeting}, {firstName}.
-        </h1>
-        <p className="mt-3 max-w-md text-ink-muted">
-          Here&rsquo;s what&rsquo;s waiting for you.
-        </p>
-      </section>
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
-      <section
-        className="fade-up mt-10 flex flex-col overflow-hidden rounded-[28px] border border-line bg-surface shadow-sm sm:flex-row"
-        style={{ animationDelay: "80ms" }}
-      >
+  const persist = (next: HomeLayout) => {
+    setLayout(next);
+    writeHomeLayout(next);
+  };
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    const oldIndex = layout.order.indexOf(active.id as HomeWidgetId);
+    const newIndex = layout.order.indexOf(over.id as HomeWidgetId);
+    if (oldIndex < 0 || newIndex < 0) return;
+    persist({ ...layout, order: arrayMove(layout.order, oldIndex, newIndex) });
+  };
+
+  const hideWidget = (id: HomeWidgetId) => persist({ ...layout, hidden: [...layout.hidden, id] });
+  const showWidget = (id: HomeWidgetId) => persist({ ...layout, hidden: layout.hidden.filter((w) => w !== id) });
+
+  const visibleOrder = useMemo(
+    () => layout.order.filter((id) => !layout.hidden.includes(id)),
+    [layout],
+  );
+
+  const widgetContent: Record<HomeWidgetId, ReactNode> = {
+    actions: (
+      <section className="flex flex-col overflow-hidden rounded-[28px] border border-line bg-surface shadow-sm sm:flex-row">
         {actions.map((action, i) => (
           <Link
             key={action.label}
@@ -250,27 +330,19 @@ export default function Home() {
               </svg>
             </span>
             <span className="flex flex-col">
-              <span className="text-sm font-medium text-ink">
-                {action.label}
-              </span>
-              <span className="text-xs text-ink-muted">
-                {actionHint(action.label, action.hint)}
-              </span>
+              <span className="text-sm font-medium text-ink">{action.label}</span>
+              <span className="text-xs text-ink-muted">{actionHint(action.label, action.hint)}</span>
             </span>
           </Link>
         ))}
       </section>
-
-      <section
-        id="at-a-glance"
-        className="fade-up mt-14 scroll-mt-24"
-        style={{ animationDelay: "140ms" }}
-      >
+    ),
+    chart: <HabitsChart />,
+    glance: (
+      <section id="at-a-glance" className="scroll-mt-24">
         <div className="flex items-baseline justify-between">
           <h2 className="font-display text-xl text-ink">At a glance</h2>
-          <span className="font-mono text-xs text-ink-muted">
-            {glance.length} items
-          </span>
+          <span className="font-mono text-xs text-ink-muted">{glance.length} items</span>
         </div>
 
         {glance.length === 0 ? (
@@ -282,25 +354,77 @@ export default function Home() {
         ) : (
           <ul className={cardClasses({ padding: "none", className: "mt-4 divide-y divide-line overflow-hidden" })}>
             {glance.map((item) => (
-              <li
-                key={item.text}
-                className="flex items-center gap-3 px-5 py-4 transition-colors hover:bg-paper/60"
-              >
-                <span
-                  className={`h-1.5 w-1.5 shrink-0 rounded-full ${kindColor[item.kind]}`}
-                  aria-hidden
-                />
+              <li key={item.text} className="flex items-center gap-3 px-5 py-4 transition-colors hover:bg-paper/60">
+                <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${kindColor[item.kind]}`} aria-hidden />
                 <span className="flex-1 text-sm text-ink">{item.text}</span>
-                <span className="font-mono text-xs text-ink-muted">
-                  {item.time}
-                </span>
+                <span className="font-mono text-xs text-ink-muted">{item.time}</span>
               </li>
             ))}
           </ul>
         )}
       </section>
+    ),
+    calendar: <CalendarWidget events={calendarEvents} />,
+  };
 
-      <CalendarWidget events={calendarEvents} />
+  return (
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-24">
+      <section className="fade-up flex items-start justify-between gap-4">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-muted">{dayLabel}</p>
+          <h1 className="mt-3 font-display text-4xl italic text-ink sm:text-5xl">
+            {greeting}, {firstName}.
+          </h1>
+          <p className="mt-3 max-w-md text-ink-muted">Here&rsquo;s what&rsquo;s waiting for you.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setEditing((e) => !e)}
+          className={`mt-1 flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+            editing
+              ? "border-clay bg-clay text-surface"
+              : "border-line text-ink-muted hover:border-clay hover:text-clay"
+          }`}
+        >
+          <SlidersIcon />
+          {editing ? "Done" : "Customize"}
+        </button>
+      </section>
+
+      {editing && (
+        <p className="fade-up mt-4 text-xs text-ink-muted">
+          Drag <GripIcon className="inline h-3 w-3 -translate-y-px" /> to reorder widgets, or hide them. Hidden
+          widgets can be added back below.
+        </p>
+      )}
+
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <SortableContext items={visibleOrder} strategy={verticalListSortingStrategy}>
+          <div className="flex flex-col gap-10 [&>*:first-child]:mt-10">
+            {visibleOrder.map((id) => (
+              <WidgetShell key={id} id={id} editing={editing} onHide={() => hideWidget(id)}>
+                {widgetContent[id]}
+              </WidgetShell>
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+
+      {editing && layout.hidden.length > 0 && (
+        <div className="fade-up mt-8 flex flex-wrap items-center gap-2 border-t border-line pt-6">
+          <span className="text-xs text-ink-muted">Hidden:</span>
+          {layout.hidden.map((id) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => showWidget(id)}
+              className="rounded-full border border-dashed border-line px-3 py-1.5 text-xs text-ink-muted transition-colors hover:border-clay hover:text-clay"
+            >
+              + {HOME_WIDGET_LABELS[id]}
+            </button>
+          ))}
+        </div>
+      )}
     </main>
   );
 }

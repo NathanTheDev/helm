@@ -123,3 +123,29 @@ export function CheckIcon({ className = "h-3.5 w-3.5" }: IconProps) {
     </svg>
   );
 }
+
+export function EyeOffIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <path
+        d="M3.5 3.5l17 17M10.6 5.4c.45-.06.92-.1 1.4-.1 5 0 8.5 4 9.5 6.7-.4 1.1-1.2 2.5-2.4 3.7m-2.9 2.1c-1.2.6-2.6 1-4.2 1-5 0-8.5-4-9.5-6.8.5-1.4 1.6-3.1 3.2-4.5M9.8 9.9a3 3 0 0 0 4.2 4.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function SlidersIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <path
+        d="M5 6.5h6m4 0h4M5 12h9m4 0h1M5 17.5h4m4 0h6"
+        strokeLinecap="round"
+      />
+      <circle cx="13" cy="6.5" r="1.8" />
+      <circle cx="16" cy="12" r="1.8" />
+      <circle cx="11" cy="17.5" r="1.8" />
+    </svg>
+  );
+}

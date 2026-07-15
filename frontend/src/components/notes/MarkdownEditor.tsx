@@ -53,5 +53,10 @@ export function MarkdownEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <div ref={containerRef} className="mt-6 min-h-[16rem] flex-1" />;
+  return (
+    <div
+      ref={containerRef}
+      className="mt-6 min-h-[16rem] flex-1 rounded-card border border-line bg-surface p-4"
+    />
+  );
 }

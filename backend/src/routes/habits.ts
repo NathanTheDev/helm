@@ -1,7 +1,10 @@
 import { Router } from "express";
 import { prisma } from "../db/client";
 import { computeHabitStats } from "../services/streak";
+import { computeDailyCompletionRates, type StatsRange } from "../services/habitStats";
 import { createHabitSchema, updateHabitSchema } from "../validation/habit";
+
+const STATS_RANGES: StatsRange[] = ["week", "month", "year", "all"];
 
 export const habitsRouter = Router();
 
@@ -23,6 +26,22 @@ habitsRouter.get("/", async (req, res) => {
     include: { completions: true },
   });
   res.json(habits.map(serializeHabit));
+});
+
+habitsRouter.get("/stats", async (req, res) => {
+  const range = STATS_RANGES.includes(req.query.range as StatsRange)
+    ? (req.query.range as StatsRange)
+    : "week";
+
+  const habits = await prisma.habit.findMany({
+    where: { userId: req.userId },
+    orderBy: { createdAt: "asc" },
+  });
+  const completions = await prisma.habitCompletion.findMany({
+    where: { habit: { userId: req.userId } },
+  });
+
+  res.json(computeDailyCompletionRates(habits, completions, range));
 });
 
 habitsRouter.get("/:id", async (req, res) => {

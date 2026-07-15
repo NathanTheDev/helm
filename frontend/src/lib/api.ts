@@ -50,6 +50,26 @@ export async function getHabits(): Promise<Habit[]> {
   return res.json();
 }
 
+export type HabitStatsRange = "week" | "month" | "year" | "all";
+
+export interface HabitDailyRate {
+  date: string;
+  completed: number;
+  total: number;
+  percent: number;
+}
+
+export async function getHabitStats(range: HabitStatsRange): Promise<HabitDailyRate[]> {
+  const res = await fetch(apiUrl(`/api/habits/stats?range=${range}`), {
+    cache: "no-store",
+    headers: await authHeaders(),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load habit stats: ${res.status}`);
+  }
+  return res.json();
+}
+
 export interface NewHabitInput {
   name: string;
   emoji?: string;
