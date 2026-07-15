@@ -6,6 +6,7 @@ import { createProject } from "@/lib/tasksApi";
 import { CardForm, cardClasses } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Dialog } from "@/components/ui/Dialog";
 
 export const PROJECT_COLORS = [
   "#c9633e", // clay
@@ -43,8 +44,8 @@ export function NewProjectForm() {
     });
   };
 
-  if (!open) {
-    return (
+  return (
+    <>
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -59,42 +60,42 @@ export function NewProjectForm() {
         <span className="text-xl leading-none">+</span>
         <span className="text-sm">New project</span>
       </button>
-    );
-  }
 
-  return (
-    <CardForm onSubmit={submit} className="flex flex-col gap-3">
-      <Input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Project name"
-        aria-label="Project name"
-        autoFocus
-      />
-
-      <div className="flex items-center gap-2">
-        {PROJECT_COLORS.map((c) => (
-          <button
-            key={c}
-            type="button"
-            onClick={() => setColor(c)}
-            aria-label={`Color ${c}`}
-            style={{ backgroundColor: c }}
-            className={`h-5 w-5 rounded-full transition-transform ${
-              color === c ? "ring-2 ring-ink ring-offset-2 ring-offset-surface" : ""
-            }`}
+      <Dialog open={open} onClose={close}>
+        <CardForm onSubmit={submit} className="flex flex-col gap-3">
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Project name"
+            aria-label="Project name"
+            autoFocus
           />
-        ))}
-      </div>
 
-      <div className="mt-1 flex justify-end gap-2">
-        <Button type="button" variant="ghost" size="sm" onClick={close} disabled={pending}>
-          Cancel
-        </Button>
-        <Button type="submit" size="sm" disabled={pending || !name.trim()}>
-          {pending ? "Adding…" : "Add project"}
-        </Button>
-      </div>
-    </CardForm>
+          <div className="flex items-center gap-2">
+            {PROJECT_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setColor(c)}
+                aria-label={`Color ${c}`}
+                style={{ backgroundColor: c }}
+                className={`h-5 w-5 rounded-full transition-transform ${
+                  color === c ? "ring-2 ring-ink ring-offset-2 ring-offset-surface" : ""
+                }`}
+              />
+            ))}
+          </div>
+
+          <div className="mt-1 flex justify-end gap-2">
+            <Button type="button" variant="ghost" size="sm" onClick={close} disabled={pending}>
+              Cancel
+            </Button>
+            <Button type="submit" size="sm" disabled={pending || !name.trim()}>
+              {pending ? "Adding…" : "Add project"}
+            </Button>
+          </div>
+        </CardForm>
+      </Dialog>
+    </>
   );
 }
