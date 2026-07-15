@@ -78,19 +78,27 @@ export function RowForm(props: RowFormProps) {
   }
 
   return (
-    <CardForm onSubmit={submit} className="flex flex-col gap-3">
-      <div className="grid gap-3 sm:grid-cols-2">
+    <CardForm onSubmit={submit} className="flex flex-col gap-1">
+      <div className="flex flex-col divide-y divide-line/70">
         {fields.map((field) => (
-          <label key={field.id} className="flex flex-col gap-1.5">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+          <div key={field.id} className="flex items-center gap-4 py-2.5 first:pt-0 last:pb-0">
+            <label
+              htmlFor={`row-field-${field.id}`}
+              className="w-32 shrink-0 truncate font-mono text-[10px] uppercase tracking-wider text-ink-muted"
+              title={field.name}
+            >
               {field.name}
-            </span>
-            {renderFieldControl(field, values[field.id], (value) => setFieldValue(field.id, value))}
-          </label>
+            </label>
+            <div className="min-w-0 flex-1">
+              {renderFieldControl(field, values[field.id], (value) => setFieldValue(field.id, value), {
+                id: `row-field-${field.id}`,
+              })}
+            </div>
+          </div>
         ))}
       </div>
 
-      {error && <p className="text-xs text-clay">{error}</p>}
+      {error && <p className="mt-2 text-xs text-clay">{error}</p>}
 
       <div className="mt-1 flex justify-end gap-2">
         <Button

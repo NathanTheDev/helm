@@ -51,6 +51,7 @@ export function renderFieldControl(
           id={id}
           type="number"
           autoFocus={autoFocus}
+          className="w-full"
           value={value === null || value === undefined ? "" : String(value)}
           onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
         />
@@ -61,6 +62,7 @@ export function renderFieldControl(
           id={id}
           type="datetime-local"
           autoFocus={autoFocus}
+          className="w-full"
           value={toDatetimeLocal(value)}
           onChange={(e) => onChange(e.target.value ? new Date(e.target.value).toISOString() : null)}
         />
@@ -88,6 +90,7 @@ export function renderFieldControl(
         <Select
           id={id}
           autoFocus={autoFocus}
+          className="w-full"
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value || null)}
         >
@@ -106,6 +109,7 @@ export function renderFieldControl(
           id={id}
           type="text"
           autoFocus={autoFocus}
+          className="w-full"
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
         />
