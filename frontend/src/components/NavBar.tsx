@@ -26,13 +26,20 @@ export default function NavBar() {
   const menuRef = useRef<HTMLDivElement>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
-  const [spaceName, setSpaceName] = useState(() => readSpaceName());
+  // Starts at the SSR-matching default, then swaps to the stored name post-
+  // mount - reading localStorage in the lazy initializer would mismatch the
+  // server-rendered "Helm" text and trigger a hydration error.
+  const [spaceName, setSpaceName] = useState(DEFAULT_SPACE_NAME);
 
   function commitSpaceName(next: string) {
     const trimmed = next.trim() || DEFAULT_SPACE_NAME;
     writeSpaceName(trimmed);
     setSpaceName(trimmed);
   }
+
+  useEffect(() => {
+    setSpaceName(readSpaceName());
+  }, []);
 
   useEffect(() => {
     setOpen(false);

@@ -1,0 +1,32 @@
+[debug] [2026-07-15T05:55:03.722Z] ----------------------------------------------------------------------
+[debug] [2026-07-15T05:55:03.724Z] Command:       /usr/bin/node /home/natha/.npm/_npx/7750544ccf494d8b/node_modules/.bin/firebase emulators:start --only auth --project helm-dev-stub
+[debug] [2026-07-15T05:55:03.725Z] CLI Version:   15.23.0
+[debug] [2026-07-15T05:55:03.725Z] Platform:      linux
+[debug] [2026-07-15T05:55:03.725Z] Node Version:  v22.22.0
+[debug] [2026-07-15T05:55:03.725Z] Detected Agent: claude-code_2-1-209_agent
+[debug] [2026-07-15T05:55:03.725Z] Time:          Wed Jul 15 2026 15:55:03 GMT+1000 (Australian Eastern Standard Time)
+[debug] [2026-07-15T05:55:03.725Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-07-15T05:55:05.337Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] Failed to authenticate, have you run firebase login?
+[warn] ⚠  emulators: You are not currently authenticated so some features may not work correctly. Please run firebase login to authenticate the CLI. 
+[info] i  emulators: Starting emulators: auth {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth"}}
+[debug] [2026-07-15T05:55:05.383Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-07-15T05:55:05.386Z] Write emulator hub locator at /tmp/hub-helm-dev-stub.json
+[warn] ⚠  emulators: The Emulator UI is not starting because none of the running emulators have a UI component. {"metadata":{"emulator":{"name":"hub"},"message":"The Emulator UI is not starting because none of the running emulators have a UI component."}}
+[debug] [2026-07-15T05:55:11.279Z] Could not find VSCode notification endpoint: TypeError: fetch failed. If you are not running the Firebase SQL Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┐
+│ Emulator       │ Host:Port      │
+├────────────────┼────────────────┤
+│ Authentication │ 127.0.0.1:9099 │
+└────────────────┴────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
