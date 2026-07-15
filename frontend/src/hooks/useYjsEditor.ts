@@ -5,8 +5,10 @@ import type { Awareness } from "y-protocols/awareness";
 import type { User } from "firebase/auth";
 import { EditorView, basicSetup } from "codemirror";
 import { markdown } from "@codemirror/lang-markdown";
+import { syntaxHighlighting } from "@codemirror/language";
 import { yCollab } from "y-codemirror.next";
 import { resolveDisplayName, randomColor } from "@/lib/presence";
+import { markdownHighlightStyle } from "@/components/notes/markdownHighlightStyle";
 
 export type ConnectionStatus = "connecting" | "connected" | "reconnecting" | "offline";
 
@@ -112,6 +114,7 @@ export function useYjsEditor(wsUrl: string, room: string, user: User | null) {
         extensions: [
           basicSetup,
           markdown(),
+          syntaxHighlighting(markdownHighlightStyle),
           EditorView.lineWrapping,
           yCollab(ytext, awareness),
           EditorView.theme({

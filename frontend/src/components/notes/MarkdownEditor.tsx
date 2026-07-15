@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import { EditorView, basicSetup } from "codemirror";
 import { markdown } from "@codemirror/lang-markdown";
+import { syntaxHighlighting } from "@codemirror/language";
+import { markdownHighlightStyle } from "./markdownHighlightStyle";
 
 // Plain (non-collaborative) markdown editor. Uncontrolled by design: it
 // mounts once with `initialContent` and reports changes via `onChange` -
@@ -30,6 +32,7 @@ export function MarkdownEditor({
       extensions: [
         basicSetup,
         markdown(),
+        syntaxHighlighting(markdownHighlightStyle),
         EditorView.lineWrapping,
         EditorView.updateListener.of((update) => {
           if (update.docChanged) onChangeRef.current(update.state.doc.toString());
