@@ -8,6 +8,8 @@ import { auth } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { MenuIcon } from "@/components/ui/Icon";
+import { Input } from "@/components/ui/Input";
+import { DEFAULT_SPACE_NAME, readSpaceName, writeSpaceName } from "@/lib/space-name";
 
 const links = [
   { href: "/notes", label: "Notes" },
@@ -22,9 +24,19 @@ export default function NavBar() {
   const { user, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
+  const [spaceName, setSpaceName] = useState(() => readSpaceName());
+
+  function commitSpaceName(next: string) {
+    const trimmed = next.trim() || DEFAULT_SPACE_NAME;
+    writeSpaceName(trimmed);
+    setSpaceName(trimmed);
+  }
 
   useEffect(() => {
     setOpen(false);
+    setAccountOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -36,6 +48,15 @@ export default function NavBar() {
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, [open]);
 
+  useEffect(() => {
+    if (!accountOpen) return;
+    function onPointerDown(e: MouseEvent) {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target as Node)) setAccountOpen(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [accountOpen]);
+
   return (
     <header className="sticky top-0 z-10 border-b border-line/70 bg-paper/85 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 sm:px-10">
@@ -44,7 +65,7 @@ export default function NavBar() {
           className="flex items-center gap-2 font-display text-lg tracking-tight text-ink"
         >
           <span className="inline-block h-2 w-2 rounded-full bg-clay" aria-hidden />
-          Helm
+          {spaceName}
         </Link>
 
         <nav className="hidden items-center gap-6 sm:flex">
@@ -65,20 +86,44 @@ export default function NavBar() {
           <ThemeSwitcher />
           {!loading &&
             (user ? (
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-clay-soft font-display text-sm text-clay"
+              <div ref={accountMenuRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setAccountOpen((o) => !o)}
+                  aria-label="Account menu"
+                  aria-expanded={accountOpen}
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-clay-soft font-display text-sm text-clay transition-colors hover:bg-clay-soft/80"
                   title={user.email ?? undefined}
                 >
                   {(user.displayName ?? user.email ?? "?").charAt(0).toUpperCase()}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => signOut(auth)}
-                  className="text-sm text-ink-muted transition-colors hover:text-ink"
-                >
-                  Sign out
                 </button>
+
+                {accountOpen && (
+                  <div className="absolute right-0 top-full z-20 mt-2 w-56 rounded-card border border-line bg-surface p-3 shadow-md">
+                    {user.email && (
+                      <p className="truncate px-1 text-xs text-ink-muted">{user.email}</p>
+                    )}
+                    <label className="mt-3 block px-1 text-xs text-ink-muted">
+                      Space name
+                      <Input
+                        defaultValue={spaceName}
+                        onBlur={(e) => commitSpaceName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.currentTarget.blur();
+                        }}
+                        className="mt-1 w-full"
+                        size="sm"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => signOut(auth)}
+                      className="mt-3 w-full rounded-control px-1 py-1.5 text-left text-sm text-ink-muted transition-colors hover:bg-clay-soft/40 hover:text-ink"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <Link
@@ -121,23 +166,37 @@ export default function NavBar() {
                     </Link>
                   );
                 })}
-                <div className="mt-1 flex items-center gap-3 border-t border-line/70 px-2 pt-2">
+                <div className="mt-1 border-t border-line/70 px-2 pt-2">
                   {!loading &&
                     (user ? (
                       <>
-                        <div
-                          className="flex h-7 w-7 items-center justify-center rounded-full bg-clay-soft font-display text-xs text-clay"
-                          title={user.email ?? undefined}
-                        >
-                          {(user.displayName ?? user.email ?? "?").charAt(0).toUpperCase()}
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="flex h-7 w-7 items-center justify-center rounded-full bg-clay-soft font-display text-xs text-clay"
+                            title={user.email ?? undefined}
+                          >
+                            {(user.displayName ?? user.email ?? "?").charAt(0).toUpperCase()}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => signOut(auth)}
+                            className="text-sm text-ink-muted transition-colors hover:text-ink"
+                          >
+                            Sign out
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => signOut(auth)}
-                          className="text-sm text-ink-muted transition-colors hover:text-ink"
-                        >
-                          Sign out
-                        </button>
+                        <label className="mt-2 block text-xs text-ink-muted">
+                          Space name
+                          <Input
+                            defaultValue={spaceName}
+                            onBlur={(e) => commitSpaceName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") e.currentTarget.blur();
+                            }}
+                            className="mt-1 w-full"
+                            size="sm"
+                          />
+                        </label>
                       </>
                     ) : (
                       <Link
