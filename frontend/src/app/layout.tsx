@@ -5,9 +5,10 @@ import AuthGate from "@/components/auth/AuthGate";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { THEME_STORAGE_KEY, CUSTOM_THEME_STORAGE_KEY, CUSTOM_THEME_VARS } from "@/lib/theme-constants";
+import { FONT_STORAGE_KEY, DEFAULT_FONT } from "@/lib/font-constants";
 import "./globals.css";
 
-// Runs before first paint so the stored (or system-preferred) theme -
+// Runs before first paint so the stored (or system-preferred) theme/font -
 // including a user-created "Custom" palette - is applied without a flash
 // of the default palette.
 const CUSTOM_THEME_KEYS = JSON.stringify(CUSTOM_THEME_VARS.map((v) => v.key));
@@ -25,6 +26,8 @@ const THEME_INIT_SCRIPT = `(function(){try{
       });
     }
   }
+  var f=localStorage.getItem(${JSON.stringify(FONT_STORAGE_KEY)})||${JSON.stringify(DEFAULT_FONT)};
+  document.documentElement.setAttribute("data-font",f);
 }catch(e){}})();`;
 
 const fraunces = Fraunces({

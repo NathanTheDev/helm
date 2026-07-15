@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import {
   THEMES,
   THEME_STORAGE_KEY,
@@ -11,21 +11,28 @@ import {
   type CustomTheme,
   type CustomThemeVar,
 } from "@/lib/theme-constants";
+import { FONTS, FONT_STORAGE_KEY, DEFAULT_FONT, type FontId } from "@/lib/font-constants";
 
-export { THEMES, THEME_STORAGE_KEY, CUSTOM_THEME_VARS, DEFAULT_CUSTOM_THEME };
-export type { ThemeId, CustomTheme, CustomThemeVar };
+export { THEMES, THEME_STORAGE_KEY, CUSTOM_THEME_VARS, DEFAULT_CUSTOM_THEME, FONTS };
+export type { ThemeId, CustomTheme, CustomThemeVar, FontId };
 
 type ThemeContextValue = {
   theme: ThemeId;
   setTheme: (theme: ThemeId) => void;
   customTheme: CustomTheme;
   setCustomColor: (key: CustomThemeVar, value: string) => void;
+  font: FontId;
+  setFont: (font: FontId) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function isThemeId(value: string | null): value is ThemeId {
   return value === "custom" || THEMES.some((t) => t.id === value);
+}
+
+function isFontId(value: string | null): value is FontId {
+  return FONTS.some((f) => f.id === value);
 }
 
 function readCustomTheme(): CustomTheme {
@@ -61,6 +68,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   });
   const [customTheme, setCustomThemeState] = useState<CustomTheme>(() => readCustomTheme());
 
+  // Font, unlike theme, has no color/attribute readout rendered as part of
+  // the initial client tree (no swatch depends on it) - reading it lazily
+  // would only save one render pass, so it's read in an effect instead to
+  // keep this file's one lazy-read exception (theme) from spreading.
+  const [font, setFontState] = useState<FontId>(DEFAULT_FONT);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(FONT_STORAGE_KEY);
+    setFontState(isFontId(stored) ? stored : DEFAULT_FONT);
+  }, []);
+
   const setTheme = (next: ThemeId) => {
     setThemeState(next);
     localStorage.setItem(THEME_STORAGE_KEY, next);
@@ -87,8 +105,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const setFont = (next: FontId) => {
+    setFontState(next);
+    localStorage.setItem(FONT_STORAGE_KEY, next);
+    document.documentElement.setAttribute("data-font", next);
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, customTheme, setCustomColor }}>
+    <ThemeContext.Provider value={{ theme, setTheme, customTheme, setCustomColor, font, setFont }}>
       {children}
     </ThemeContext.Provider>
   );

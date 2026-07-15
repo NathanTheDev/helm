@@ -88,6 +88,15 @@
   --shadow-lg: 0 16px 40px -8px var(--shadow-color);
 }
 
+[data-font="modern"] {
+  --font-display: var(--font-inter);
+}
+
+[data-font="mono"] {
+  --font-display: var(--font-plex-mono);
+  --font-sans: var(--font-plex-mono);
+}
+
 body {
   background-color: var(--paper);
   color: var(--ink);
