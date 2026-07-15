@@ -4,12 +4,28 @@ import NavBar from "@/components/NavBar";
 import AuthGate from "@/components/auth/AuthGate";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-context";
-import { THEME_STORAGE_KEY } from "@/lib/theme-constants";
+import { THEME_STORAGE_KEY, CUSTOM_THEME_STORAGE_KEY, CUSTOM_THEME_VARS } from "@/lib/theme-constants";
 import "./globals.css";
 
-// Runs before first paint so the stored (or system-preferred) theme is
-// applied without a flash of the default palette.
-const THEME_INIT_SCRIPT = `(function(){try{var k=${JSON.stringify(THEME_STORAGE_KEY)};var s=localStorage.getItem(k);var t=s||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"paper");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();`;
+// Runs before first paint so the stored (or system-preferred) theme -
+// including a user-created "Custom" palette - is applied without a flash
+// of the default palette.
+const CUSTOM_THEME_KEYS = JSON.stringify(CUSTOM_THEME_VARS.map((v) => v.key));
+const THEME_INIT_SCRIPT = `(function(){try{
+  var k=${JSON.stringify(THEME_STORAGE_KEY)};
+  var s=localStorage.getItem(k);
+  var t=s||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"paper");
+  document.documentElement.setAttribute("data-theme",t);
+  if(t==="custom"){
+    var raw=localStorage.getItem(${JSON.stringify(CUSTOM_THEME_STORAGE_KEY)});
+    if(raw){
+      var c=JSON.parse(raw);
+      ${CUSTOM_THEME_KEYS}.forEach(function(key){
+        if(c[key]) document.documentElement.style.setProperty("--"+key,c[key]);
+      });
+    }
+  }
+}catch(e){}})();`;
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",

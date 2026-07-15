@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { THEMES, useTheme } from "@/lib/theme-context";
+import { THEMES, CUSTOM_THEME_VARS, useTheme } from "@/lib/theme-context";
 
 export function ThemeSwitcher() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, customTheme, setCustomColor } = useTheme();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -17,7 +17,8 @@ export function ThemeSwitcher() {
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, [open]);
 
-  const current = THEMES.find((t) => t.id === theme) ?? THEMES[0];
+  const currentSwatch =
+    theme === "custom" ? customTheme.paper : (THEMES.find((t) => t.id === theme) ?? THEMES[0]).swatch;
 
   return (
     <div ref={rootRef} className="relative">
@@ -30,13 +31,13 @@ export function ThemeSwitcher() {
       >
         <span
           className="h-3.5 w-3.5 rounded-full border border-line/70"
-          style={{ backgroundColor: current.swatch }}
+          style={{ backgroundColor: currentSwatch }}
           aria-hidden
         />
       </button>
 
       {open && (
-        <div className="absolute right-0 z-20 mt-2 w-36 rounded-card border border-line bg-surface p-1.5 shadow-md">
+        <div className="absolute right-0 z-20 mt-2 w-52 rounded-card border border-line bg-surface p-1.5 shadow-md">
           {THEMES.map((t) => (
             <button
               key={t.id}
@@ -58,6 +59,38 @@ export function ThemeSwitcher() {
               {theme === t.id && <span aria-hidden>✓</span>}
             </button>
           ))}
+
+          <button
+            type="button"
+            onClick={() => setTheme("custom")}
+            className={`flex w-full items-center gap-2 rounded-control px-2 py-1.5 text-left text-sm transition-colors hover:bg-clay-soft/40 ${
+              theme === "custom" ? "text-ink" : "text-ink-muted"
+            }`}
+          >
+            <span
+              className="h-2.5 w-2.5 shrink-0 rounded-full border border-line/70"
+              style={{ backgroundColor: customTheme.paper }}
+              aria-hidden
+            />
+            <span className="flex-1">Custom…</span>
+            {theme === "custom" && <span aria-hidden>✓</span>}
+          </button>
+
+          {theme === "custom" && (
+            <div className="mt-1 flex justify-between gap-1 border-t border-line/70 px-2 pb-1 pt-2">
+              {CUSTOM_THEME_VARS.map(({ key, label }) => (
+                <input
+                  key={key}
+                  type="color"
+                  value={customTheme[key]}
+                  onChange={(e) => setCustomColor(key, e.target.value)}
+                  aria-label={label}
+                  title={label}
+                  className="h-6 w-6 cursor-pointer rounded border border-line/70 bg-transparent p-0"
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
