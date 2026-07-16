@@ -284,7 +284,10 @@ rowsRouter.patch("/:id", async (req, res) => {
 
   const row = await prisma.customRow.update({
     where: { id: req.params.id },
-    data: { values: values as Prisma.InputJsonValue },
+    data: {
+      values: values as Prisma.InputJsonValue,
+      position: parsed.data.position,
+    },
   });
   res.json(row);
 });

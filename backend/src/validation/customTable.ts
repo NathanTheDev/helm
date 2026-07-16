@@ -53,4 +53,5 @@ export const createRowSchema = z.object({
 
 export const updateRowSchema = z.object({
   values: z.record(z.string(), z.unknown()).optional(),
+  position: z.number().optional(),
 });

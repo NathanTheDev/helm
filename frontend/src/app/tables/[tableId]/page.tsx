@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { arrayMove } from "@dnd-kit/sortable";
 import {
   getTable,
   getRows,
   deleteTable,
   deleteField,
   deleteRow,
+  updateField,
+  updateRow,
   sortRows,
   filterRows,
   FILTER_OPERATORS_BY_TYPE,
@@ -25,6 +28,16 @@ import { RowForm } from "@/components/RowForm";
 import { Button, IconButton } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { TrashIcon } from "@/components/ui/Icon";
+
+// Position for the moved item sitting at `index` in `list` (which includes it).
+function positionForIndex(list: { position: number }[], index: number): number {
+  const before = list[index - 1];
+  const after = list[index + 1];
+  if (before && after) return (before.position + after.position) / 2;
+  if (before) return before.position + 1;
+  if (after) return after.position - 1;
+  return 1;
+}
 
 export default function TableDetailPage() {
   const { tableId } = useParams<{ tableId: string }>();
@@ -120,6 +133,30 @@ export default function TableDetailPage() {
       .catch(() => {});
   };
 
+  const reorderField = (activeId: string, overId: string) => {
+    if (!table) return;
+    const oldIndex = table.fields.findIndex((f) => f.id === activeId);
+    const newIndex = table.fields.findIndex((f) => f.id === overId);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    const reordered = arrayMove(table.fields, oldIndex, newIndex);
+    const position = positionForIndex(reordered, newIndex);
+    const nextFields = reordered.map((f) => (f.id === activeId ? { ...f, position } : f));
+    setTable({ ...table, fields: nextFields });
+    updateField(activeId, { position }).catch(() => refresh());
+  };
+
+  const reorderRow = (activeId: string, overId: string) => {
+    const oldIndex = rows.findIndex((r) => r.id === activeId);
+    const newIndex = rows.findIndex((r) => r.id === overId);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    const reordered = arrayMove(rows, oldIndex, newIndex);
+    const position = positionForIndex(reordered, newIndex);
+    setRows(reordered.map((r) => (r.id === activeId ? { ...r, position } : r)));
+    updateRow(activeId, { position }).catch(() => refreshRows());
+  };
+
   const handleFilterFieldChange = (fieldId: string | null) => {
     setFilterFieldId(fieldId);
     const field = fieldId ? (table?.fields.find((f) => f.id === fieldId) ?? null) : null;
@@ -206,14 +243,17 @@ export default function TableDetailPage() {
               fields={table.fields}
               rows={displayedRows}
               isFiltered={Boolean(filterField && filterOperator)}
+              rowsReorderable={!sortField && !filterField}
               editingRowId={editingRowId}
               onAddField={() => setAddingField(true)}
               onEditField={setEditingField}
               onDeleteField={removeField}
+              onReorderField={reorderField}
               onEditRow={(row) => setEditingRowId(row.id)}
               onRowSaved={handleRowSaved}
               onCancelEditRow={() => setEditingRowId(null)}
               onDeleteRow={removeRow}
+              onReorderRow={reorderRow}
             />
             <RowForm mode="create" tableId={table.id} fields={table.fields} onCreated={handleRowCreated} />
           </>

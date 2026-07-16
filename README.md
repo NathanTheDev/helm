@@ -44,10 +44,12 @@ Sign up with any email/password at `/signup` — the emulator accepts anything
 and doesn't send real email. Emulator accounts/data reset every time the
 emulator restarts.
 
-Note: seeded demo data (`npm run db:seed`) is attached to a placeholder
-`DEFAULT_USER_ID`, not a real Firebase UID, so it won't show up under any
-account you sign up with — it's only useful for direct DB inspection right
-now.
+Seeded demo data (`npm run db:seed`) is attached to a placeholder
+`DEFAULT_USER_ID`, not a real Firebase UID, so it won't show up under an
+account you sign up fresh. To see it: `npm run seed:auth` (emulator must be
+running) creates a fixed emulator account whose UID matches
+`DEFAULT_USER_ID` — sign in at `/login` with `demo@helm.dev` /
+`helm-demo-1234`.
 
 Swapping in a real Firebase project later is env-only (`FIREBASE_PROJECT_ID`,
 `NEXT_PUBLIC_FIREBASE_*` client config) — no code changes.
@@ -104,10 +106,12 @@ npm run dev                   # http://localhost:3000
 
 ```
 docker compose up -d
-(cd backend  && cp .env.example .env && npm install && npm run prisma:deploy && npm run db:seed && npm run dev)
+npx firebase-tools emulators:start --only auth &
+(cd backend  && cp .env.example .env && npm install && npm run prisma:deploy && npm run db:seed && npm run seed:auth && npm run dev)
 (cd frontend && cp .env.example .env.local && npm install && npm run dev)
 ```
 
-Then open the frontend and visit `/habits`, `/projects`, or `/worklog`. The
-seed populates demo habits plus two projects with tasks, tags, sub-tasks, and
-tracked time (including one running timer).
+Then open the frontend and sign in at `/login` with `demo@helm.dev` /
+`helm-demo-1234` (created by `seed:auth`) to see seeded demo habits plus two
+projects with tasks, tags, sub-tasks, and tracked time (including one running
+timer) — or sign up fresh at `/signup` for an empty account.

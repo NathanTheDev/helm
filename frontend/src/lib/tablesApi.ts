@@ -160,7 +160,7 @@ export async function createRow(
 
 export async function updateRow(
   rowId: string,
-  input: { values: Record<string, unknown> },
+  input: { values?: Record<string, unknown>; position?: number },
 ): Promise<CustomRow> {
   const res = await fetch(apiUrl(`/api/rows/${rowId}`), {
     method: "PATCH",
