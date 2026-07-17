@@ -82,6 +82,13 @@ export function ThemeSwitcher() {
           className="h-3.5 w-3.5 rounded-full border border-line/70"
           style={{ backgroundColor: currentSwatch }}
           aria-hidden
+          // currentSwatch depends on ThemeProvider's lazily-read `theme`,
+          // which is intentionally read from the DOM (matching the blocking
+          // pre-paint script) rather than always the SSR default - same
+          // tradeoff already made for <html suppressHydrationWarning> in
+          // layout.tsx. The mismatch this causes is expected and correct
+          // (client's value is the real one), not a bug to patch around.
+          suppressHydrationWarning
         />
       </button>
 
