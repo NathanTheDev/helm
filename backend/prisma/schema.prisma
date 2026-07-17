@@ -180,3 +180,15 @@ model CustomRow {
 
   @@index([tableId])
 }
+
+// One row per user (upsert on connect/reconnect) - access/refresh tokens are
+// AES-256-GCM ciphertext (see src/lib/crypto.ts), never stored in plaintext.
+model GoogleCalendarConnection {
+  userId          String   @id
+  accessTokenEnc  String
+  refreshTokenEnc String
+  expiryDate      DateTime
+  scope           String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

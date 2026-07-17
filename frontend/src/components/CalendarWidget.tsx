@@ -1,6 +1,7 @@
 import { cardClasses } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import type { CalendarEvent } from "@/lib/calendarApi";
+import { Button } from "@/components/ui/Button";
+import { startGoogleCalendarConnect, type CalendarEvent } from "@/lib/calendarApi";
 
 function isSameDay(a: Date, b: Date): boolean {
   return a.toDateString() === b.toDateString();
@@ -22,7 +23,12 @@ function timeLabel(event: CalendarEvent): string {
   });
 }
 
-export function CalendarWidget({ events }: { events: CalendarEvent[] }) {
+async function handleConnect() {
+  const url = await startGoogleCalendarConnect();
+  window.location.href = url;
+}
+
+export function CalendarWidget({ events, connected }: { events: CalendarEvent[]; connected: boolean }) {
   const now = new Date();
   const upcoming = [...events]
     .filter((e) => new Date(e.endsAt) >= now)
@@ -33,12 +39,24 @@ export function CalendarWidget({ events }: { events: CalendarEvent[] }) {
     <section className="fade-up mt-14" style={{ animationDelay: "200ms" }}>
       <div className="flex items-baseline justify-between">
         <h2 className="font-display text-xl text-ink">Coming up</h2>
-        <span className="font-mono text-xs text-ink-muted">
-          {upcoming.length} {upcoming.length === 1 ? "event" : "events"}
-        </span>
+        {connected && (
+          <span className="font-mono text-xs text-ink-muted">
+            {upcoming.length} {upcoming.length === 1 ? "event" : "events"}
+          </span>
+        )}
       </div>
 
-      {upcoming.length === 0 ? (
+      {!connected ? (
+        <EmptyState
+          className="mt-4"
+          title="Connect your calendar to see what's coming up."
+          action={
+            <Button size="sm" onClick={handleConnect}>
+              Connect Google Calendar
+            </Button>
+          }
+        />
+      ) : upcoming.length === 0 ? (
         <EmptyState className="mt-4" title="Nothing on your calendar." />
       ) : (
         <ul className={cardClasses({ padding: "none", className: "mt-4 divide-y divide-line overflow-hidden" })}>

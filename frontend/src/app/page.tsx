@@ -177,6 +177,7 @@ export default function Home() {
   const [projectsGlance, setProjectsGlance] = useState<GlanceItem[]>([]);
   const [notesGlance, setNotesGlance] = useState<GlanceItem[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [calendarConnected, setCalendarConnected] = useState(false);
   const [layout, setLayout] = useState<HomeLayout>({ order: DEFAULT_WIDGET_ORDER, hidden: [] });
   const [editing, setEditing] = useState(false);
 
@@ -266,8 +267,14 @@ export default function Home() {
       .catch(() => setNotesGlance([]));
 
     getCalendarEvents()
-      .then(setCalendarEvents)
-      .catch(() => setCalendarEvents([]));
+      .then((result) => {
+        setCalendarEvents(result.events);
+        setCalendarConnected(result.connected);
+      })
+      .catch(() => {
+        setCalendarEvents([]);
+        setCalendarConnected(false);
+      });
 
     getWorklog()
       .then((worklog) => setTodaySeconds(worklog.todaySeconds))
@@ -364,7 +371,7 @@ export default function Home() {
         )}
       </section>
     ),
-    calendar: <CalendarWidget events={calendarEvents} />,
+    calendar: <CalendarWidget events={calendarEvents} connected={calendarConnected} />,
   };
 
   return (
