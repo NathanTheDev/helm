@@ -4,6 +4,8 @@
 your calendar in one place, built on a Next.js frontend and an Express +
 Prisma + Postgres API.
 
+<img width="1579" height="995" alt="image" src="https://github.com/user-attachments/assets/6cf31c49-d66f-4edd-a314-3990e5766817" />
+
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-5-black?logo=express)
