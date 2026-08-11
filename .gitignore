@@ -1,3 +1,4 @@
 .playwright-mcp/
 firebase-debug.log
 *.pglite
+/tmp/
