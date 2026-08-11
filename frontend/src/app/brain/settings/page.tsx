@@ -88,9 +88,8 @@ export default function BrainSettingsPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-20">
-      {/* TODO(#11 Phase 4): point at /brain once the chat page lands there. */}
-      <Link href="/" className="w-fit text-sm text-ink-muted transition-colors hover:text-ink">
-        ← Back home
+      <Link href="/brain" className="w-fit text-sm text-ink-muted transition-colors hover:text-ink">
+        ← Back to Brain
       </Link>
 
       <h1 className="mt-6 font-display text-3xl text-ink sm:text-4xl">Vault connection</h1>

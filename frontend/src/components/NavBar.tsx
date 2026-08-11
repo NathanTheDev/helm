@@ -16,8 +16,7 @@ const links = [
   { href: "/habits", label: "Habits" },
   { href: "/projects", label: "Projects" },
   { href: "/tables", label: "Tables" },
-  // TODO(#11 Phase 4): point at /brain once the chat page lands there.
-  { href: "/brain/settings", label: "Brain" },
+  { href: "/brain", label: "Brain" },
 ];
 
 export default function NavBar() {
