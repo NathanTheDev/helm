@@ -13,6 +13,7 @@ import { subTasksNestedRouter, subTasksRouter } from "./routes/subTasks";
 import { notesRouter } from "./routes/notes";
 import { calendarRouter } from "./routes/calendar";
 import { obsidianConnectionRouter } from "./routes/obsidianConnection";
+import { aiRouter } from "./routes/ai";
 import { handleOAuthCallback } from "./services/googleCalendar";
 import {
   tablesRouter,
@@ -67,6 +68,7 @@ app.use("/api/worklog", worklogRouter);
 app.use("/api/notes", notesRouter);
 app.use("/api/calendar", calendarRouter);
 app.use("/api/obsidian/connection", obsidianConnectionRouter);
+app.use("/api/ai", aiRouter);
 app.use("/api/tables", tablesRouter);
 app.use("/api/tables/:tableId/fields", tableFieldsRouter);
 app.use("/api/fields", fieldsRouter);
