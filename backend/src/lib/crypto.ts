@@ -1,9 +1,10 @@
 import crypto from "crypto";
 
-// Encrypts secrets we have to persist at rest (currently: Google Calendar
-// OAuth tokens) - AES-256-GCM, key from GOOGLE_TOKEN_ENCRYPTION_KEY (32-byte
-// hex). Output packs iv + authTag + ciphertext together so a single string
-// column can hold everything decrypt() needs.
+// Encrypts secrets we have to persist at rest (Google Calendar OAuth tokens,
+// the Obsidian vault connection API key) - AES-256-GCM, key from
+// GOOGLE_TOKEN_ENCRYPTION_KEY (32-byte hex). Output packs iv + authTag +
+// ciphertext together so a single string column can hold everything
+// decrypt() needs.
 const KEY_HEX = process.env.GOOGLE_TOKEN_ENCRYPTION_KEY;
 if (!KEY_HEX) {
   console.warn(

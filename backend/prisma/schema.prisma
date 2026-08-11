@@ -124,16 +124,16 @@ model TaskTag {
 }
 
 model Note {
-  id             String    @id @default(cuid())
-  userId         String
-  title          String    @default("Untitled")
-  content        String    @default("")
-  published      Boolean   @default(false)
-  shareToken     String?   @unique
-  externalDocId  String?
-  publishedAt    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  userId        String
+  title         String    @default("Untitled")
+  content       String    @default("")
+  published     Boolean   @default(false)
+  shareToken    String?   @unique
+  externalDocId String?
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([userId])
 }
@@ -191,4 +191,19 @@ model GoogleCalendarConnection {
   scope           String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+// One row per user (upsert on connect/reconnect) - points at the MCP server
+// exposed by the user's own Obsidian "Local REST API" plugin, reached over a
+// private tunnel (e.g. Tailscale) they set up themselves. apiKeyEnc is
+// AES-256-GCM ciphertext (see src/lib/crypto.ts), never stored in plaintext.
+model ObsidianConnection {
+  userId        String    @id
+  baseUrl       String
+  apiKeyEnc     String
+  status        String    @default("UNVERIFIED") // UNVERIFIED | CONNECTED | ERROR
+  lastError     String?
+  lastCheckedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
