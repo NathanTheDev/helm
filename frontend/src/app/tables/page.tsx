@@ -6,6 +6,7 @@ import { getTables, type CustomTable } from "@/lib/tablesApi";
 import { NewTableForm } from "@/components/NewTableForm";
 import { cardClasses } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { TablesListSkeleton } from "./loading";
 
 function formatUpdated(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -43,7 +44,9 @@ export default function TablesPage() {
         Build a table for anything that doesn&rsquo;t fit — your own columns, your own data.
       </p>
 
-      {loading ? null : failed ? (
+      {loading ? (
+        <TablesListSkeleton />
+      ) : failed ? (
         <EmptyState
           tone="error"
           className="mt-10"

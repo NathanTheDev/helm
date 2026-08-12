@@ -245,63 +245,66 @@ export function TableGrid({
   return (
     <div className="flex flex-col gap-4">
       <Card padding="none" className="overflow-x-auto">
-        <table className="w-full min-w-full border-collapse text-left text-sm">
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleFieldDragEnd}>
-            <thead>
-              <tr className="divide-x divide-line border-b border-line">
-                <SortableContext items={fields.map((f) => f.id)} strategy={horizontalListSortingStrategy}>
-                  {fields.map((field, i) => (
-                    <FieldHeader
-                      key={field.id}
-                      field={field}
-                      i={i}
-                      onEditField={onEditField}
-                      onDeleteField={onDeleteField}
-                    />
-                  ))}
-                </SortableContext>
-                <th className="w-10 px-2 py-3 text-right">
-                  <IconButton onClick={onAddField} aria-label="Add field">
-                    <PlusIcon />
-                  </IconButton>
-                </th>
-              </tr>
-            </thead>
-          </DndContext>
-          {rows.length > 0 && (
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleRowDragEnd}>
-              <tbody>
-                <SortableContext items={rows.map((r) => r.id)} strategy={verticalListSortingStrategy}>
-                  {rows.map((row) => (
-                    <Fragment key={row.id}>
-                      <TableRow
-                        row={row}
-                        fields={fields}
-                        editing={editingRowId === row.id}
-                        reorderable={rowsReorderable}
-                        onEditRow={onEditRow}
-                        onDeleteRow={onDeleteRow}
+        {/* Both DndContexts must wrap <table> itself, not just <thead>/<tbody> -
+            DndContext renders a hidden a11y <div> alongside its children, and a
+            <div> can't be a direct child of <table> (invalid HTML, hydration error). */}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleFieldDragEnd}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleRowDragEnd}>
+            <table className="w-full min-w-full border-collapse text-left text-sm">
+              <thead>
+                <tr className="divide-x divide-line border-b border-line">
+                  <SortableContext items={fields.map((f) => f.id)} strategy={horizontalListSortingStrategy}>
+                    {fields.map((field, i) => (
+                      <FieldHeader
+                        key={field.id}
+                        field={field}
+                        i={i}
+                        onEditField={onEditField}
+                        onDeleteField={onDeleteField}
                       />
-                      {editingRowId === row.id && (
-                        <tr className="border-b border-line">
-                          <td colSpan={fields.length + 1} className="bg-paper/40 p-4">
-                            <RowForm
-                              mode="edit"
-                              fields={fields}
-                              row={row}
-                              onSaved={onRowSaved}
-                              onCancel={onCancelEditRow}
-                            />
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
-                  ))}
-                </SortableContext>
-              </tbody>
-            </DndContext>
-          )}
-        </table>
+                    ))}
+                  </SortableContext>
+                  <th className="w-10 px-2 py-3 text-right">
+                    <IconButton onClick={onAddField} aria-label="Add field">
+                      <PlusIcon />
+                    </IconButton>
+                  </th>
+                </tr>
+              </thead>
+              {rows.length > 0 && (
+                <tbody>
+                  <SortableContext items={rows.map((r) => r.id)} strategy={verticalListSortingStrategy}>
+                    {rows.map((row) => (
+                      <Fragment key={row.id}>
+                        <TableRow
+                          row={row}
+                          fields={fields}
+                          editing={editingRowId === row.id}
+                          reorderable={rowsReorderable}
+                          onEditRow={onEditRow}
+                          onDeleteRow={onDeleteRow}
+                        />
+                        {editingRowId === row.id && (
+                          <tr className="border-b border-line">
+                            <td colSpan={fields.length + 1} className="bg-paper/40 p-4">
+                              <RowForm
+                                mode="edit"
+                                fields={fields}
+                                row={row}
+                                onSaved={onRowSaved}
+                                onCancel={onCancelEditRow}
+                              />
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    ))}
+                  </SortableContext>
+                </tbody>
+              )}
+            </table>
+          </DndContext>
+        </DndContext>
       </Card>
 
       {rows.length === 0 &&

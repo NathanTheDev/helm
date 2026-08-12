@@ -180,6 +180,11 @@ export default function Home() {
   const [calendarConnected, setCalendarConnected] = useState(false);
   const [layout, setLayout] = useState<HomeLayout>({ order: DEFAULT_WIDGET_ORDER, hidden: [] });
   const [editing, setEditing] = useState(false);
+  const [habitsLoaded, setHabitsLoaded] = useState(false);
+  const [projectsLoaded, setProjectsLoaded] = useState(false);
+  const [notesLoaded, setNotesLoaded] = useState(false);
+  const [worklogLoaded, setWorklogLoaded] = useState(false);
+  const initialLoading = !habitsLoaded || !projectsLoaded || !notesLoaded || !worklogLoaded;
 
   useEffect(() => {
     setLayout(readHomeLayout());
@@ -212,7 +217,8 @@ export default function Home() {
       .catch(() => {
         setDueToday(0);
         setHabitsGlance([]);
-      });
+      })
+      .finally(() => setHabitsLoaded(true));
 
     getProjects()
       .then(async (projects) => {
@@ -236,7 +242,8 @@ export default function Home() {
       .catch(() => {
         setOpenTasks(0);
         setProjectsGlance([]);
-      });
+      })
+      .finally(() => setProjectsLoaded(true));
 
     getNotes()
       .then((notes) => {
@@ -264,7 +271,8 @@ export default function Home() {
 
         setNotesGlance(items);
       })
-      .catch(() => setNotesGlance([]));
+      .catch(() => setNotesGlance([]))
+      .finally(() => setNotesLoaded(true));
 
     getCalendarEvents()
       .then((result) => {
@@ -278,10 +286,12 @@ export default function Home() {
 
     getWorklog()
       .then((worklog) => setTodaySeconds(worklog.todaySeconds))
-      .catch(() => setTodaySeconds(0));
+      .catch(() => setTodaySeconds(0))
+      .finally(() => setWorklogLoaded(true));
   }, []);
 
   const actionHint = (label: string, fallback: string) => {
+    if (initialLoading && ["Habits", "Projects", "At a glance", "Worklog"].includes(label)) return "—";
     if (label === "Habits") return `${dueToday} due today`;
     if (label === "Projects") return `${openTasks} open`;
     if (label === "At a glance") return `${glance.length} ${glance.length === 1 ? "update" : "updates"}`;
@@ -349,10 +359,21 @@ export default function Home() {
       <section id="at-a-glance" className="scroll-mt-24">
         <div className="flex items-baseline justify-between">
           <h2 className="font-display text-xl text-ink">At a glance</h2>
-          <span className="font-mono text-xs text-ink-muted">{glance.length} items</span>
+          <span className="font-mono text-xs text-ink-muted">
+            {initialLoading ? "—" : `${glance.length} items`}
+          </span>
         </div>
 
-        {glance.length === 0 ? (
+        {initialLoading ? (
+          <div className={cardClasses({ padding: "none", className: "mt-4 divide-y divide-line overflow-hidden" })}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-5 py-4">
+                <div className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-line" />
+                <div className="h-3.5 w-56 animate-pulse rounded bg-paper" />
+              </div>
+            ))}
+          </div>
+        ) : glance.length === 0 ? (
           <EmptyState
             className="mt-4"
             title="All caught up."

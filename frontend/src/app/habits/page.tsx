@@ -7,6 +7,7 @@ import { HabitCard } from "@/components/HabitCard";
 import { NewHabitForm } from "@/components/NewHabitForm";
 import { HabitsChart } from "@/components/HabitsChart";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { HabitsGridSkeleton } from "./loading";
 
 export default function HabitsPage() {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -40,7 +41,9 @@ export default function HabitsPage() {
         <HabitsChart />
       </div>
 
-      {loading ? null : failed ? (
+      {loading ? (
+        <HabitsGridSkeleton />
+      ) : failed ? (
         <EmptyState
           tone="error"
           className="mt-10"

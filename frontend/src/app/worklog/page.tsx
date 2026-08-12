@@ -5,10 +5,21 @@ import { useEffect, useState } from "react";
 import { getWorklog, formatDuration, type Worklog } from "@/lib/tasksApi";
 import { Card, cardClasses } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { WorklogSkeleton } from "./loading";
 
 const dayLetters = ["S", "M", "T", "W", "T", "F", "S"];
 function dayLetter(date: string): string {
   return dayLetters[new Date(`${date}T00:00:00`).getDay()];
+}
+
+function formatDayLabel(date: string): string {
+  const target = new Date(`${date}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((today.getTime() - target.getTime()) / 86_400_000);
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  return target.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 }
 
 export default function WorklogPage() {
@@ -39,7 +50,9 @@ export default function WorklogPage() {
         Time you&rsquo;ve tracked across every project.
       </p>
 
-      {loading ? null : failed ? (
+      {loading ? (
+        <WorklogSkeleton />
+      ) : failed ? (
         <EmptyState
           tone="error"
           className="mt-10"
@@ -108,7 +121,7 @@ function WorklogContent({ worklog }: { worklog: Worklog }) {
                 className="flex items-center justify-between px-5 py-3"
               >
                 <span className="font-mono text-xs text-ink-muted">
-                  {day.date}
+                  {formatDayLabel(day.date)}
                 </span>
                 <span className="text-sm text-ink">
                   {formatDuration(day.seconds)}

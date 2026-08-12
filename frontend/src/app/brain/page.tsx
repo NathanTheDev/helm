@@ -72,7 +72,9 @@ export default function BrainPage() {
 
       <div ref={scrollRef} className="mt-6 flex-1 space-y-4 overflow-y-auto">
         {messages.length === 0 ? (
-          <p className="text-sm text-ink-muted/60">No messages yet — ask something to get started.</p>
+          <div className="flex h-full min-h-[200px] items-center justify-center">
+            <p className="text-sm text-ink-muted/60">No messages yet — ask something to get started.</p>
+          </div>
         ) : (
           messages.map((message, i) => (
             <div
@@ -92,9 +94,12 @@ export default function BrainPage() {
           ))
         )}
         {sending && <p className="text-sm text-ink-muted">Thinking…</p>}
+        {error && (
+          <p className="max-w-[85%] rounded-card border border-clay/40 bg-clay-soft/20 px-4 py-3 text-sm text-clay">
+            {error}
+          </p>
+        )}
       </div>
-
-      {error && <p className="mt-3 text-sm text-clay">{error}</p>}
 
       <div className="sticky bottom-0 mt-4 flex items-end gap-2 border-t border-line bg-paper py-4">
         <Textarea

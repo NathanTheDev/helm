@@ -28,6 +28,7 @@ import { RowForm } from "@/components/RowForm";
 import { Button, IconButton } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { TrashIcon } from "@/components/ui/Icon";
+import TableDetailLoading from "./loading";
 
 // Position for the moved item sitting at `index` in `list` (which includes it).
 function positionForIndex(list: { position: number }[], index: number): number {
@@ -170,7 +171,7 @@ export default function TableDetailPage() {
     setFilterValue(null);
   };
 
-  if (loading) return null;
+  if (loading) return <TableDetailLoading />;
 
   if (failed || !table) {
     return (

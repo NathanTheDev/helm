@@ -12,6 +12,7 @@ import {
 import { RememberProject } from "@/components/RememberProject";
 import { Board } from "@/components/Board";
 import { EmptyState } from "@/components/ui/EmptyState";
+import BoardLoading from "./loading";
 
 export default function BoardPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -49,7 +50,7 @@ export default function BoardPage() {
     };
   }, [projectId]);
 
-  if (loading) return null;
+  if (loading) return <BoardLoading />;
 
   if (failed || !project) {
     return (

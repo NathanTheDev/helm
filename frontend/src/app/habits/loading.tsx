@@ -1,5 +1,15 @@
 import { cardClasses } from "@/components/ui/Card";
 
+export function HabitsGridSkeleton() {
+  return (
+    <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className={cardClasses({ padding: "none", className: "h-[168px] animate-pulse" })} />
+      ))}
+    </div>
+  );
+}
+
 export default function Loading() {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-20">
@@ -12,10 +22,8 @@ export default function Loading() {
         A quiet place to keep the streaks you care about.
       </p>
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className={cardClasses({ padding: "none", className: "h-[168px] animate-pulse" })} />
-        ))}
+      <div className="mt-10">
+        <HabitsGridSkeleton />
       </div>
     </main>
   );

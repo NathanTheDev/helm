@@ -103,7 +103,7 @@ export function ProjectCard({
       <div className="flex items-start justify-between gap-2">
         <Link
           href={`/projects/${project.id}`}
-          className="group flex min-w-0 items-center gap-2"
+          className="group flex min-w-0 flex-1 items-center gap-2"
         >
           <span
             className="h-2.5 w-2.5 shrink-0 rounded-full"

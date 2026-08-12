@@ -7,6 +7,7 @@ import { cardClasses } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/ui/Button";
+import { NotesListSkeleton } from "./loading";
 
 function formatUpdated(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -44,7 +45,9 @@ export default function NotesPage() {
         Write alone, publish when you want company.
       </p>
 
-      {loading ? null : failed ? (
+      {loading ? (
+        <NotesListSkeleton />
+      ) : failed ? (
         <EmptyState
           tone="error"
           className="mt-10"

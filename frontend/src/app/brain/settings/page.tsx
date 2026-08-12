@@ -14,6 +14,7 @@ import {
   testObsidianConnection,
   type ObsidianConnectionStatus,
 } from "@/lib/obsidianApi";
+import { VaultConnectionSkeleton } from "./loading";
 
 const STATUS_LABEL: Record<ObsidianConnectionStatus["status"], string> = {
   CONNECTED: "Connected",
@@ -98,7 +99,9 @@ export default function BrainSettingsPage() {
         MCP server, reached over a private tunnel (e.g. Tailscale) you control.
       </p>
 
-      {loading ? null : loadFailed ? (
+      {loading ? (
+        <VaultConnectionSkeleton />
+      ) : loadFailed ? (
         <EmptyState
           tone="error"
           className="mt-10"

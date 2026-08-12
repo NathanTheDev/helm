@@ -7,6 +7,7 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { NewProjectForm } from "@/components/NewProjectForm";
 import { JumpBackIn } from "@/components/JumpBackIn";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ProjectsGridSkeleton } from "./loading";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -70,7 +71,9 @@ export default function ProjectsPage() {
         Each project is a board. Pick one to plan and track your work.
       </p>
 
-      {loading ? null : failed ? (
+      {loading ? (
+        <ProjectsGridSkeleton />
+      ) : failed ? (
         <EmptyState
           tone="error"
           className="mt-10"
@@ -87,7 +90,7 @@ export default function ProjectsPage() {
             </p>
           )}
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {ordered.map((project) => (
               <ProjectCard
                 key={project.id}
