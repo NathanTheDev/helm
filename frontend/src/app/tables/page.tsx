@@ -37,7 +37,7 @@ export default function TablesPage() {
       <div className="mt-6 flex items-baseline justify-between">
         <h1 className="font-display text-3xl text-ink sm:text-4xl">Tables</h1>
         <span className="font-mono text-xs text-ink-muted">
-          {loading || failed ? "—" : `${tables.length} tables`}
+          {loading || failed ? "—" : `${tables.length} ${tables.length === 1 ? "table" : "tables"}`}
         </span>
       </div>
       <p className="mt-2 max-w-md text-ink-muted">

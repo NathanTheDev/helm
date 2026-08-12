@@ -102,13 +102,13 @@ export function ThemeSwitcher() {
               <OptionCard key={t.id} active={theme === t.id} onClick={() => setTheme(t.id)}>
                 <Swatch color={t.swatch} />
                 <span className="flex-1 text-xs font-medium text-ink">{t.label}</span>
-                {theme === t.id && <span className="text-clay" aria-hidden>✓</span>}
+                {theme === t.id && <span className="text-clay-text" aria-hidden>✓</span>}
               </OptionCard>
             ))}
             <OptionCard active={theme === "custom"} onClick={() => setTheme("custom")}>
               <Swatch color={customTheme.paper} secondary={customTheme.clay} />
               <span className="flex-1 text-xs font-medium text-ink">Custom</span>
-              {theme === "custom" && <span className="text-clay" aria-hidden>✓</span>}
+              {theme === "custom" && <span className="text-clay-text" aria-hidden>✓</span>}
             </OptionCard>
           </div>
 

@@ -10,6 +10,7 @@ import { MarkdownPreview } from "@/components/notes/MarkdownPreview";
 import { CollabEditor } from "@/components/notes/CollabEditor";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { NoteSkeleton } from "./loading";
 
 const AUTOSAVE_DELAY_MS = 800;
 const NOTES_WS_URL = process.env.NEXT_PUBLIC_NOTES_WS_URL ?? "ws://localhost:1234";
@@ -27,6 +28,7 @@ export default function NotePage() {
   const [mode, setMode] = useState<"edit" | "preview" | "split">("edit");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
   const [closing, setClosing] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -70,12 +72,12 @@ export default function NotePage() {
 
   async function handlePublish() {
     setPublishing(true);
+    setPublishError(null);
     try {
       const updated = await publishNote(id);
       setNote(updated);
     } catch {
-      // Save-state indicator already shows failures for title edits; a
-      // failed publish just leaves the button clickable to retry.
+      setPublishError("Couldn't publish this note. Try again.");
     } finally {
       setPublishing(false);
     }
@@ -120,7 +122,13 @@ export default function NotePage() {
     );
   }
 
-  if (!note) return null;
+  if (!note) {
+    return (
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-20">
+        <NoteSkeleton />
+      </main>
+    );
+  }
 
   const isOwner = note.userId === user?.uid;
 
@@ -139,69 +147,72 @@ export default function NotePage() {
         mode === "split" ? "max-w-5xl" : "max-w-3xl"
       }`}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <Link href="/" className="text-sm text-ink-muted transition-colors hover:text-ink">
           ← Back home
         </Link>
-        <div className="flex items-center gap-4">
-          {isOwner && <span className="font-mono text-xs text-ink-muted">{saveLabel}</span>}
+        <div className="flex flex-col items-end gap-1.5">
+          <div className="flex items-center gap-4">
+            {isOwner && <span className="font-mono text-xs text-ink-muted">{saveLabel}</span>}
 
-          {isOwner && note.published && (
-            <button
-              type="button"
-              onClick={handleCopyLink}
-              className="text-sm text-ink-muted transition-colors hover:text-ink"
-            >
-              {copied ? "Copied!" : "Copy link"}
-            </button>
-          )}
+            {isOwner && note.published && (
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="text-sm text-ink-muted transition-colors hover:text-ink"
+              >
+                {copied ? "Copied!" : "Copy link"}
+              </button>
+            )}
 
-          {isOwner && note.published && (
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={closing}
-              className="text-sm text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
-            >
-              {closing ? "Closing…" : "Close link"}
-            </button>
-          )}
+            {isOwner && note.published && (
+              <button
+                type="button"
+                onClick={handleClose}
+                disabled={closing}
+                className="text-sm text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
+              >
+                {closing ? "Closing…" : "Close link"}
+              </button>
+            )}
 
-          {isOwner && !note.published && (
-            <Button size="md" onClick={handlePublish} disabled={publishing}>
-              {publishing ? "Publishing…" : "Publish"}
-            </Button>
-          )}
+            {isOwner && !note.published && (
+              <Button size="md" onClick={handlePublish} disabled={publishing}>
+                {publishing ? "Publishing…" : "Publish"}
+              </Button>
+            )}
 
-          <div className="flex overflow-hidden rounded-full border border-line text-sm">
-            <button
-              type="button"
-              onClick={() => setMode("edit")}
-              className={`px-3 py-1 transition-colors ${
-                mode === "edit" ? "bg-clay text-surface" : "text-ink-muted hover:text-ink"
-              }`}
-            >
-              Write
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("preview")}
-              className={`px-3 py-1 transition-colors ${
-                mode === "preview" ? "bg-clay text-surface" : "text-ink-muted hover:text-ink"
-              }`}
-            >
-              Preview
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("split")}
-              className={`hidden px-3 py-1 transition-colors sm:block ${
-                mode === "split" ? "bg-clay text-surface" : "text-ink-muted hover:text-ink"
-              }`}
-            >
-              Split
-            </button>
+            <div className="flex overflow-hidden rounded-full border border-line text-sm">
+              <button
+                type="button"
+                onClick={() => setMode("edit")}
+                className={`px-3 py-1 transition-colors ${
+                  mode === "edit" ? "bg-clay text-surface" : "text-ink-muted hover:text-ink"
+                }`}
+              >
+                Write
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("preview")}
+                className={`px-3 py-1 transition-colors ${
+                  mode === "preview" ? "bg-clay text-surface" : "text-ink-muted hover:text-ink"
+                }`}
+              >
+                Preview
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("split")}
+                className={`hidden px-3 py-1 transition-colors sm:block ${
+                  mode === "split" ? "bg-clay text-surface" : "text-ink-muted hover:text-ink"
+                }`}
+              >
+                Split
+              </button>
+            </div>
           </div>
+          {publishError && <p className="text-xs text-clay-text">{publishError}</p>}
         </div>
       </div>
 

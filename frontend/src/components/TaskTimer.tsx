@@ -59,7 +59,7 @@ export function TaskTimer({ task }: { task: Task }) {
         </Button>
         <span className="font-mono text-[11px] text-ink-muted">
           {running && (
-            <span className="mr-1 text-clay">{formatClock(liveElapsed)}</span>
+            <span className="mr-1 text-clay-text">{formatClock(liveElapsed)}</span>
           )}
           {formatDuration(total)} tracked
         </span>

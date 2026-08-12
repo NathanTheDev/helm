@@ -63,7 +63,7 @@ export default function BrainPage() {
       {vaultConnected === false && (
         <p className="mt-4 text-sm text-ink-muted">
           Your Obsidian vault isn&apos;t connected —{" "}
-          <Link href="/brain/settings" className="text-clay underline">
+          <Link href="/brain/settings" className="text-clay-text underline">
             connect it in settings
           </Link>{" "}
           for vault-backed answers. helm data (tasks, habits) still works.

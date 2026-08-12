@@ -10,7 +10,7 @@ export function MarkdownPreview({ content }: { content: string }) {
         [&_h2]:font-display [&_h2]:text-xl [&_h2]:mt-5 [&_h2]:mb-2
         [&_h3]:font-display [&_h3]:text-lg [&_h3]:mt-4 [&_h3]:mb-1
         [&_p]:my-3 [&_p]:leading-relaxed
-        [&_a]:text-clay [&_a]:underline
+        [&_a]:text-clay-text [&_a]:underline
         [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5
         [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5
         [&_li]:my-1

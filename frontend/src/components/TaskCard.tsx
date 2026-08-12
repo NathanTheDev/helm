@@ -152,7 +152,7 @@ export function TaskCard({ task }: { task: Task }) {
             </span>
           )}
           {task.dueDate && (
-            <span className={overdue ? "text-clay" : ""}>
+            <span className={overdue ? "text-clay-text" : ""}>
               ◷ {formatDueDate(task.dueDate)}
             </span>
           )}

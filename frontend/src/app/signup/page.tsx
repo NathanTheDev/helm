@@ -48,7 +48,7 @@ export default function SignupPage() {
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 pb-24">
       <h1 className="font-display text-3xl italic text-ink">Create account</h1>
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-3">
-        {error && <p className="text-sm text-clay">{error}</p>}
+        {error && <p className="text-sm text-clay-text">{error}</p>}
         <Input
           type="email"
           placeholder="Email"

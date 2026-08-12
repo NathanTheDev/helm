@@ -5,7 +5,7 @@ export type BadgeSize = "xs" | "sm";
 
 const TONE_CLASSES: Record<BadgeTone, string> = {
   neutral: "bg-paper text-ink-muted",
-  accent: "bg-clay-soft text-clay",
+  accent: "bg-clay-soft text-clay-text",
   success: "bg-sage-soft text-sage",
 };
 

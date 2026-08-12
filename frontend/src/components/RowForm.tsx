@@ -98,7 +98,7 @@ export function RowForm(props: RowFormProps) {
         ))}
       </div>
 
-      {error && <p className="mt-2 text-xs text-clay">{error}</p>}
+      {error && <p className="mt-2 text-xs text-clay-text">{error}</p>}
 
       <div className="mt-1 flex justify-end gap-2">
         <Button

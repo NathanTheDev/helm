@@ -271,7 +271,7 @@ export function FieldForm(props: FieldFormProps) {
         {renderFieldControl({ type, config: { options } }, defaultValue, setDefaultValue)}
       </div>
 
-      {error && <p className="text-xs text-clay">{error}</p>}
+      {error && <p className="text-xs text-clay-text">{error}</p>}
 
       <div className="mt-1 flex justify-end gap-2">
         <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={pending}>

@@ -7,6 +7,11 @@
   --ink: #26221c;
   --ink-muted: #726b60;
   --clay: #c9633e;
+  /* Darker than --clay: plain clay-on-paper text (error copy, inline links)
+     is ~3.4:1, below WCAG AA's 4.5:1 for normal text. --clay stays as-is
+     for buttons/icons/borders where that ratio doesn't apply; --clay-text
+     is for anything rendered as actual paragraph/link text. */
+  --clay-text: #a04b2c;
   --clay-soft: #f0ded0;
   --line: #e3dbc9;
   --sage: #6f7d5c;
@@ -26,6 +31,7 @@
   --ink: #23281d;
   --ink-muted: #69735c;
   --clay: #b5502e;
+  --clay-text: #9c472a;
   --clay-soft: #ecd9c8;
   --line: #dbe3cc;
   --sage: #4f7a44;
@@ -45,6 +51,7 @@
   --ink: #f3efe6;
   --ink-muted: #a89f8f;
   --clay: #e0855a;
+  --clay-text: var(--clay);
   --clay-soft: #3a2a20;
   --line: #3a352c;
   --sage: #93a97e;
@@ -65,6 +72,11 @@
 [data-theme="custom"] {
   --ink-muted: color-mix(in srgb, var(--ink) 60%, var(--paper));
   --line: color-mix(in srgb, var(--ink) 15%, var(--paper));
+  /* Mixed toward --ink (not left equal to --clay) so error/link text stays
+     legible regardless of how light the user's chosen accent color is -
+     same reasoning as the fixed --clay-text darkened shade in the built-in
+     themes below. */
+  --clay-text: color-mix(in srgb, var(--clay) 55%, var(--ink));
   --clay-soft: color-mix(in srgb, var(--clay) 20%, var(--paper));
   --sage-soft: color-mix(in srgb, var(--sage) 20%, var(--paper));
 }
@@ -75,6 +87,7 @@
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-clay: var(--clay);
+  --color-clay-text: var(--clay-text);
   --color-clay-soft: var(--clay-soft);
   --color-line: var(--line);
   --color-sage: var(--sage);

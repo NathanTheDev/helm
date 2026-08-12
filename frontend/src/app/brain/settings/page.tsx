@@ -118,7 +118,7 @@ export default function BrainSettingsPage() {
                   <span className="font-mono text-xs text-ink-muted">{status.baseUrl}</span>
                 </div>
                 {status.status === "ERROR" && status.lastError && (
-                  <p className="mt-2 text-sm text-clay">{status.lastError}</p>
+                  <p className="mt-2 text-sm text-clay-text">{status.lastError}</p>
                 )}
                 {status.lastCheckedAt && (
                   <p className="mt-1 text-xs text-ink-muted">
@@ -157,7 +157,7 @@ export default function BrainSettingsPage() {
               />
             </label>
 
-            {formError && <p className="text-sm text-clay">{formError}</p>}
+            {formError && <p className="text-sm text-clay-text">{formError}</p>}
 
             <Button type="submit" disabled={saving} className="self-start">
               {saving ? "Saving…" : "Save & test connection"}
