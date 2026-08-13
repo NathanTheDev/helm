@@ -56,7 +56,9 @@ export default function NewNotePage() {
         className="mt-10 w-full bg-transparent font-display text-3xl italic text-ink placeholder:text-ink-muted/60 focus:outline-none sm:text-4xl"
       />
 
-      <MarkdownEditor initialContent={content} onChange={setContent} />
+      <div className="mt-6 flex flex-1 flex-col">
+        <MarkdownEditor initialContent={content} onChange={setContent} />
+      </div>
     </main>
   );
 }

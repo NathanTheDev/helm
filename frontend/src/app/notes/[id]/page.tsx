@@ -231,7 +231,9 @@ export default function NotePage() {
       {note.published && note.externalDocId ? (
         <CollabEditor wsUrl={NOTES_WS_URL} room={note.externalDocId} user={user} mode={mode} />
       ) : (
-        <div className={mode === "split" ? "grid flex-1 grid-cols-1 gap-6 md:grid-cols-2" : "flex flex-1 flex-col"}>
+        <div
+          className={`mt-6 ${mode === "split" ? "grid flex-1 grid-cols-1 gap-6 md:grid-cols-2" : "flex flex-1 flex-col"}`}
+        >
           {mode !== "preview" && (
             <MarkdownEditor
               initialContent={content}
@@ -241,7 +243,7 @@ export default function NotePage() {
               }}
             />
           )}
-          {mode !== "edit" && <MarkdownPreview content={content} />}
+          {mode !== "edit" && <MarkdownPreview content={content} framed={mode === "split"} />}
         </div>
       )}
     </main>

@@ -2,9 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { EditorView, basicSetup } from "codemirror";
-import { markdown } from "@codemirror/lang-markdown";
-import { syntaxHighlighting } from "@codemirror/language";
-import { markdownHighlightStyle } from "./markdownHighlightStyle";
+import { liveMarkdownExtensions } from "./liveMarkdown";
 
 // Plain (non-collaborative) markdown editor. Uncontrolled by design: it
 // mounts once with `initialContent` and reports changes via `onChange` -
@@ -31,18 +29,9 @@ export function MarkdownEditor({
       doc: initialContent,
       extensions: [
         basicSetup,
-        markdown(),
-        syntaxHighlighting(markdownHighlightStyle),
-        EditorView.lineWrapping,
+        ...liveMarkdownExtensions,
         EditorView.updateListener.of((update) => {
           if (update.docChanged) onChangeRef.current(update.state.doc.toString());
-        }),
-        EditorView.theme({
-          "&": { height: "100%", backgroundColor: "transparent" },
-          "&.cm-focused": { outline: "none" },
-          ".cm-scroller": { overflow: "auto", fontFamily: "var(--font-plex-mono), monospace", fontSize: "0.9rem" },
-          ".cm-content": { padding: "0", caretColor: "var(--clay)" },
-          ".cm-gutters": { display: "none" },
         }),
       ],
       parent: containerRef.current,
@@ -56,7 +45,7 @@ export function MarkdownEditor({
   return (
     <div
       ref={containerRef}
-      className="mt-6 min-h-[16rem] flex-1 rounded-card border border-line bg-surface p-4"
+      className="min-h-[16rem] flex-1 rounded-card border border-line bg-surface p-4"
     />
   );
 }

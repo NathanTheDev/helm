@@ -30,8 +30,13 @@ export function CollabEditor({
       </div>
 
       <div className={mode === "split" ? "grid flex-1 grid-cols-1 gap-6 md:grid-cols-2" : "flex flex-1 flex-col"}>
-        {mode !== "preview" && <div ref={editorContainerRef} className="min-h-[16rem] flex-1" />}
-        {mode !== "edit" && <MarkdownPreview content={content} />}
+        {mode !== "preview" && (
+          <div
+            ref={editorContainerRef}
+            className="min-h-[16rem] flex-1 rounded-card border border-line bg-surface p-4"
+          />
+        )}
+        {mode !== "edit" && <MarkdownPreview content={content} framed={mode === "split"} />}
       </div>
     </div>
   );

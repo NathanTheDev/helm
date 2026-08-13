@@ -10,11 +10,15 @@
   /* Darker than --clay: plain clay-on-paper text (error copy, inline links)
      is ~3.4:1, below WCAG AA's 4.5:1 for normal text. --clay stays as-is
      for buttons/icons/borders where that ratio doesn't apply; --clay-text
-     is for anything rendered as actual paragraph/link text. */
+     is for anything rendered as actual paragraph/link text. Same pattern
+     for --sage-text below (Badge's "success" tone). */
   --clay-text: #a04b2c;
   --clay-soft: #f0ded0;
   --line: #e3dbc9;
   --sage: #6f7d5c;
+  /* Darker than --sage, same reasoning as --clay-text: plain sage-on-soft
+     text (the Badge "success" tone) is ~3.5:1, below WCAG AA's 4.5:1. */
+  --sage-text: #59644a;
   --sage-soft: #e2e6d8;
   --slate: #4f6d7a;
   --slate-soft: #dbe4e6;
@@ -35,6 +39,7 @@
   --clay-soft: #ecd9c8;
   --line: #dbe3cc;
   --sage: #4f7a44;
+  --sage-text: #43683a;
   --sage-soft: #d8e6cd;
   --slate: #46707a;
   --slate-soft: #d3e2e0;
@@ -55,6 +60,7 @@
   --clay-soft: #3a2a20;
   --line: #3a352c;
   --sage: #93a97e;
+  --sage-text: var(--sage);
   --sage-soft: #2a3123;
   --slate: #85aabb;
   --slate-soft: #22323a;
@@ -78,6 +84,7 @@
      themes below. */
   --clay-text: color-mix(in srgb, var(--clay) 55%, var(--ink));
   --clay-soft: color-mix(in srgb, var(--clay) 20%, var(--paper));
+  --sage-text: color-mix(in srgb, var(--sage) 55%, var(--ink));
   --sage-soft: color-mix(in srgb, var(--sage) 20%, var(--paper));
 }
 
@@ -91,6 +98,7 @@
   --color-clay-soft: var(--clay-soft);
   --color-line: var(--line);
   --color-sage: var(--sage);
+  --color-sage-text: var(--sage-text);
   --color-sage-soft: var(--sage-soft);
   --color-slate: var(--slate);
   --color-slate-soft: var(--slate-soft);
