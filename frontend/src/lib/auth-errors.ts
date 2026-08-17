@@ -44,6 +44,32 @@ export function isDismissedPopupError(error: unknown): boolean {
   );
 }
 
+// Firebase surfaces "user not found" for a reset-code request on an unknown
+// email - collapsed the same way sign-in errors are, so a failed request
+// can't be used to enumerate which emails have accounts.
+export function mapForgotPasswordError(error: unknown): string {
+  if (error instanceof FirebaseError && error.code === "auth/invalid-email") {
+    return "Enter a valid email address.";
+  }
+  return "Something went wrong. Please try again.";
+}
+
+export function mapResetPasswordError(error: unknown): string {
+  if (error instanceof FirebaseError) {
+    switch (error.code) {
+      case "auth/expired-action-code":
+        return "This reset link has expired. Request a new one.";
+      case "auth/invalid-action-code":
+        return "This reset link is invalid or has already been used.";
+      case "auth/user-disabled":
+        return "This account has been disabled.";
+      case "auth/weak-password":
+        return "Password should be at least 6 characters.";
+    }
+  }
+  return "Something went wrong. Please try again.";
+}
+
 // Signing up with email/password, then signing in with Google/GitHub using
 // the same email, should "behave intentionally" rather than silently create
 // a duplicate account. Firebase's default "one account per email address"

@@ -57,6 +57,9 @@ export default function LoginPage() {
         <Button type="submit" size="lg" className="mt-1" disabled={submitting}>
           {submitting ? "Signing in…" : "Sign in"}
         </Button>
+        <Link href="/forgot-password" className="text-center text-sm text-ink-muted hover:text-ink">
+          Forgot password?
+        </Link>
         <SocialSignInButtons onError={setError} />
         <p className="mt-2 text-sm text-ink-muted">
           Don&rsquo;t have an account?{" "}

@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useRequireAuth } from "@/lib/auth-context";
 
-const PUBLIC_PATHS = new Set(["/login", "/signup"]);
+const PUBLIC_PATHS = new Set(["/login", "/signup", "/forgot-password", "/reset-password"]);
 
 // Sign-in is required app-wide except for the auth pages themselves (which
 // would otherwise redirect-loop against themselves).
