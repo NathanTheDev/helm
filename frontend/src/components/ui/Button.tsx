@@ -50,11 +50,12 @@ export function LinkButton({ variant, size, className = "", href, children, ...p
   );
 }
 
-export type IconButtonTone = "muted" | "danger";
+export type IconButtonTone = "muted" | "danger" | "active";
 
 const ICON_TONE_CLASSES: Record<IconButtonTone, string> = {
   muted: "text-ink-muted hover:text-ink",
   danger: "text-ink-muted hover:text-clay",
+  active: "rounded-control bg-clay-soft text-clay",
 };
 
 type IconButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { tone?: IconButtonTone };

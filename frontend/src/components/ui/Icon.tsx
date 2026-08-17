@@ -136,6 +136,56 @@ export function EyeOffIcon({ className = "h-3.5 w-3.5" }: IconProps) {
   );
 }
 
+export function CloseIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <path d="M6 6l12 12M18 6 6 18" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function ExpandIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <path
+        d="M8 4H4v4M16 4h4v4M8 20H4v-4M16 20h4v-4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function CollapseIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <path
+        d="M4 8h4V4M20 8h-4V4M4 16h4v4M20 16h-4v4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function DockLeftIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <rect x="4" y="5" width="16" height="14" rx="1.5" />
+      <rect x="4" y="5" width="6" height="14" rx="1.5" fill="currentColor" stroke="none" opacity="0.35" />
+    </svg>
+  );
+}
+
+export function DockRightIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <rect x="4" y="5" width="16" height="14" rx="1.5" />
+      <rect x="14" y="5" width="6" height="14" rx="1.5" fill="currentColor" stroke="none" opacity="0.35" />
+    </svg>
+  );
+}
+
 export function SlidersIcon({ className = "h-3.5 w-3.5" }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>

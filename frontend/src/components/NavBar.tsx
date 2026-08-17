@@ -7,9 +7,11 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { MenuIcon } from "@/components/ui/Icon";
+import { MenuIcon, PencilIcon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
+import { IconButton } from "@/components/ui/Button";
 import { DEFAULT_SPACE_NAME, readSpaceName, writeSpaceName } from "@/lib/space-name";
+import { useNoteWindow } from "@/lib/note-window-context";
 
 const links = [
   { href: "/notes", label: "Notes" },
@@ -22,6 +24,7 @@ const links = [
 export default function NavBar() {
   const pathname = usePathname();
   const { user, loading } = useAuth();
+  const { openNewNote } = useNoteWindow();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -90,6 +93,16 @@ export default function NavBar() {
               </Link>
             );
           })}
+          {user && (
+            <IconButton
+              aria-label="New note"
+              title="New note"
+              onClick={openNewNote}
+              className="rounded-control border border-line p-1.5 hover:border-clay"
+            >
+              <PencilIcon />
+            </IconButton>
+          )}
           <ThemeSwitcher />
           {!loading &&
             (user ? (
@@ -143,6 +156,16 @@ export default function NavBar() {
         </nav>
 
         <div className="flex items-center gap-2 sm:hidden">
+          {user && (
+            <IconButton
+              aria-label="New note"
+              title="New note"
+              onClick={openNewNote}
+              className="rounded-control border border-line p-1.5 hover:border-clay"
+            >
+              <PencilIcon />
+            </IconButton>
+          )}
           <ThemeSwitcher />
           <div ref={menuRef} className="relative">
             <button

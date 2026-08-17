@@ -4,6 +4,8 @@ import NavBar from "@/components/NavBar";
 import AuthGate from "@/components/auth/AuthGate";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-context";
+import { NoteWindowProvider } from "@/lib/note-window-context";
+import { NoteWindow } from "@/components/notes/NoteWindow";
 import { THEME_STORAGE_KEY, CUSTOM_THEME_STORAGE_KEY, CUSTOM_THEME_VARS } from "@/lib/theme-constants";
 import { FONT_STORAGE_KEY, DEFAULT_FONT } from "@/lib/font-constants";
 import "./globals.css";
@@ -67,10 +69,13 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <ThemeProvider>
           <AuthProvider>
-            <NavBar />
-            <AuthGate>
-              <div className="flex-1 flex flex-col">{children}</div>
-            </AuthGate>
+            <NoteWindowProvider>
+              <NavBar />
+              <AuthGate>
+                <div className="flex-1 flex flex-col">{children}</div>
+              </AuthGate>
+              <NoteWindow />
+            </NoteWindowProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
