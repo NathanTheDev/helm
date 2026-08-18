@@ -38,7 +38,6 @@ function readPeers(awareness: Awareness): PresenceUser[] {
 // ("codemirror") must match backend/src/services/notesCollab.ts's seed.
 export function useYjsEditor(wsUrl: string, room: string, user: User | null) {
   const editorContainerRef = useRef<HTMLDivElement>(null);
-  const [content, setContent] = useState("");
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
   const [synced, setSynced] = useState(false);
   const [peers, setPeers] = useState<PresenceUser[]>([]);
@@ -99,10 +98,6 @@ export function useYjsEditor(wsUrl: string, room: string, user: User | null) {
       window.addEventListener("online", goOnline);
       if (!navigator.onLine) queueMicrotask(goOffline);
 
-      const observer = () => setContent(ytext.toString());
-      ytext.observe(observer);
-      queueMicrotask(observer);
-
       const awarenessListener = () => setPeers(readPeers(awareness));
       awareness.on("change", awarenessListener);
       queueMicrotask(awarenessListener);
@@ -116,7 +111,6 @@ export function useYjsEditor(wsUrl: string, room: string, user: User | null) {
       cleanup = () => {
         window.removeEventListener("offline", goOffline);
         window.removeEventListener("online", goOnline);
-        ytext.unobserve(observer);
         awareness.off("change", awarenessListener);
         view.destroy();
         provider.destroy();
@@ -130,5 +124,5 @@ export function useYjsEditor(wsUrl: string, room: string, user: User | null) {
     };
   }, [wsUrl, room, user]);
 
-  return { editorContainerRef, content, status, synced, peers };
+  return { editorContainerRef, status, synced, peers };
 }

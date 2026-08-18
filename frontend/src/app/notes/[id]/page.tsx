@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from "react";
 import { getNote, updateNote, publishNote, closeNote, type Note } from "@/lib/notesApi";
 import { useAuth } from "@/lib/auth-context";
 import { MarkdownEditor } from "@/components/notes/MarkdownEditor";
-import { MarkdownPreview } from "@/components/notes/MarkdownPreview";
 import { CollabEditor } from "@/components/notes/CollabEditor";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -25,7 +24,6 @@ export default function NotePage() {
   const [failed, setFailed] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [mode, setMode] = useState<"edit" | "preview" | "split">("edit");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
@@ -142,11 +140,7 @@ export default function NotePage() {
           : "";
 
   return (
-    <main
-      className={`mx-auto flex w-full flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-20 ${
-        mode === "split" ? "max-w-5xl" : "max-w-3xl"
-      }`}
-    >
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-20">
       <div className="flex items-start justify-between">
         <Link href="/" className="text-sm text-ink-muted transition-colors hover:text-ink">
           ← Back home
@@ -181,36 +175,6 @@ export default function NotePage() {
                 {publishing ? "Publishing…" : "Publish"}
               </Button>
             )}
-
-            <div className="flex overflow-hidden rounded-full border border-line text-sm">
-              <button
-                type="button"
-                onClick={() => setMode("edit")}
-                className={`px-3 py-1 transition-colors ${
-                  mode === "edit" ? "bg-clay text-surface" : "text-ink-muted hover:text-ink"
-                }`}
-              >
-                Write
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("preview")}
-                className={`px-3 py-1 transition-colors ${
-                  mode === "preview" ? "bg-clay text-surface" : "text-ink-muted hover:text-ink"
-                }`}
-              >
-                Preview
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("split")}
-                className={`hidden px-3 py-1 transition-colors sm:block ${
-                  mode === "split" ? "bg-clay text-surface" : "text-ink-muted hover:text-ink"
-                }`}
-              >
-                Split
-              </button>
-            </div>
           </div>
           {publishError && <p className="text-xs text-clay-text">{publishError}</p>}
         </div>
@@ -229,21 +193,16 @@ export default function NotePage() {
       />
 
       {note.published && note.externalDocId ? (
-        <CollabEditor wsUrl={NOTES_WS_URL} room={note.externalDocId} user={user} mode={mode} />
+        <CollabEditor wsUrl={NOTES_WS_URL} room={note.externalDocId} user={user} />
       ) : (
-        <div
-          className={`mt-6 ${mode === "split" ? "grid flex-1 grid-cols-1 gap-6 md:grid-cols-2" : "flex flex-1 flex-col"}`}
-        >
-          {mode !== "preview" && (
-            <MarkdownEditor
-              initialContent={content}
-              onChange={(next) => {
-                setContent(next);
-                scheduleSave({ content: next });
-              }}
-            />
-          )}
-          {mode !== "edit" && <MarkdownPreview content={content} framed={mode === "split"} />}
+        <div className="mt-6 flex flex-1 flex-col">
+          <MarkdownEditor
+            initialContent={content}
+            onChange={(next) => {
+              setContent(next);
+              scheduleSave({ content: next });
+            }}
+          />
         </div>
       )}
     </main>
