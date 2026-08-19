@@ -7,6 +7,8 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { mapSignUpError } from "@/lib/auth-errors";
 import { SocialSignInButtons } from "@/components/auth/SocialSignInButtons";
+import { AuthShell } from "@/components/auth/AuthShell";
+import { PasswordField } from "@/components/auth/PasswordField";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
@@ -45,9 +47,10 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 pb-24">
-      <h1 className="font-display text-3xl italic text-ink">Create account</h1>
-      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-3">
+    <AuthShell>
+      <h1 className="font-display text-2xl italic text-ink">Create account</h1>
+      <p className="mt-1.5 text-sm text-ink-muted">Get your space set up.</p>
+      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-3">
         {error && <p className="text-sm text-clay-text">{error}</p>}
         <Input
           type="email"
@@ -56,28 +59,20 @@ export default function SignupPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           size="md"
-          tone="surface"
+          tone="paper"
         />
-        <Input
-          type="password"
-          placeholder="Password"
-          autoComplete="new-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          size="md"
-          tone="surface"
-        />
+        <PasswordField value={password} onChange={setPassword} autoComplete="new-password" />
         <Button type="submit" size="lg" className="mt-1" disabled={submitting}>
           {submitting ? "Creating account…" : "Sign up"}
         </Button>
         <SocialSignInButtons onError={setError} />
-        <p className="mt-2 text-sm text-ink-muted">
-          Already have an account?{" "}
-          <Link href="/login" className="text-ink hover:underline">
-            Sign in
-          </Link>
-        </p>
       </form>
-    </main>
+      <p className="mt-6 border-t border-line pt-5 text-center text-sm text-ink-muted">
+        Already have an account?{" "}
+        <Link href="/login" className="text-ink hover:underline">
+          Sign in
+        </Link>
+      </p>
+    </AuthShell>
   );
 }

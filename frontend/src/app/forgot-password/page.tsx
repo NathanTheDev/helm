@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { mapForgotPasswordError } from "@/lib/auth-errors";
+import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
@@ -45,26 +46,29 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 pb-24">
-        <h1 className="font-display text-3xl italic text-ink">Check your email</h1>
-        <p className="mt-4 text-sm text-ink-muted">
+      <AuthShell>
+        <h1 className="font-display text-2xl italic text-ink">Check your email</h1>
+        <p className="mt-3 text-sm text-ink-muted">
           If an account exists for <span className="text-ink">{email}</span>, we&rsquo;ve sent a
           link to reset your password.
         </p>
-        <Link href="/login" className="mt-6 text-sm text-ink hover:underline">
-          Back to sign in
+        <Link
+          href="/login"
+          className="mt-6 inline-block text-sm text-ink-muted hover:text-ink"
+        >
+          ← Back to sign in
         </Link>
-      </main>
+      </AuthShell>
     );
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 pb-24">
-      <h1 className="font-display text-3xl italic text-ink">Reset password</h1>
-      <p className="mt-2 text-sm text-ink-muted">
+    <AuthShell>
+      <h1 className="font-display text-2xl italic text-ink">Reset password</h1>
+      <p className="mt-1.5 text-sm text-ink-muted">
         Enter your email and we&rsquo;ll send you a link to get back in.
       </p>
-      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-3">
+      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-3">
         {error && <p className="text-sm text-clay-text">{error}</p>}
         <Input
           type="email"
@@ -73,15 +77,17 @@ export default function ForgotPasswordPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           size="md"
-          tone="surface"
+          tone="paper"
         />
         <Button type="submit" size="lg" className="mt-1" disabled={submitting}>
           {submitting ? "Sending…" : "Send reset link"}
         </Button>
-        <Link href="/login" className="mt-2 text-center text-sm text-ink-muted hover:text-ink">
+      </form>
+      <p className="mt-6 border-t border-line pt-5 text-center text-sm text-ink-muted">
+        <Link href="/login" className="text-ink hover:underline">
           Back to sign in
         </Link>
-      </form>
-    </main>
+      </p>
+    </AuthShell>
   );
 }

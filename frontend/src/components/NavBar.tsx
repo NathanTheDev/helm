@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/Input";
 import { IconButton } from "@/components/ui/Button";
 import { DEFAULT_SPACE_NAME, readSpaceName, writeSpaceName } from "@/lib/space-name";
 import { useNoteWindow } from "@/lib/note-window-context";
+import { AUTH_PATHS } from "@/lib/auth-paths";
 
 const links = [
   { href: "/notes", label: "Notes" },
@@ -66,6 +67,11 @@ export default function NavBar() {
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, [accountOpen]);
+
+  // Auth pages render their own minimal branded header (AuthShell) instead
+  // of the full nav - showing Notes/Habits/etc. links, or a "Sign in" link
+  // while already on the sign-in page, is just clutter there.
+  if (AUTH_PATHS.has(pathname)) return null;
 
   return (
     <header className="sticky top-0 z-10 border-b border-line/70 bg-paper/85 backdrop-blur">

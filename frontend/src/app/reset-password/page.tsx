@@ -6,8 +6,9 @@ import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { confirmPasswordReset, verifyPasswordResetCode } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { mapResetPasswordError } from "@/lib/auth-errors";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { AuthShell } from "@/components/auth/AuthShell";
+import { PasswordField } from "@/components/auth/PasswordField";
+import { Button, LinkButton } from "@/components/ui/Button";
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -74,63 +75,57 @@ function ResetPasswordForm() {
 
   if (state.status === "invalid") {
     return (
-      <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 pb-24">
-        <h1 className="font-display text-3xl italic text-ink">Link expired</h1>
-        <p className="mt-4 text-sm text-ink-muted">{state.message}</p>
-        <Link href="/forgot-password" className="mt-6 text-sm text-ink hover:underline">
-          Request a new link
+      <AuthShell>
+        <h1 className="font-display text-2xl italic text-ink">Link expired</h1>
+        <p className="mt-3 text-sm text-ink-muted">{state.message}</p>
+        <Link
+          href="/forgot-password"
+          className="mt-6 inline-block text-sm text-ink-muted hover:text-ink"
+        >
+          ← Request a new link
         </Link>
-      </main>
+      </AuthShell>
     );
   }
 
   if (state.status === "done") {
     return (
-      <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 pb-24">
-        <h1 className="font-display text-3xl italic text-ink">Password reset</h1>
-        <p className="mt-4 text-sm text-ink-muted">
+      <AuthShell>
+        <h1 className="font-display text-2xl italic text-ink">Password reset</h1>
+        <p className="mt-3 text-sm text-ink-muted">
           Your password has been updated. You can now sign in with your new password.
         </p>
-        <Link
-          href="/login"
-          className="mt-6 inline-block rounded-pill bg-clay px-4 py-2.5 text-center text-sm font-medium text-surface hover:bg-clay/90"
-        >
+        <LinkButton href="/login" variant="primary" size="lg" className="mt-6 block w-full text-center">
           Sign in
-        </Link>
-      </main>
+        </LinkButton>
+      </AuthShell>
     );
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 pb-24">
-      <h1 className="font-display text-3xl italic text-ink">Set a new password</h1>
-      <p className="mt-2 text-sm text-ink-muted">
+    <AuthShell>
+      <h1 className="font-display text-2xl italic text-ink">Set a new password</h1>
+      <p className="mt-1.5 text-sm text-ink-muted">
         Resetting the password for <span className="text-ink">{state.email}</span>.
       </p>
-      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-3">
+      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-3">
         {error && <p className="text-sm text-clay-text">{error}</p>}
-        <Input
-          type="password"
+        <PasswordField
+          value={password}
+          onChange={setPassword}
           placeholder="New password"
           autoComplete="new-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          size="md"
-          tone="surface"
         />
-        <Input
-          type="password"
+        <PasswordField
+          value={confirmPassword}
+          onChange={setConfirmPassword}
           placeholder="Confirm new password"
           autoComplete="new-password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          size="md"
-          tone="surface"
         />
         <Button type="submit" size="lg" className="mt-1" disabled={submitting}>
           {submitting ? "Resetting…" : "Reset password"}
         </Button>
       </form>
-    </main>
+    </AuthShell>
   );
 }

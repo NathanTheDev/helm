@@ -124,6 +124,19 @@ export function CheckIcon({ className = "h-3.5 w-3.5" }: IconProps) {
   );
 }
 
+export function EyeIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <path
+        d="M2.5 12c1.4-3 5-6.7 9.5-6.7s8.1 3.7 9.5 6.7c-1.4 3-5 6.7-9.5 6.7s-8.1-3.7-9.5-6.7Z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="12" r="2.7" />
+    </svg>
+  );
+}
+
 export function EyeOffIcon({ className = "h-3.5 w-3.5" }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
