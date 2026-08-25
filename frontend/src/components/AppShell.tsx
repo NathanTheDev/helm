@@ -55,7 +55,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       cancelAnimationFrame(raf);
       mql.removeEventListener("change", onChange);
     };
-  }, [sidebarPanelRef]);
+    // `pathname` is a dependency (not just used for the early return below)
+    // because the Panel/Sidebar tree only exists on non-auth routes: when
+    // this effect first runs while on an auth route, `sidebarPanelRef` is
+    // still null and the sync is a no-op. Re-running it on every pathname
+    // change re-syncs once the Group/Panel actually mounts (e.g. right
+    // after a login/signup redirect into the app on a mobile viewport).
+  }, [sidebarPanelRef, pathname]);
 
   // Auth pages (login/signup/forgot-password/reset-password) render their
   // own minimal branded header (AuthShell) instead - no sidebar, no top bar.
