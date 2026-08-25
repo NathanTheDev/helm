@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Input, type InputSize, type InputTone } from "@/components/ui/Input";
 import { EyeIcon, EyeOffIcon } from "@/components/ui/Icon";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 type PasswordFieldProps = {
   value: string;
@@ -24,7 +25,7 @@ export function PasswordField({
   const [visible, setVisible] = useState(false);
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <Input
         type={visible ? "text" : "password"}
         placeholder={placeholder}
@@ -33,17 +34,19 @@ export function PasswordField({
         onChange={(e) => onChange(e.target.value)}
         size={size}
         tone={tone}
-        className="pr-10"
+        className="w-full pr-10"
       />
       {value.length > 0 && (
-        <button
-          type="button"
-          onClick={() => setVisible((v) => !v)}
-          aria-label={visible ? "Hide password" : "Show password"}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted transition-colors hover:text-ink"
-        >
-          {visible ? <EyeOffIcon /> : <EyeIcon />}
-        </button>
+        <Tooltip content={visible ? "Hide password" : "Show password"}>
+          <button
+            type="button"
+            onClick={() => setVisible((v) => !v)}
+            aria-label={visible ? "Hide password" : "Show password"}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted transition-colors hover:text-ink"
+          >
+            {visible ? <EyeOffIcon /> : <EyeIcon />}
+          </button>
+        </Tooltip>
       )}
     </div>
   );
