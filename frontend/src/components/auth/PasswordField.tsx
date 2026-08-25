@@ -35,14 +35,16 @@ export function PasswordField({
         tone={tone}
         className="pr-10"
       />
-      <button
-        type="button"
-        onClick={() => setVisible((v) => !v)}
-        aria-label={visible ? "Hide password" : "Show password"}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted transition-colors hover:text-ink"
-      >
-        {visible ? <EyeOffIcon /> : <EyeIcon />}
-      </button>
+      {value.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setVisible((v) => !v)}
+          aria-label={visible ? "Hide password" : "Show password"}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted transition-colors hover:text-ink"
+        >
+          {visible ? <EyeOffIcon /> : <EyeIcon />}
+        </button>
+      )}
     </div>
   );
 }
