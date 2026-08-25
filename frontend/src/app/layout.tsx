@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
-import NavBar from "@/components/NavBar";
-import AuthGate from "@/components/auth/AuthGate";
+import { AppShell } from "@/components/AppShell";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { NoteWindowProvider } from "@/lib/note-window-context";
@@ -65,15 +64,12 @@ export default function RootLayout({
       className={`${fraunces.variable} ${inter.variable} ${plexMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-paper text-ink font-sans">
+      <body className="h-full flex flex-col bg-paper text-ink font-sans">
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <ThemeProvider>
           <AuthProvider>
             <NoteWindowProvider>
-              <NavBar />
-              <AuthGate>
-                <div className="flex-1 flex flex-col">{children}</div>
-              </AuthGate>
+              <AppShell>{children}</AppShell>
               <NoteWindow />
             </NoteWindowProvider>
           </AuthProvider>
