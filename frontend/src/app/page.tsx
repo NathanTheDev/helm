@@ -31,6 +31,7 @@ import { IconButton } from "@/components/ui/Button";
 import { EyeOffIcon, GripIcon, SlidersIcon } from "@/components/ui/Icon";
 import { CalendarWidget } from "@/components/CalendarWidget";
 import { HabitsChart } from "@/components/HabitsChart";
+import { AiChatWidget } from "@/components/AiChatWidget";
 
 const actions = [
   {
@@ -331,6 +332,7 @@ export default function Home() {
   );
 
   const widgetContent: Record<HomeWidgetId, ReactNode> = {
+    aiChat: <AiChatWidget />,
     actions: (
       <section className="flex flex-col overflow-hidden rounded-[28px] border border-line bg-surface shadow-sm sm:flex-row">
         {actions.map((action, i) => (
@@ -438,9 +440,9 @@ export default function Home() {
         </SortableContext>
       </DndContext>
 
-      {editing && layout.hidden.length > 0 && (
+      {layout.hidden.length > 0 && (
         <div className="fade-up mt-8 flex flex-wrap items-center gap-2 border-t border-line pt-6">
-          <span className="text-xs text-ink-muted">Hidden:</span>
+          <span className="text-xs text-ink-muted">Add widgets:</span>
           {layout.hidden.map((id) => (
             <button
               key={id}
