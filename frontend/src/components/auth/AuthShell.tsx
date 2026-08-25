@@ -1,13 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { DEFAULT_SPACE_NAME, readSpaceName } from "@/lib/space-name";
 
 // Auth pages (login/signup/forgot-password/reset-password) don't render the
 // app's NavBar - see AUTH_PATHS in lib/auth-paths.ts - so this is their
-// entire header/chrome: just a wordmark back to "/", no nav links, no
-// account menu, nothing else to click.
+// entire header/chrome: just a static wordmark, no nav links, no account
+// menu, nothing clickable at all.
 export function AuthShell({ children }: { children: ReactNode }) {
   // Same SSR-safe pattern as NavBar: start at the default so server and
   // first client render match, then swap to the stored name post-mount.
@@ -36,13 +35,10 @@ export function AuthShell({ children }: { children: ReactNode }) {
         }}
       />
 
-      <Link
-        href="/"
-        className="relative mb-8 flex items-center gap-2 font-display text-lg tracking-tight text-ink"
-      >
+      <div className="relative mb-8 flex items-center gap-2 font-display text-lg tracking-tight text-ink">
         <span className="inline-block h-2 w-2 rounded-full bg-clay" aria-hidden />
         {spaceName}
-      </Link>
+      </div>
 
       <div className="relative w-full max-w-sm rounded-card border border-line bg-surface p-8 shadow-lg sm:p-9">
         {children}
