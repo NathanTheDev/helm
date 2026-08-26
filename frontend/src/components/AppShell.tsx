@@ -108,19 +108,12 @@ function expandUntilApplied(getPanel: () => PanelImperativeHandle | null, cancel
 // persistence, keyed off the `id` below.
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  // onlySaveAfterUserInteractions: true is load-bearing, not a nicety - the
-  // rail-collapse and mobile-hide paths both call the Panel's imperative
-  // resize() API, and without this, that gets persisted as the "default"
-  // layout the same as a real drag would. The library then appears to
-  // mishandle rehydrating a persisted layout that small on the *next*
-  // mount (resets to `defaultSize` instead of respecting it - reproduced
-  // via Playwright: reload once from a clean layout while collapsed
-  // correctly lands at the rail width, but a second consecutive reload
-  // snaps back to the full expanded width despite the collapsed flag and
-  // the persisted layout itself both still being correct). Scoping
-  // persistence to genuine drag/keyboard resizes on the Separator sidesteps
-  // that edge case entirely, since the "true" persisted default then never
-  // reflects anything but a normal, non-collapsed width.
+  // onlySaveAfterUserInteractions: true - without it, the rail-collapse and
+  // mobile-hide paths' imperative resize() calls get persisted as the
+  // "default" layout the same as a real drag would, which is never what's
+  // wanted (that width is a transient UI state, not a preference). See the
+  // `mounted`-keyed remount below for the *other*, more fundamental
+  // defaultLayout bug this also happens to route around for the rail case.
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: "helm-sidebar-layout",
     storage: ssrSafeLocalStorage,
@@ -128,6 +121,35 @@ export function AppShell({ children }: { children: ReactNode }) {
   });
   const sidebarPanelRef = usePanelRef();
   const [railCollapsed, setRailCollapsed] = useState(false);
+
+  // Traced into react-resizable-panels 4.12.3's own source
+  // (dist/react-resizable-panels.js): `Group` wraps the `defaultLayout`
+  // prop in a "latest ref" helper (`Re()`) before putting it in a layout
+  // effect's dependency array. That ref's *identity* never changes across
+  // renders (only its contents get mutated, one render late, via Re's own
+  // effect), so the layout effect that actually applies `defaultLayout` to
+  // the Panels' sizes only ever fires once, on the very first mount - it
+  // never re-fires when a *later* render supplies a different
+  // `defaultLayout` value. `useDefaultLayout` reads localStorage through
+  // `useSyncExternalStore`, which - by design, matching the library's own
+  // documented "slight layout shift" warning for percentage-based
+  // defaultLayout - serves `null` during SSR and only resolves to the real
+  // persisted value in a post-hydration correction render. That correction
+  // arrives exactly one render too late for Group's broken effect to ever
+  // see it: confirmed by direct instrumentation that `defaultLayout` is
+  // already the correct persisted value by the time `<Group>` receives it
+  // as a prop, yet the Panel renders at `defaultSize` regardless - for any
+  // persisted width, not just the small rail-collapse one, including a
+  // completely ordinary manual drag-resize.
+  // Forcing a full remount via `key` once hydration has settled sidesteps
+  // the bug entirely: `Re()`'s ref is *correctly* seeded on a fresh mount
+  // (via plain `useRef(initialValue)`, no effect delay), so a Group that
+  // mounts for the first time already holding the settled, correct
+  // `defaultLayout` applies it right away. This fires exactly once per
+  // hard page load (`mounted` only ever goes false -> true), not on every
+  // client-side navigation between routes.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Panel's `className` only reaches a *nested* div, not the flex-item div
   // that actually reserves width in the Group - a plain `hidden sm:block`
@@ -163,7 +185,14 @@ export function AppShell({ children }: { children: ReactNode }) {
     // still null and the sync is a no-op. Re-running it on every pathname
     // change re-syncs once the Group/Panel actually mounts (e.g. right
     // after a login/signup redirect into the app on a mobile viewport).
-  }, [sidebarPanelRef, pathname]);
+    // `mounted` is a dependency because the Group below remounts (via its
+    // `key`) once `mounted` flips true (see that comment) - without this,
+    // the retry loop above keeps running against the *old*, by-then-
+    // unmounted Panel instance (throwing once react-resizable-panels
+    // notices its parent Group is gone) instead of the fresh one, and
+    // never re-applies the collapsed/hidden width to the panel that
+    // actually replaced it.
+  }, [sidebarPanelRef, pathname, mounted]);
 
   function toggleRailCollapsed() {
     const panel = sidebarPanelRef.current;
@@ -184,6 +213,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-0 flex-1 flex-col">
       <MobileNavBar />
       <Group
+        key={mounted ? "hydrated" : "ssr"}
         orientation="horizontal"
         defaultLayout={defaultLayout}
         onLayoutChanged={onLayoutChanged}
