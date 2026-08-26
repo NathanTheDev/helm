@@ -8,6 +8,7 @@ import { AUTH_PATHS } from "@/lib/auth-paths";
 import AuthGate from "@/components/auth/AuthGate";
 import { Sidebar } from "@/components/Sidebar";
 import { MobileNavBar } from "@/components/MobileNavBar";
+import { TabBar } from "@/components/TabBar";
 
 // useDefaultLayout falls back to the bare `localStorage` global whenever
 // `storage` is omitted/undefined - that throws a ReferenceError during SSR
@@ -141,6 +142,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Separator>
         <Panel id="content" className="flex min-h-0 flex-col" suppressHydrationWarning>
           <AuthGate>
+            <TabBar />
             <div className="flex flex-1 flex-col overflow-y-auto">{children}</div>
           </AuthGate>
         </Panel>

@@ -12,6 +12,7 @@ import {
 import { RememberProject } from "@/components/RememberProject";
 import { Board } from "@/components/Board";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useTabTitle } from "@/lib/tabs-context";
 import BoardLoading from "./loading";
 
 export default function BoardPage() {
@@ -21,6 +22,8 @@ export default function BoardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [failed, setFailed] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  useTabTitle(project?.name);
 
   useEffect(() => {
     let cancelled = false;

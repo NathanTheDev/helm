@@ -28,6 +28,7 @@ import { RowForm } from "@/components/RowForm";
 import { Button, IconButton } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { TrashIcon } from "@/components/ui/Icon";
+import { useTabTitle } from "@/lib/tabs-context";
 import TableDetailLoading from "./loading";
 
 // Position for the moved item sitting at `index` in `list` (which includes it).
@@ -48,6 +49,8 @@ export default function TableDetailPage() {
   const [rows, setRows] = useState<CustomRow[]>([]);
   const [failed, setFailed] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  useTabTitle(table?.name);
   const [addingField, setAddingField] = useState(false);
   const [editingField, setEditingField] = useState<CustomField | null>(null);
   const [editingRowId, setEditingRowId] = useState<string | null>(null);

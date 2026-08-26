@@ -3,8 +3,7 @@ import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-context";
-import { NoteWindowProvider } from "@/lib/note-window-context";
-import { NoteWindow } from "@/components/notes/NoteWindow";
+import { TabsProvider } from "@/lib/tabs-context";
 import { THEME_STORAGE_KEY, CUSTOM_THEME_STORAGE_KEY, CUSTOM_THEME_VARS } from "@/lib/theme-constants";
 import { FONT_STORAGE_KEY, DEFAULT_FONT } from "@/lib/font-constants";
 import "./globals.css";
@@ -68,10 +67,9 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <ThemeProvider>
           <AuthProvider>
-            <NoteWindowProvider>
+            <TabsProvider>
               <AppShell>{children}</AppShell>
-              <NoteWindow />
-            </NoteWindowProvider>
+            </TabsProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

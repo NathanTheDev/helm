@@ -8,7 +8,6 @@ import { ChevronsLeftIcon, PencilIcon, NotesIcon, HabitsIcon, ProjectsIcon, Tabl
 import { IconButton } from "@/components/ui/Button";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { readSpaceName } from "@/lib/space-name";
-import { useNoteWindow } from "@/lib/note-window-context";
 import { useEffect, useState } from "react";
 
 const links = [
@@ -31,7 +30,6 @@ type SidebarProps = {
 export function Sidebar({ collapsed, onToggleCollapsed }: SidebarProps) {
   const pathname = usePathname();
   const { user, loading } = useAuth();
-  const { openNewNote } = useNoteWindow();
   const [spaceName, setSpaceName] = useState("");
 
   useEffect(() => {
@@ -53,13 +51,13 @@ export function Sidebar({ collapsed, onToggleCollapsed }: SidebarProps) {
           <div className="flex shrink-0 items-center gap-0.5">
             {user && (
               <Tooltip content="New note" side="right">
-                <IconButton
+                <Link
+                  href="/notes/new"
                   aria-label="New note"
-                  onClick={openNewNote}
-                  className="rounded-control p-1.5 hover:bg-clay-soft/40"
+                  className="flex items-center justify-center rounded-control p-1.5 text-ink-muted transition-[color,transform] hover:bg-clay-soft/40 hover:text-ink active:scale-90"
                 >
                   <PencilIcon />
-                </IconButton>
+                </Link>
               </Tooltip>
             )}
             <Tooltip content="Collapse sidebar" side="right">

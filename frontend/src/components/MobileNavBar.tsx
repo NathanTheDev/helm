@@ -9,9 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { MenuIcon, PencilIcon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
-import { IconButton } from "@/components/ui/Button";
 import { DEFAULT_SPACE_NAME, readSpaceName, writeSpaceName } from "@/lib/space-name";
-import { useNoteWindow } from "@/lib/note-window-context";
 
 const links = [
   { href: "/notes", label: "Notes" },
@@ -27,7 +25,6 @@ const links = [
 export function MobileNavBar() {
   const pathname = usePathname();
   const { user, loading } = useAuth();
-  const { openNewNote } = useNoteWindow();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [spaceName, setSpaceName] = useState(DEFAULT_SPACE_NAME);
@@ -65,14 +62,14 @@ export function MobileNavBar() {
 
         <div className="flex items-center gap-2">
           {user && (
-            <IconButton
+            <Link
+              href="/notes/new"
               aria-label="New note"
               title="New note"
-              onClick={openNewNote}
-              className="rounded-control border border-line p-1.5 hover:border-clay"
+              className="flex items-center justify-center rounded-control border border-line p-1.5 text-ink-muted transition-colors hover:border-clay hover:text-ink"
             >
               <PencilIcon />
-            </IconButton>
+            </Link>
           )}
           <ThemeSwitcher />
           <div ref={menuRef} className="relative">

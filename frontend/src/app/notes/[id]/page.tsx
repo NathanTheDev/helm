@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getNote, updateNote, publishNote, closeNote, type Note } from "@/lib/notesApi";
 import { useAuth } from "@/lib/auth-context";
+import { useTabTitle } from "@/lib/tabs-context";
 import { MarkdownEditor } from "@/components/notes/MarkdownEditor";
 import { CollabEditor } from "@/components/notes/CollabEditor";
 import { Button } from "@/components/ui/Button";
@@ -32,6 +33,8 @@ export default function NotePage() {
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latest = useRef({ title: "", content: "" });
+
+  useTabTitle(note ? title.trim() || "Untitled" : null);
 
   useEffect(() => {
     getNote(id)
