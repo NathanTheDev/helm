@@ -1,14 +1,13 @@
-export type HomeWidgetId = "aiChat" | "actions" | "chart" | "glance" | "calendar";
+export type HomeWidgetId = "aiChat" | "chart" | "glance" | "calendar";
 
 export const HOME_WIDGET_LABELS: Record<HomeWidgetId, string> = {
   aiChat: "AI chat",
-  actions: "Quick actions",
   chart: "Habit completion",
   glance: "At a glance",
   calendar: "Coming up",
 };
 
-export const DEFAULT_WIDGET_ORDER: HomeWidgetId[] = ["aiChat", "actions", "chart", "glance", "calendar"];
+export const DEFAULT_WIDGET_ORDER: HomeWidgetId[] = ["aiChat", "chart", "glance", "calendar"];
 
 export interface HomeLayout {
   order: HomeWidgetId[];
@@ -20,7 +19,7 @@ const HOME_LAYOUT_STORAGE_KEY = "helm-home-layout";
 // opt-in widget added via the "Add widgets" row, not a default-on section.
 const DEFAULT_LAYOUT: HomeLayout = {
   order: DEFAULT_WIDGET_ORDER,
-  hidden: ["actions", "chart", "glance", "calendar"],
+  hidden: ["chart", "glance", "calendar"],
 };
 
 function isWidgetId(value: unknown): value is HomeWidgetId {

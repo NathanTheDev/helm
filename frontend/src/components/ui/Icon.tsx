@@ -300,11 +300,13 @@ export function BrainIcon({ className = "h-3.5 w-3.5" }: IconProps) {
 export function GearIcon({ className = "h-3.5 w-3.5" }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
-      <circle cx="12" cy="12" r="2.9" />
-      <path
-        d="M12 3.8v2.5M12 17.7v2.5M20.2 12h-2.5M6.3 12H3.8M17.6 6.4l-1.8 1.8M8.2 15.8l-1.8 1.8M17.6 17.6l-1.8-1.8M8.2 8.2 6.4 6.4"
-        strokeLinecap="round"
-      />
+      <circle cx="12" cy="12" r="6.2" />
+      <circle cx="12" cy="12" r="2.1" />
+      <g fill="currentColor" stroke="none">
+        {[0, 60, 120, 180, 240, 300].map((angle) => (
+          <rect key={angle} x="10.8" y="3.6" width="2.4" height="2.8" rx="0.4" transform={`rotate(${angle} 12 12)`} />
+        ))}
+      </g>
     </svg>
   );
 }

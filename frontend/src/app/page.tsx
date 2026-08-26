@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -16,7 +15,7 @@ import {
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { getHabits } from "@/lib/api";
-import { getProjects, getProjectTasks, getWorklog, formatDuration } from "@/lib/tasksApi";
+import { getProjects, getProjectTasks, getWorklog } from "@/lib/tasksApi";
 import { getNotes } from "@/lib/notesApi";
 import { getCalendarEvents, type CalendarEvent } from "@/lib/calendarApi";
 import { useAuth } from "@/lib/auth-context";
@@ -37,83 +36,6 @@ import { Tooltip } from "@/components/ui/Tooltip";
 import { CalendarWidget } from "@/components/CalendarWidget";
 import { HabitsChart } from "@/components/HabitsChart";
 import { AiChatWidget } from "@/components/AiChatWidget";
-
-const actions = [
-  {
-    href: "/notes/new",
-    label: "New note",
-    hint: "Start writing",
-    tint: "bg-clay-soft text-clay",
-    icon: (
-      <path
-        d="M4 20.5v-3.6L15.4 5.5a1.5 1.5 0 0 1 2.1 0l1.6 1.6a1.5 1.5 0 0 1 0 2.1L7.7 20.6H4Z"
-        strokeLinejoin="round"
-      />
-    ),
-  },
-  {
-    href: "/habits",
-    label: "Habits",
-    hint: "—",
-    tint: "bg-sage-soft text-sage",
-    icon: (
-      <>
-        <path d="M9 12.5l2 2 4.5-5" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="12" cy="12" r="8.5" />
-      </>
-    ),
-  },
-  {
-    href: "/projects",
-    label: "Projects",
-    hint: "—",
-    tint: "bg-slate-soft text-slate",
-    icon: (
-      <>
-        <rect x="4" y="5" width="4.5" height="14" rx="1.2" />
-        <rect x="9.75" y="5" width="4.5" height="9" rx="1.2" />
-        <rect x="15.5" y="5" width="4.5" height="11" rx="1.2" />
-      </>
-    ),
-  },
-  {
-    href: "/tables",
-    label: "Tables",
-    hint: "Your own data",
-    tint: "bg-plum-soft text-plum",
-    icon: (
-      <>
-        <rect x="3.5" y="4.5" width="17" height="15" rx="1.5" />
-        <path d="M3.5 9.5h17M9 9.5V19.5" strokeLinecap="round" />
-      </>
-    ),
-  },
-  {
-    href: "#at-a-glance",
-    label: "At a glance",
-    hint: "Jump to updates",
-    tint: "bg-ochre-soft text-ochre",
-    icon: (
-      <path
-        d="M12 4.5c-2.5 0-4.3 1.9-4.3 4.5v2.6c0 .7-.3 1.4-.8 1.9l-.9.9c-.5.5-.2 1.4.5 1.4h11c.7 0 1-.9.5-1.4l-.9-.9a2.7 2.7 0 0 1-.8-1.9V9c0-2.6-1.8-4.5-4.3-4.5Z M10.2 19a1.9 1.9 0 0 0 3.6 0"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    ),
-  },
-  {
-    href: "/worklog",
-    label: "Worklog",
-    hint: "—",
-    tint: "bg-sage-soft text-sage",
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="8.5" />
-        <path d="M12 7.5V12l3 2" strokeLinecap="round" strokeLinejoin="round" />
-      </>
-    ),
-  },
-];
 
 type GlanceItem = { kind: string; text: string; time: string };
 
@@ -176,9 +98,6 @@ function WidgetShell({
 
 export default function Home() {
   const { user } = useAuth();
-  const [dueToday, setDueToday] = useState(0);
-  const [openTasks, setOpenTasks] = useState(0);
-  const [todaySeconds, setTodaySeconds] = useState(0);
   const [habitsGlance, setHabitsGlance] = useState<GlanceItem[]>([]);
   const [projectsGlance, setProjectsGlance] = useState<GlanceItem[]>([]);
   const [notesGlance, setNotesGlance] = useState<GlanceItem[]>([]);
@@ -229,7 +148,6 @@ export default function Home() {
     getHabits()
       .then((habits) => {
         const due = habits.filter((h) => h.isDueToday && !h.isCompletedToday);
-        setDueToday(due.length);
 
         const items: GlanceItem[] = [];
         if (due.length > 0) {
@@ -249,10 +167,7 @@ export default function Home() {
         }
         setHabitsGlance(items);
       })
-      .catch(() => {
-        setDueToday(0);
-        setHabitsGlance([]);
-      })
+      .catch(() => setHabitsGlance([]))
       .finally(() => setHabitsLoaded(true));
 
     getProjects()
@@ -260,7 +175,6 @@ export default function Home() {
         const active = projects.filter((p) => !p.archived);
         const taskLists = await Promise.all(active.map((p) => getProjectTasks(p.id)));
         const open = taskLists.flat().filter((t) => t.status !== "DONE").length;
-        setOpenTasks(open);
 
         const items: GlanceItem[] = [];
         if (open > 0) {
@@ -274,10 +188,7 @@ export default function Home() {
         }
         setProjectsGlance(items);
       })
-      .catch(() => {
-        setOpenTasks(0);
-        setProjectsGlance([]);
-      })
+      .catch(() => setProjectsGlance([]))
       .finally(() => setProjectsLoaded(true));
 
     getNotes()
@@ -320,19 +231,9 @@ export default function Home() {
       });
 
     getWorklog()
-      .then((worklog) => setTodaySeconds(worklog.todaySeconds))
-      .catch(() => setTodaySeconds(0))
-      .finally(() => setWorklogLoaded(true));
+      .then(() => setWorklogLoaded(true))
+      .catch(() => setWorklogLoaded(true));
   }, []);
-
-  const actionHint = (label: string, fallback: string) => {
-    if (initialLoading && ["Habits", "Projects", "At a glance", "Worklog"].includes(label)) return "—";
-    if (label === "Habits") return `${dueToday} due today`;
-    if (label === "Projects") return `${openTasks} open`;
-    if (label === "At a glance") return `${glance.length} ${glance.length === 1 ? "update" : "updates"}`;
-    if (label === "Worklog") return `${formatDuration(todaySeconds)} today`;
-    return fallback;
-  };
 
   const glance = [...habitsGlance, ...projectsGlance, ...notesGlance];
 
@@ -367,29 +268,6 @@ export default function Home() {
 
   const widgetContent: Record<HomeWidgetId, ReactNode> = {
     aiChat: <AiChatWidget />,
-    actions: (
-      <section className="flex flex-col overflow-hidden rounded-[28px] border border-line bg-surface shadow-sm sm:flex-row">
-        {actions.map((action, i) => (
-          <Link
-            key={action.label}
-            href={action.href}
-            className={`group flex flex-1 items-center gap-3 px-6 py-5 transition-colors hover:bg-clay-soft/40 ${
-              i > 0 ? "border-t border-line sm:border-t-0 sm:border-l" : ""
-            }`}
-          >
-            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${action.tint}`}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5">
-                {action.icon}
-              </svg>
-            </span>
-            <span className="flex flex-col">
-              <span className="text-sm font-medium text-ink">{action.label}</span>
-              <span className="text-xs text-ink-muted">{actionHint(action.label, action.hint)}</span>
-            </span>
-          </Link>
-        ))}
-      </section>
-    ),
     chart: <HabitsChart />,
     glance: (
       <section id="at-a-glance" className="scroll-mt-24">
