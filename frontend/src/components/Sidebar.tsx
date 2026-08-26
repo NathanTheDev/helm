@@ -49,29 +49,43 @@ export function Sidebar({ collapsed, onToggleCollapsed }: SidebarProps) {
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-clay" aria-hidden />
           {!collapsed && <span className="truncate">{spaceName}</span>}
         </Link>
-        <div className="flex shrink-0 items-center gap-1">
-          {user && !collapsed && (
-            <Tooltip content="New note" side="right">
+        {!collapsed && (
+          <div className="flex shrink-0 items-center gap-0.5">
+            {user && (
+              <Tooltip content="New note" side="right">
+                <IconButton
+                  aria-label="New note"
+                  onClick={openNewNote}
+                  className="rounded-control p-1.5 hover:bg-clay-soft/40"
+                >
+                  <PencilIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Tooltip content="Collapse sidebar" side="right">
               <IconButton
-                aria-label="New note"
-                onClick={openNewNote}
-                className="rounded-control border border-line p-1.5 hover:border-clay"
+                aria-label="Collapse sidebar"
+                onClick={onToggleCollapsed}
+                className="rounded-control p-1.5 hover:bg-clay-soft/40"
               >
-                <PencilIcon />
+                <ChevronsLeftIcon />
               </IconButton>
             </Tooltip>
-          )}
-          <Tooltip content={collapsed ? "Expand sidebar" : "Collapse sidebar"} side="right">
-            <IconButton
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              onClick={onToggleCollapsed}
-              className="rounded-control border border-line p-1.5 hover:border-clay"
-            >
-              <ChevronsLeftIcon className={`h-3.5 w-3.5 transition-transform ${collapsed ? "rotate-180" : ""}`} />
-            </IconButton>
-          </Tooltip>
-        </div>
+          </div>
+        )}
       </div>
+
+      {collapsed && (
+        <Tooltip content="Expand sidebar" side="right">
+          <IconButton
+            aria-label="Expand sidebar"
+            onClick={onToggleCollapsed}
+            className="mt-3 self-center rounded-control p-1.5 hover:bg-clay-soft/40"
+          >
+            <ChevronsLeftIcon className="rotate-180" />
+          </IconButton>
+        </Tooltip>
+      )}
 
       <nav className="mt-8 flex flex-col gap-1">
         {links.map((link) => {

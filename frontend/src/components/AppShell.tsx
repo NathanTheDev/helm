@@ -23,9 +23,14 @@ const ssrSafeLocalStorage: LayoutStorage = {
 // Sized to fit the nav links' icon+label content, not an arbitrary round
 // number - see Sidebar.tsx's `links`.
 const SIDEBAR_DEFAULT_WIDTH = 224;
-// Icon-only rail width, driven by the Sidebar's own collapse toggle (below
-// the Panel's minSize - resize() ignores minSize the same way the mobile
-// hide path's resize(0) already does, per AppShell's other gotcha notes).
+// Icon-only rail width, driven by the Sidebar's own collapse toggle. Also
+// doubles as the Panel's `minSize` (see below) - resize() targets below
+// minSize silently snap to `collapsedSize` (0) instead of landing at the
+// requested value, so minSize has to come down to exactly this number for
+// resize(SIDEBAR_RAIL_WIDTH) to actually land there instead of snapping to
+// fully hidden. (`collapsedSize` itself stays 0, not this - that's the
+// mobile-hide target; see the mobile-sync effect below, which relies on
+// literal 0 via a separate resize() call, not this rail state.)
 const SIDEBAR_RAIL_WIDTH = 64;
 const RAIL_STORAGE_KEY = "helm-sidebar-collapsed";
 
@@ -60,11 +65,19 @@ export function AppShell({ children }: { children: ReactNode }) {
   // class on the Panel doesn't stop it from occupying layout space on
   // mobile. Collapsing it for real (native collapse/expand, driven by a
   // resize-aware media query) is what actually gives that width back.
+  //
+  // Also applies the persisted rail-collapse preference on desktop, folded
+  // into this same effect/rAF rather than a second one - two effects each
+  // scheduling their own requestAnimationFrame and calling the Panel's
+  // imperative API independently raced in practice.
   useEffect(() => {
+    const collapsed = readRailCollapsed();
+    setRailCollapsed(collapsed);
     const mql = window.matchMedia("(min-width: 640px)");
-    const sync = (matches: boolean) => {
-      if (matches) sidebarPanelRef.current?.expand();
-      else sidebarPanelRef.current?.resize(0);
+    const sync = (isDesktop: boolean) => {
+      if (!isDesktop) sidebarPanelRef.current?.resize(0);
+      else if (collapsed) sidebarPanelRef.current?.resize(SIDEBAR_RAIL_WIDTH);
+      else sidebarPanelRef.current?.expand();
     };
     // Panel's imperative API isn't ready to act on the very first paint -
     // collapse()/resize() silently no-op if called before the Group has
@@ -82,22 +95,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     // still null and the sync is a no-op. Re-running it on every pathname
     // change re-syncs once the Group/Panel actually mounts (e.g. right
     // after a login/signup redirect into the app on a mobile viewport).
-  }, [sidebarPanelRef, pathname]);
-
-  // Applies a persisted rail-collapse choice on (re)mount, after the mobile
-  // sync effect above so it wins the last word on desktop - it must not
-  // fire on a mobile viewport, where the sidebar is meant to be fully
-  // hidden (size 0) regardless of the rail preference.
-  useEffect(() => {
-    const collapsed = readRailCollapsed();
-    setRailCollapsed(collapsed);
-    if (!collapsed) return;
-    const raf = requestAnimationFrame(() => {
-      if (window.matchMedia("(min-width: 640px)").matches) {
-        sidebarPanelRef.current?.resize(SIDEBAR_RAIL_WIDTH);
-      }
-    });
-    return () => cancelAnimationFrame(raf);
   }, [sidebarPanelRef, pathname]);
 
   function toggleRailCollapsed() {
@@ -128,7 +125,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           id="sidebar"
           panelRef={sidebarPanelRef}
           defaultSize={SIDEBAR_DEFAULT_WIDTH}
-          minSize={200}
+          minSize={SIDEBAR_RAIL_WIDTH}
           maxSize={420}
           collapsible
           collapsedSize={0}
