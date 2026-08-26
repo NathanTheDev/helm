@@ -243,3 +243,76 @@ export function SlidersIcon({ className = "h-3.5 w-3.5" }: IconProps) {
     </svg>
   );
 }
+
+export function NotesIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <path d="M6 3.5h8.5L18 7v13.5H6V3.5Z" strokeLinejoin="round" />
+      <path d="M9 9.5h6M9 13h6M9 16.5h3.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function HabitsIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M8.3 12.3l2.4 2.4 5-5.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function ProjectsIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <path
+        d="M4 7.3A1.5 1.5 0 0 1 5.5 5.8h3.7l1.7 2h7.6A1.5 1.5 0 0 1 20 9.3v8.4a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.7V7.3Z"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function TablesIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <rect x="4" y="4.5" width="16" height="15" rx="1.5" />
+      <path d="M4 9.8h16M4 15h16M10.3 4.5v15" />
+    </svg>
+  );
+}
+
+export function BrainIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <path
+        d="M9.3 4.5a2.8 2.8 0 0 0-2.8 2.8v.2a2.5 2.5 0 0 0-1.3 2.2c0 .9.5 1.7 1.2 2.1a2.8 2.8 0 0 0 1.9 4.6v.4A2.3 2.3 0 0 0 10.6 19a1.9 1.9 0 0 0 1.9-1.9V6.9a2.4 2.4 0 0 0-3.2-2.4Z"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14.7 4.5a2.8 2.8 0 0 1 2.8 2.8v.2a2.5 2.5 0 0 1 1.3 2.2c0 .9-.5 1.7-1.2 2.1a2.8 2.8 0 0 1-1.9 4.6v.4A2.3 2.3 0 0 1 13.4 19a1.9 1.9 0 0 1-1.9-1.9V6.9a2.4 2.4 0 0 1 3.2-2.4Z"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function GearIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <circle cx="12" cy="12" r="2.9" />
+      <path
+        d="M12 3.8v2.5M12 17.7v2.5M20.2 12h-2.5M6.3 12H3.8M17.6 6.4l-1.8 1.8M8.2 15.8l-1.8 1.8M17.6 17.6l-1.8-1.8M8.2 8.2 6.4 6.4"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function ChevronsLeftIcon({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={className}>
+      <path d="M13 6l-6 6 6 6M19 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}

@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { DEFAULT_SPACE_NAME, readSpaceName, writeSpaceName } from "@/lib/space-name";
 import {
   DndContext,
   PointerSensor,
@@ -28,7 +31,9 @@ import {
 import { cardClasses } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { IconButton } from "@/components/ui/Button";
-import { EyeOffIcon, GripIcon, SlidersIcon } from "@/components/ui/Icon";
+import { EyeOffIcon, GearIcon, GripIcon, SlidersIcon } from "@/components/ui/Icon";
+import { Input } from "@/components/ui/Input";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { CalendarWidget } from "@/components/CalendarWidget";
 import { HabitsChart } from "@/components/HabitsChart";
 import { AiChatWidget } from "@/components/AiChatWidget";
@@ -182,6 +187,35 @@ export default function Home() {
   const [layout, setLayout] = useState<HomeLayout>({ order: DEFAULT_WIDGET_ORDER, hidden: [] });
   const [editing, setEditing] = useState(false);
   const [habitsLoaded, setHabitsLoaded] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [spaceName, setSpaceName] = useState(DEFAULT_SPACE_NAME);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const settingsMenuRef = useRef<HTMLDivElement>(null);
+
+  function commitSpaceName(next: string) {
+    const trimmed = next.trim() || DEFAULT_SPACE_NAME;
+    writeSpaceName(trimmed);
+    setSpaceName(trimmed);
+  }
+
+  useEffect(() => {
+    setSpaceName(readSpaceName());
+  }, []);
+
+  useEffect(() => {
+    if (!profileOpen && !settingsOpen) return;
+    function onPointerDown(e: MouseEvent) {
+      if (profileOpen && profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+      if (settingsOpen && settingsMenuRef.current && !settingsMenuRef.current.contains(e.target as Node)) {
+        setSettingsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [profileOpen, settingsOpen]);
   const [projectsLoaded, setProjectsLoaded] = useState(false);
   const [notesLoaded, setNotesLoaded] = useState(false);
   const [worklogLoaded, setWorklogLoaded] = useState(false);
@@ -407,18 +441,80 @@ export default function Home() {
           </h1>
           <p className="mt-3 max-w-md text-ink-muted">Here&rsquo;s what&rsquo;s waiting for you.</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setEditing((e) => !e)}
-          className={`mt-1 flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-            editing
-              ? "border-clay bg-clay text-surface"
-              : "border-line text-ink-muted hover:border-clay hover:text-clay"
-          }`}
-        >
-          <SlidersIcon />
-          {editing ? "Done" : "Customize"}
-        </button>
+        <div className="mt-1 flex shrink-0 items-center gap-2">
+          {user && (
+            <div ref={profileMenuRef} className="relative">
+              <Tooltip content={user.email ?? "Profile"} side="bottom" disabled={profileOpen}>
+                <button
+                  type="button"
+                  onClick={() => setProfileOpen((o) => !o)}
+                  aria-label="Profile"
+                  aria-expanded={profileOpen}
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-clay-soft font-display text-sm text-clay transition-colors hover:bg-clay-soft/70"
+                >
+                  {(user.displayName ?? user.email ?? "?").charAt(0).toUpperCase()}
+                </button>
+              </Tooltip>
+
+              {profileOpen && (
+                <div className="absolute right-0 z-20 mt-2 w-56 rounded-card border border-line bg-surface p-3 shadow-md">
+                  <p className="truncate px-1 text-xs text-ink-muted">{user.email}</p>
+                  <button
+                    type="button"
+                    onClick={() => signOut(auth)}
+                    className="mt-2 w-full rounded-control px-1 py-1.5 text-left text-sm text-ink-muted transition-colors hover:bg-clay-soft/40 hover:text-ink"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div ref={settingsMenuRef} className="relative">
+            <Tooltip content="Settings" side="bottom" disabled={settingsOpen}>
+              <button
+                type="button"
+                onClick={() => setSettingsOpen((o) => !o)}
+                aria-label="Settings"
+                aria-expanded={settingsOpen}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-line text-ink-muted transition-colors hover:border-clay hover:text-clay"
+              >
+                <GearIcon />
+              </button>
+            </Tooltip>
+
+            {settingsOpen && (
+              <div className="absolute right-0 z-20 mt-2 w-56 rounded-card border border-line bg-surface p-3 shadow-md">
+                <label className="block px-1 text-xs text-ink-muted">
+                  Space name
+                  <Input
+                    defaultValue={spaceName}
+                    onBlur={(e) => commitSpaceName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") e.currentTarget.blur();
+                    }}
+                    className="mt-1 w-full"
+                    size="sm"
+                  />
+                </label>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setEditing((e) => !e)}
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+              editing
+                ? "border-clay bg-clay text-surface"
+                : "border-line text-ink-muted hover:border-clay hover:text-clay"
+            }`}
+          >
+            <SlidersIcon />
+            {editing ? "Done" : "Customize"}
+          </button>
+        </div>
       </section>
 
       {editing && (
