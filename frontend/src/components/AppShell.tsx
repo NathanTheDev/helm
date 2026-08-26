@@ -3,7 +3,15 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { Group, Panel, Separator, useDefaultLayout, usePanelRef, type LayoutStorage } from "react-resizable-panels";
+import {
+  Group,
+  Panel,
+  Separator,
+  useDefaultLayout,
+  usePanelRef,
+  type LayoutStorage,
+  type PanelImperativeHandle,
+} from "react-resizable-panels";
 import { AUTH_PATHS } from "@/lib/auth-paths";
 import AuthGate from "@/components/auth/AuthGate";
 import { Sidebar } from "@/components/Sidebar";
@@ -46,6 +54,52 @@ function writeRailCollapsed(collapsed: boolean) {
   else window.localStorage.removeItem(RAIL_STORAGE_KEY);
 }
 
+// A single requestAnimationFrame defer isn't always enough - neither for
+// `sidebarPanelRef.current` to be attached (a hard page reload does far
+// more hydration work than a live client-side toggle, and sometimes still
+// hadn't attached the ref one frame later) nor, once it has, for the
+// Panel's imperative API to be ready to act on it (its internal size
+// measurement doesn't appear to be strictly synchronized to rAF timing).
+// Either gap silently no-ops the resize call, leaving the actual panel
+// width desynced from the `collapsed` React state driving Sidebar's
+// icon-only rendering - icon-only content stranded in a full-width column.
+// `cancelled` is checked at each retry so a stale loop from a previous
+// effect run (e.g. the user toggled again, or navigated) can't stomp on
+// a newer one after the fact; `framesLeft` bounds it so a panel that's
+// never going to mount (this effect runs unconditionally, including on
+// auth routes where there is no Panel at all) doesn't retry forever.
+function resizeUntilApplied(
+  getPanel: () => PanelImperativeHandle | null,
+  target: number,
+  cancelled: { current: boolean },
+  framesLeft = 45,
+) {
+  if (cancelled.current || framesLeft <= 0) return;
+  const panel = getPanel();
+  if (!panel) {
+    requestAnimationFrame(() => resizeUntilApplied(getPanel, target, cancelled, framesLeft - 1));
+    return;
+  }
+  panel.resize(target);
+  requestAnimationFrame(() => {
+    if (!cancelled.current && Math.abs(panel.getSize().inPixels - target) > 1) {
+      resizeUntilApplied(getPanel, target, cancelled, framesLeft - 1);
+    }
+  });
+}
+
+// Same panel-ref-not-attached-yet gap as above, but for `.expand()`, which
+// has no target size to verify against.
+function expandUntilApplied(getPanel: () => PanelImperativeHandle | null, cancelled: { current: boolean }, framesLeft = 45) {
+  if (cancelled.current || framesLeft <= 0) return;
+  const panel = getPanel();
+  if (!panel) {
+    requestAnimationFrame(() => expandUntilApplied(getPanel, cancelled, framesLeft - 1));
+    return;
+  }
+  panel.expand();
+}
+
 // Desktop nav is a resizable left sidebar (react-resizable-panels' Group/
 // Panel/Separator - note the v4 API renamed these from the older
 // PanelGroup/Panel/PanelResizeHandle names, checked against the installed
@@ -54,9 +108,23 @@ function writeRailCollapsed(collapsed: boolean) {
 // persistence, keyed off the `id` below.
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  // onlySaveAfterUserInteractions: true is load-bearing, not a nicety - the
+  // rail-collapse and mobile-hide paths both call the Panel's imperative
+  // resize() API, and without this, that gets persisted as the "default"
+  // layout the same as a real drag would. The library then appears to
+  // mishandle rehydrating a persisted layout that small on the *next*
+  // mount (resets to `defaultSize` instead of respecting it - reproduced
+  // via Playwright: reload once from a clean layout while collapsed
+  // correctly lands at the rail width, but a second consecutive reload
+  // snaps back to the full expanded width despite the collapsed flag and
+  // the persisted layout itself both still being correct). Scoping
+  // persistence to genuine drag/keyboard resizes on the Separator sidesteps
+  // that edge case entirely, since the "true" persisted default then never
+  // reflects anything but a normal, non-collapsed width.
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: "helm-sidebar-layout",
     storage: ssrSafeLocalStorage,
+    onlySaveAfterUserInteractions: true,
   });
   const sidebarPanelRef = usePanelRef();
   const [railCollapsed, setRailCollapsed] = useState(false);
@@ -75,19 +143,18 @@ export function AppShell({ children }: { children: ReactNode }) {
     const collapsed = readRailCollapsed();
     setRailCollapsed(collapsed);
     const mql = window.matchMedia("(min-width: 640px)");
+    const cancelled = { current: false };
+    const getPanel = () => sidebarPanelRef.current;
     const sync = (isDesktop: boolean) => {
-      if (!isDesktop) sidebarPanelRef.current?.resize(0);
-      else if (collapsed) sidebarPanelRef.current?.resize(SIDEBAR_RAIL_WIDTH);
-      else sidebarPanelRef.current?.expand();
+      if (!isDesktop) resizeUntilApplied(getPanel, 0, cancelled);
+      else if (collapsed) resizeUntilApplied(getPanel, SIDEBAR_RAIL_WIDTH, cancelled);
+      else expandUntilApplied(getPanel, cancelled);
     };
-    // Panel's imperative API isn't ready to act on the very first paint -
-    // collapse()/resize() silently no-op if called before the Group has
-    // completed its initial size measurement. A rAF defers past that.
-    const raf = requestAnimationFrame(() => sync(mql.matches));
+    sync(mql.matches);
     const onChange = (e: MediaQueryListEvent) => sync(e.matches);
     mql.addEventListener("change", onChange);
     return () => {
-      cancelAnimationFrame(raf);
+      cancelled.current = true;
       mql.removeEventListener("change", onChange);
     };
     // `pathname` is a dependency (not just used for the early return below)
@@ -102,7 +169,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     const panel = sidebarPanelRef.current;
     if (!panel) return;
     const next = !railCollapsed;
-    panel.resize(next ? SIDEBAR_RAIL_WIDTH : SIDEBAR_DEFAULT_WIDTH);
+    resizeUntilApplied(() => panel, next ? SIDEBAR_RAIL_WIDTH : SIDEBAR_DEFAULT_WIDTH, { current: false });
     setRailCollapsed(next);
     writeRailCollapsed(next);
   }
