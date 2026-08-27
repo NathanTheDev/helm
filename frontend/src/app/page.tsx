@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { GearIcon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { Tooltip } from "@/components/ui/Tooltip";
+import { ChatInterface } from "@/components/ChatInterface";
 
 type GlanceItem = { kind: string; text: string; time: string };
 
@@ -227,27 +228,30 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-24">
-        <section className="fade-up">
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 pb-6 pt-12 sm:px-10 sm:pt-16">
+        <section className="fade-up shrink-0">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-muted">{dayLabel}</p>
-          <h1 className="mt-3 font-display text-4xl italic text-ink sm:text-5xl">
+          <h1 className="mt-2 font-display text-3xl italic text-ink sm:text-4xl">
             {greeting}, {firstName}.
           </h1>
-          <p className="mt-3 max-w-md text-ink-muted">Here&rsquo;s what&rsquo;s waiting for you.</p>
         </section>
 
-        <section id="at-a-glance" className="fade-up mt-10 scroll-mt-24">
+        <section className="fade-up mt-6 flex min-h-[60vh] flex-1 flex-col">
+          <ChatInterface />
+        </section>
+
+        <section id="at-a-glance" className="fade-up mt-10 shrink-0 scroll-mt-24">
           <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-xl text-ink">At a glance</h2>
+            <h2 className="font-display text-sm text-ink-muted">At a glance</h2>
             <span className="font-mono text-xs text-ink-muted">
               {initialLoading ? "—" : `${glance.length} items`}
             </span>
           </div>
 
           {initialLoading ? (
-            <div className={cardClasses({ padding: "none", className: "mt-4 divide-y divide-line overflow-hidden" })}>
+            <div className={cardClasses({ padding: "none", className: "mt-3 divide-y divide-line overflow-hidden" })}>
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3 px-5 py-4">
+                <div key={i} className="flex items-center gap-3 px-5 py-3">
                   <div className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-line" />
                   <div className="h-3.5 w-56 animate-pulse rounded bg-paper" />
                 </div>
@@ -255,14 +259,14 @@ export default function Home() {
             </div>
           ) : glance.length === 0 ? (
             <EmptyState
-              className="mt-4"
+              className="mt-3"
               title="All caught up."
               description="Nothing new across your habits, projects, or notes."
             />
           ) : (
-            <ul className={cardClasses({ padding: "none", className: "mt-4 divide-y divide-line overflow-hidden" })}>
+            <ul className={cardClasses({ padding: "none", className: "mt-3 divide-y divide-line overflow-hidden" })}>
               {glance.map((item) => (
-                <li key={item.text} className="flex items-center gap-3 px-5 py-4 transition-colors hover:bg-paper/60">
+                <li key={item.text} className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-paper/60">
                   <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${kindColor[item.kind]}`} aria-hidden />
                   <span className="flex-1 text-sm text-ink">{item.text}</span>
                   <span className="font-mono text-xs text-ink-muted">{item.time}</span>
