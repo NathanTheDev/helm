@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { ArrowUpIcon } from "@/components/ui/Icon";
 import { PENDING_CHAT_MESSAGE_KEY } from "@/lib/aiApi";
@@ -29,7 +28,7 @@ export function AiChatWidget() {
         Your habits, notes, and projects — all in one place to ask about.
       </p>
       <div className="mt-5 flex items-end gap-2">
-        <Textarea
+        <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -39,7 +38,7 @@ export function AiChatWidget() {
             }
           }}
           placeholder="Ask about your tasks, habits, or notes…"
-          className="max-h-40 min-h-14 flex-1 resize-none"
+          className="max-h-40 min-h-14 flex-1 resize-none bg-transparent text-sm text-ink outline-none placeholder:text-ink-muted/60"
           rows={2}
         />
         <Button
