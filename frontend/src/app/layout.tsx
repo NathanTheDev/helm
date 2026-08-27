@@ -4,6 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { TabsProvider } from "@/lib/tabs-context";
+import { SplitViewProvider } from "@/lib/split-view-context";
 import { THEME_STORAGE_KEY, CUSTOM_THEME_STORAGE_KEY, CUSTOM_THEME_VARS } from "@/lib/theme-constants";
 import { FONT_STORAGE_KEY, DEFAULT_FONT } from "@/lib/font-constants";
 import "./globals.css";
@@ -68,7 +69,9 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <TabsProvider>
-              <AppShell>{children}</AppShell>
+              <SplitViewProvider>
+                <AppShell>{children}</AppShell>
+              </SplitViewProvider>
             </TabsProvider>
           </AuthProvider>
         </ThemeProvider>

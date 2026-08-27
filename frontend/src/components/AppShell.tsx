@@ -13,10 +13,13 @@ import {
   type PanelImperativeHandle,
 } from "react-resizable-panels";
 import { AUTH_PATHS } from "@/lib/auth-paths";
+import { isEmbedded } from "@/lib/embed";
+import { useSplitView } from "@/lib/split-view-context";
 import AuthGate from "@/components/auth/AuthGate";
 import { Sidebar } from "@/components/Sidebar";
 import { MobileNavBar } from "@/components/MobileNavBar";
 import { TabBar } from "@/components/TabBar";
+import { SplitPane } from "@/components/SplitPane";
 
 // useDefaultLayout falls back to the bare `localStorage` global whenever
 // `storage` is omitted/undefined - that throws a ReferenceError during SSR
@@ -125,6 +128,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   // ref (not state) so the onResize handler below always reads the latest
   // value without needing to be re-subscribed on every breakpoint change.
   const isDesktopRef = useRef(true);
+  const { splitHref, closeSplit } = useSplitView();
+  // Whether *this* document is a split-view pane's iframe. Starts false
+  // (matches SSR, which has no `window`) and flips after mount if true -
+  // same "server doesn't know, client does" shape as `mounted` below, just
+  // for a different question. The one-render flash of full chrome this
+  // costs in the embedded case is harmless (the iframe is created empty and
+  // immediately navigated, so nothing meaningful is visible during it).
+  const [embedded, setEmbedded] = useState(false);
+  useEffect(() => setEmbedded(isEmbedded()), []);
 
   // Traced into react-resizable-panels 4.12.3's own source
   // (dist/react-resizable-panels.js): `Group` wraps the `defaultLayout`
@@ -214,6 +226,20 @@ export function AppShell({ children }: { children: ReactNode }) {
     return <div className="flex flex-1 flex-col">{children}</div>;
   }
 
+  // A split-view pane (see SplitPane.tsx): same app, same auth gate, but no
+  // Sidebar/TabBar/MobileNavBar or resizable Group - it's meant to look like
+  // bare page content sitting inside the primary pane, not a second copy of
+  // the whole shell.
+  if (embedded) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <AuthGate>
+          <div className="flex flex-1 flex-col overflow-y-auto">{children}</div>
+        </AuthGate>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <MobileNavBar />
@@ -261,7 +287,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Panel id="content" className="flex min-h-0 flex-col" suppressHydrationWarning>
           <AuthGate>
             <TabBar />
-            <div className="flex flex-1 flex-col overflow-y-auto">{children}</div>
+            {splitHref ? (
+              <SplitPane mainChildren={children} splitHref={splitHref} onCloseSplit={closeSplit} />
+            ) : (
+              <div className="flex flex-1 flex-col overflow-y-auto">{children}</div>
+            )}
           </AuthGate>
         </Panel>
       </Group>

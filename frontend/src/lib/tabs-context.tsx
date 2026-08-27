@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AUTH_PATHS } from "@/lib/auth-paths";
+import { isEmbedded } from "@/lib/embed";
 
 export type TabIconKey = "home" | "notes" | "habits" | "projects" | "tables" | "brain" | "worklog";
 
@@ -69,17 +70,24 @@ export function TabsProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // A split-view pane is a same-origin iframe running this exact same
+    // provider - if it read/wrote the real "helm-open-tabs" key too, it'd
+    // silently register its own pathname as a tab in the *parent* window's
+    // tab bar. It never renders TabBar (see AppShell's embed branch) so
+    // there's nothing for a local tab list to drive anyway; just skip
+    // touching storage entirely and leave it at the default.
+    if (isEmbedded()) return;
     setTabs(readTabs());
     setHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || isEmbedded()) return;
     writeTabs(tabs);
   }, [tabs, hydrated]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || isEmbedded()) return;
     if (AUTH_PATHS.has(pathname)) return;
     setTabs((prev) => {
       if (prev.some((t) => t.href === pathname)) return prev;
