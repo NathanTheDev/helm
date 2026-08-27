@@ -10,10 +10,13 @@ import { sendChatMessage, type ChatMessage } from "@/lib/aiApi";
 export function ChatInterface({
   placeholder = "Ask about your tasks, habits, or notes…",
   emptyText = "No messages yet — ask something to get started.",
+  initialMessage,
   onVaultConnected,
 }: {
   placeholder?: string;
   emptyText?: string;
+  /** Sent automatically, once, on mount - e.g. a message typed on the dashboard before navigating here. */
+  initialMessage?: string;
   onVaultConnected?: (connected: boolean) => void;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -21,13 +24,21 @@ export function ChatInterface({
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const autoSentRef = useRef(false);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, sending]);
 
-  async function handleSend() {
-    const text = input.trim();
+  useEffect(() => {
+    if (!initialMessage || autoSentRef.current) return;
+    autoSentRef.current = true;
+    handleSend(initialMessage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMessage]);
+
+  async function handleSend(overrideText?: string) {
+    const text = (overrideText ?? input).trim();
     if (!text || sending) return;
 
     const next = [...messages, { role: "user" as const, content: text }];
@@ -94,7 +105,7 @@ export function ChatInterface({
           className="max-h-40 min-h-11 flex-1 resize-none"
           rows={1}
         />
-        <Button onClick={handleSend} disabled={sending || !input.trim()} size="sm" aria-label="Send message">
+        <Button onClick={() => handleSend()} disabled={sending || !input.trim()} size="sm" aria-label="Send message">
           <ArrowUpIcon />
         </Button>
       </div>

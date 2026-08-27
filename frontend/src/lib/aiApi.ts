@@ -1,5 +1,11 @@
 import { apiUrl, authHeaders } from "./api";
 
+// Set by the dashboard's chat box right before navigating to /brain, read
+// once (and cleared) by BrainPage on mount so the message sent from home
+// actually opens as the first turn of the /brain chat tab instead of being
+// dropped on navigation.
+export const PENDING_CHAT_MESSAGE_KEY = "helm-pending-chat-message";
+
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;

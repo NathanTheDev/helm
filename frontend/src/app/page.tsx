@@ -1,41 +1,87 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { DEFAULT_SPACE_NAME, readSpaceName, writeSpaceName } from "@/lib/space-name";
-import { getHabits } from "@/lib/api";
-import { getProjects, getProjectTasks, getWorklog } from "@/lib/tasksApi";
-import { getNotes } from "@/lib/notesApi";
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { getCalendarEvents, type CalendarEvent } from "@/lib/calendarApi";
 import { useAuth } from "@/lib/auth-context";
-import { cardClasses } from "@/components/ui/Card";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { GearIcon } from "@/components/ui/Icon";
+import {
+  DEFAULT_WIDGET_ORDER,
+  HOME_WIDGET_LABELS,
+  readHomeLayout,
+  writeHomeLayout,
+  type HomeLayout,
+  type HomeWidgetId,
+} from "@/lib/home-layout";
+import { IconButton } from "@/components/ui/Button";
+import { EyeOffIcon, GearIcon, GripIcon, SlidersIcon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { Tooltip } from "@/components/ui/Tooltip";
-import { ChatInterface } from "@/components/ChatInterface";
+import { CalendarWidget } from "@/components/CalendarWidget";
+import { HabitsChart } from "@/components/HabitsChart";
+import { AiChatWidget } from "@/components/AiChatWidget";
 
-type GlanceItem = { kind: string; text: string; time: string };
+function WidgetShell({
+  id,
+  editing,
+  onHide,
+  children,
+}: {
+  id: HomeWidgetId;
+  editing: boolean;
+  onHide: () => void;
+  children: ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+    disabled: !editing,
+  });
 
-function formatRelative(iso: string): string {
-  const hours = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000);
-  if (hours < 1) return "now";
-  if (hours < 24) return `${hours}h`;
-  return `${Math.floor(hours / 24)}d`;
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className={editing ? "relative rounded-[28px] ring-1 ring-line" : ""}>
+      {editing && (
+        <div className="absolute -top-3.5 right-4 z-10 flex items-center gap-1 rounded-full border border-line bg-surface px-1.5 py-1 shadow-md">
+          <button
+            {...attributes}
+            {...listeners}
+            aria-label={`Drag to reorder ${HOME_WIDGET_LABELS[id]}`}
+            className="flex h-6 w-6 cursor-grab items-center justify-center text-ink-muted transition-colors hover:text-ink active:cursor-grabbing"
+          >
+            <GripIcon className="h-3.5 w-3.5" />
+          </button>
+          <IconButton tone="danger" onClick={onHide} aria-label={`Hide ${HOME_WIDGET_LABELS[id]}`}>
+            <EyeOffIcon />
+          </IconButton>
+        </div>
+      )}
+      {children}
+    </div>
+  );
 }
-
-const kindColor: Record<string, string> = {
-  habit: "bg-sage",
-  note: "bg-clay",
-  project: "bg-slate",
-};
 
 export default function Home() {
   const { user } = useAuth();
-  const [habitsGlance, setHabitsGlance] = useState<GlanceItem[]>([]);
-  const [projectsGlance, setProjectsGlance] = useState<GlanceItem[]>([]);
-  const [notesGlance, setNotesGlance] = useState<GlanceItem[]>([]);
-  const [habitsLoaded, setHabitsLoaded] = useState(false);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [calendarConnected, setCalendarConnected] = useState(false);
+  const [layout, setLayout] = useState<HomeLayout>({ order: DEFAULT_WIDGET_ORDER, hidden: [] });
+  const [editing, setEditing] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [spaceName, setSpaceName] = useState(DEFAULT_SPACE_NAME);
@@ -65,98 +111,57 @@ export default function Home() {
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, [profileOpen, settingsOpen]);
-  const [projectsLoaded, setProjectsLoaded] = useState(false);
-  const [notesLoaded, setNotesLoaded] = useState(false);
-  const [worklogLoaded, setWorklogLoaded] = useState(false);
-  const initialLoading = !habitsLoaded || !projectsLoaded || !notesLoaded || !worklogLoaded;
 
   useEffect(() => {
-    getHabits()
-      .then((habits) => {
-        const due = habits.filter((h) => h.isDueToday && !h.isCompletedToday);
-
-        const items: GlanceItem[] = [];
-        if (due.length > 0) {
-          items.push({
-            kind: "habit",
-            text: `${due.length} ${due.length === 1 ? "habit is" : "habits are"} due today`,
-            time: "",
-          });
-        }
-        const topStreak = [...habits].sort((a, b) => b.streak - a.streak)[0];
-        if (topStreak && topStreak.streak > 0) {
-          items.push({
-            kind: "habit",
-            text: `${topStreak.name} — ${topStreak.streak} day streak`,
-            time: "",
-          });
-        }
-        setHabitsGlance(items);
-      })
-      .catch(() => setHabitsGlance([]))
-      .finally(() => setHabitsLoaded(true));
-
-    getProjects()
-      .then(async (projects) => {
-        const active = projects.filter((p) => !p.archived);
-        const taskLists = await Promise.all(active.map((p) => getProjectTasks(p.id)));
-        const open = taskLists.flat().filter((t) => t.status !== "DONE").length;
-
-        const items: GlanceItem[] = [];
-        if (open > 0) {
-          items.push({
-            kind: "project",
-            text: `${open} open ${open === 1 ? "task" : "tasks"} across ${active.length} ${
-              active.length === 1 ? "project" : "projects"
-            }`,
-            time: "",
-          });
-        }
-        setProjectsGlance(items);
-      })
-      .catch(() => setProjectsGlance([]))
-      .finally(() => setProjectsLoaded(true));
-
-    getNotes()
-      .then((notes) => {
-        const items: GlanceItem[] = [];
-
-        if (notes.length > 0) {
-          const stalest = [...notes].sort(
-            (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
-          )[0];
-          items.push({
-            kind: "note",
-            text: `“${stalest.title || "Untitled note"}” hasn’t been touched in ${formatRelative(stalest.updatedAt)}`,
-            time: formatRelative(stalest.updatedAt),
-          });
-        }
-
-        const publishedCount = notes.filter((n) => n.published).length;
-        if (publishedCount > 0) {
-          items.push({
-            kind: "note",
-            text: `${publishedCount} ${publishedCount === 1 ? "note is" : "notes are"} published and shareable`,
-            time: "",
-          });
-        }
-
-        setNotesGlance(items);
-      })
-      .catch(() => setNotesGlance([]))
-      .finally(() => setNotesLoaded(true));
-
-    getWorklog()
-      .then(() => setWorklogLoaded(true))
-      .catch(() => setWorklogLoaded(true));
+    setLayout(readHomeLayout());
   }, []);
 
-  const glance = [...habitsGlance, ...projectsGlance, ...notesGlance];
+  useEffect(() => {
+    getCalendarEvents()
+      .then((result) => {
+        setCalendarEvents(result.events);
+        setCalendarConnected(result.connected);
+      })
+      .catch(() => {
+        setCalendarEvents([]);
+        setCalendarConnected(false);
+      });
+  }, []);
 
   const firstName = user?.displayName?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "there";
   const now = new Date();
   const dayLabel = now.toLocaleDateString(undefined, { weekday: "long" });
   const greeting = now.getHours() < 12 ? "Good morning" : now.getHours() < 18 ? "Good afternoon" : "Good evening";
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+
+  const persist = (next: HomeLayout) => {
+    setLayout(next);
+    writeHomeLayout(next);
+  };
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    const oldIndex = layout.order.indexOf(active.id as HomeWidgetId);
+    const newIndex = layout.order.indexOf(over.id as HomeWidgetId);
+    if (oldIndex < 0 || newIndex < 0) return;
+    persist({ ...layout, order: arrayMove(layout.order, oldIndex, newIndex) });
+  };
+
+  const hideWidget = (id: HomeWidgetId) => persist({ ...layout, hidden: [...layout.hidden, id] });
+  const showWidget = (id: HomeWidgetId) => persist({ ...layout, hidden: layout.hidden.filter((w) => w !== id) });
+
+  const visibleOrder = useMemo(
+    () => layout.order.filter((id) => !layout.hidden.includes(id)),
+    [layout],
+  );
+
+  const widgetContent: Record<HomeWidgetId, ReactNode> = {
+    aiChat: <AiChatWidget />,
+    chart: <HabitsChart />,
+    calendar: <CalendarWidget events={calendarEvents} connected={calendarConnected} />,
+  };
 
   return (
     <>
@@ -228,53 +233,63 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 pb-6 pt-12 sm:px-10 sm:pt-16">
-        <section className="fade-up shrink-0">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-muted">{dayLabel}</p>
-          <h1 className="mt-2 font-display text-3xl italic text-ink sm:text-4xl">
-            {greeting}, {firstName}.
-          </h1>
-        </section>
-
-        <section className="fade-up mt-6 flex min-h-[60vh] flex-1 flex-col">
-          <ChatInterface />
-        </section>
-
-        <section id="at-a-glance" className="fade-up mt-10 shrink-0 scroll-mt-24">
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-sm text-ink-muted">At a glance</h2>
-            <span className="font-mono text-xs text-ink-muted">
-              {initialLoading ? "—" : `${glance.length} items`}
-            </span>
+      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-24 pt-16 sm:px-10 sm:pt-24">
+        <section className="fade-up flex items-start justify-between gap-4">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-muted">{dayLabel}</p>
+            <h1 className="mt-3 font-display text-4xl italic text-ink sm:text-5xl">
+              {greeting}, {firstName}.
+            </h1>
+            <p className="mt-3 max-w-md text-ink-muted">Here&rsquo;s what&rsquo;s waiting for you.</p>
           </div>
+          <button
+            type="button"
+            onClick={() => setEditing((e) => !e)}
+            className={`mt-1 flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+              editing
+                ? "border-clay bg-clay text-surface"
+                : "border-line text-ink-muted hover:border-clay hover:text-clay"
+            }`}
+          >
+            <SlidersIcon />
+            {editing ? "Done" : "Customize"}
+          </button>
+        </section>
 
-          {initialLoading ? (
-            <div className={cardClasses({ padding: "none", className: "mt-3 divide-y divide-line overflow-hidden" })}>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3 px-5 py-3">
-                  <div className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-line" />
-                  <div className="h-3.5 w-56 animate-pulse rounded bg-paper" />
-                </div>
+        {editing && (
+          <p className="fade-up mt-4 text-xs text-ink-muted">
+            Drag <GripIcon className="inline h-3 w-3 -translate-y-px" /> to reorder widgets, or hide them. Hidden
+            widgets can be added back below.
+          </p>
+        )}
+
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <SortableContext items={visibleOrder} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col gap-10 [&>*:first-child]:mt-10">
+              {visibleOrder.map((id) => (
+                <WidgetShell key={id} id={id} editing={editing} onHide={() => hideWidget(id)}>
+                  {widgetContent[id]}
+                </WidgetShell>
               ))}
             </div>
-          ) : glance.length === 0 ? (
-            <EmptyState
-              className="mt-3"
-              title="All caught up."
-              description="Nothing new across your habits, projects, or notes."
-            />
-          ) : (
-            <ul className={cardClasses({ padding: "none", className: "mt-3 divide-y divide-line overflow-hidden" })}>
-              {glance.map((item) => (
-                <li key={item.text} className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-paper/60">
-                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${kindColor[item.kind]}`} aria-hidden />
-                  <span className="flex-1 text-sm text-ink">{item.text}</span>
-                  <span className="font-mono text-xs text-ink-muted">{item.time}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+          </SortableContext>
+        </DndContext>
+
+        {layout.hidden.length > 0 && (
+          <div className="fade-up mt-8 flex flex-wrap items-center gap-2 border-t border-line pt-6">
+            <span className="text-xs text-ink-muted">Add widgets:</span>
+            {layout.hidden.map((id) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => showWidget(id)}
+                className="rounded-full border border-dashed border-line px-3 py-1.5 text-xs text-ink-muted transition-colors hover:border-clay hover:text-clay"
+              >
+                + {HOME_WIDGET_LABELS[id]}
+              </button>
+            ))}
+          </div>
+        )}
       </main>
     </>
   );

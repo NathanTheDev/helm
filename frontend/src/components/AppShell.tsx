@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
   Group,
@@ -121,6 +121,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   });
   const sidebarPanelRef = usePanelRef();
   const [railCollapsed, setRailCollapsed] = useState(false);
+  // Tracks the current matchMedia("(min-width: 640px)") result, kept in a
+  // ref (not state) so the onResize handler below always reads the latest
+  // value without needing to be re-subscribed on every breakpoint change.
+  const isDesktopRef = useRef(true);
 
   // Traced into react-resizable-panels 4.12.3's own source
   // (dist/react-resizable-panels.js): `Group` wraps the `defaultLayout`
@@ -168,6 +172,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     const cancelled = { current: false };
     const getPanel = () => sidebarPanelRef.current;
     const sync = (isDesktop: boolean) => {
+      isDesktopRef.current = isDesktop;
       if (!isDesktop) resizeUntilApplied(getPanel, 0, cancelled);
       else if (collapsed) resizeUntilApplied(getPanel, SIDEBAR_RAIL_WIDTH, cancelled);
       else expandUntilApplied(getPanel, cancelled);
@@ -227,6 +232,22 @@ export function AppShell({ children }: { children: ReactNode }) {
           maxSize={420}
           collapsible
           collapsedSize={0}
+          // `collapsible`/`collapsedSize=0` have to stay (the mobile-hide
+          // path above needs a real resize(0) to work) - but that also lets
+          // a manual desktop drag past minSize snap all the way to 0, which
+          // is never wanted (the icon rail, not "gone", is the floor for a
+          // drag). Bounce any such 0-width result on desktop back up to the
+          // rail width and flip into rail-collapsed state, so a too-far
+          // drag reads as "collapsed to icons" instead of "vanished". Mobile
+          // hides via this exact same 0 target, but isDesktopRef is false
+          // by the time that resize fires, so it's excluded here.
+          onResize={(size) => {
+            if (isDesktopRef.current && size.inPixels < 1) {
+              resizeUntilApplied(() => sidebarPanelRef.current, SIDEBAR_RAIL_WIDTH, { current: false });
+              setRailCollapsed(true);
+              writeRailCollapsed(true);
+            }
+          }}
           className="border-r border-line/70"
           suppressHydrationWarning
         >

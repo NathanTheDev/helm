@@ -4,9 +4,18 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ChatInterface } from "@/components/ChatInterface";
 import { getObsidianConnectionStatus } from "@/lib/obsidianApi";
+import { PENDING_CHAT_MESSAGE_KEY } from "@/lib/aiApi";
+
+function readPendingMessage(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  const value = sessionStorage.getItem(PENDING_CHAT_MESSAGE_KEY);
+  if (value) sessionStorage.removeItem(PENDING_CHAT_MESSAGE_KEY);
+  return value ?? undefined;
+}
 
 export default function BrainPage() {
   const [vaultConnected, setVaultConnected] = useState<boolean | null>(null);
+  const [initialMessage] = useState(readPendingMessage);
 
   useEffect(() => {
     getObsidianConnectionStatus()
@@ -39,6 +48,7 @@ export default function BrainPage() {
       <div className="mt-6 flex min-h-0 flex-1 flex-col">
         <ChatInterface
           placeholder="Ask about your vault, tasks, or habits…"
+          initialMessage={initialMessage}
           onVaultConnected={setVaultConnected}
         />
       </div>
