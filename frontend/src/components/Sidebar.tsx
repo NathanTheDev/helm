@@ -38,7 +38,7 @@ export function Sidebar({ collapsed, onToggleCollapsed }: SidebarProps) {
 
   return (
     <div className="flex h-full flex-col overflow-y-auto bg-paper px-4 py-5">
-      <div className="flex items-center justify-between gap-2">
+      <div className={`flex items-center gap-2 ${collapsed ? "justify-center" : "justify-between"}`}>
         <Link
           href="/"
           aria-label={spaceName}
