@@ -24,7 +24,7 @@ export function AiChatWidget() {
   }
 
   return (
-    <div className="flex items-end gap-2 rounded-[28px] bg-surface p-4 sm:p-5">
+    <div className="flex items-end gap-2 rounded-full bg-surface p-3">
       <textarea
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -35,11 +35,11 @@ export function AiChatWidget() {
           }
         }}
         placeholder="Ask about your tasks, habits, or notes…"
-        className="max-h-40 min-h-14 flex-1 resize-none bg-transparent text-sm text-ink outline-none placeholder:text-ink-muted/60"
-        rows={2}
+        className="max-h-40 min-h-9 flex-1 resize-none bg-transparent px-2 py-1 text-sm text-ink outline-none placeholder:text-ink-muted/60"
+        rows={1}
       />
       <Button
-        size="lg"
+        size="sm"
         onClick={handleSend}
         disabled={!input.trim()}
         aria-label="Send message"
