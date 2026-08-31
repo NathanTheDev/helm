@@ -13,7 +13,6 @@ import {
   BrainIcon,
   ClockIcon,
   CloseIcon,
-  DockRightIcon,
 } from "@/components/ui/Icon";
 
 const ICONS: Record<TabIconKey, (props: { className?: string }) => React.JSX.Element> = {
@@ -123,21 +122,18 @@ export function TabBar() {
               return <Icon className="h-3.5 w-3.5 shrink-0" />;
             })()}
             <span className="truncate">{splitTab.label}</span>
+            {/* Just the one hover-reveal close button, matching the main
+                strip's chips - the separate always-visible dock/undock
+                button was redundant clutter now that dragging (not a
+                button) is how you open a split in the first place. This
+                one closes the split (not the tab - closeTab is a
+                deliberately separate action, reachable from the main
+                strip once the tab lands back there) so it reads the same
+                as every other "X" in this UI: closes *this view*. */}
             <button
               type="button"
-              aria-label="Close split view"
+              aria-label={`Close split view (${splitTab.label})`}
               onClick={closeSplit}
-              className="-mr-0.5 shrink-0 rounded-control p-0.5 text-clay transition-opacity hover:bg-clay-soft/60"
-            >
-              <DockRightIcon className="h-3 w-3" />
-            </button>
-            <button
-              type="button"
-              aria-label={`Close ${splitTab.label}`}
-              onClick={() => {
-                closeSplit();
-                closeTab(splitTab.href);
-              }}
               className="-mr-1 shrink-0 rounded-control p-0.5 opacity-0 transition-opacity hover:bg-clay-soft/60 group-hover:opacity-100"
             >
               <CloseIcon className="h-3 w-3" />
