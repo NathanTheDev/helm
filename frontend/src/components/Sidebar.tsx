@@ -80,7 +80,12 @@ export function Sidebar({ collapsed, onToggleCollapsed }: SidebarProps) {
             onClick={onToggleCollapsed}
             className="mt-3 self-center rounded-control p-1.5 hover:bg-clay-soft/40"
           >
-            <ChevronsLeftIcon className="rotate-180" />
+            {/* Sized to match the nav icons below (h-[18px]) rather than
+                ChevronsLeftIcon's own h-3.5 default - at the smaller size
+                this sat alone under the wordmark with no grouping to mark
+                it as a control, and read as a stray mark rather than a
+                button. */}
+            <ChevronsLeftIcon className="h-[18px] w-[18px] rotate-180" />
           </IconButton>
         </Tooltip>
       )}
