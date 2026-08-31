@@ -20,6 +20,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { MobileNavBar } from "@/components/MobileNavBar";
 import { TabBar } from "@/components/TabBar";
 import { SplitPane } from "@/components/SplitPane";
+import { SplitDropZone } from "@/components/SplitDropZone";
 
 // useDefaultLayout falls back to the bare `localStorage` global whenever
 // `storage` is omitted/undefined - that throws a ReferenceError during SSR
@@ -308,11 +309,17 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Panel id="content" className="flex min-h-0 flex-col" suppressHydrationWarning>
           <AuthGate>
             <TabBar />
-            {splitHref ? (
-              <SplitPane mainChildren={children} splitHref={splitHref} />
-            ) : (
-              <div className="flex flex-1 flex-col overflow-y-auto">{children}</div>
-            )}
+            {/* `relative` so SplitDropZone's overlay (only mounted mid-drag,
+                see that component) positions against this content area
+                specifically, not the whole viewport. */}
+            <div className="relative flex min-h-0 flex-1">
+              {splitHref ? (
+                <SplitPane mainChildren={children} splitHref={splitHref} />
+              ) : (
+                <div className="flex flex-1 flex-col overflow-y-auto">{children}</div>
+              )}
+              <SplitDropZone />
+            </div>
           </AuthGate>
         </Panel>
       </Group>

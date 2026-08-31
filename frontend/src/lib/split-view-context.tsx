@@ -7,6 +7,13 @@ type SplitViewContextValue = {
   splitHref: string | null;
   openSplit: (href: string) => void;
   closeSplit: () => void;
+  // Which tab (by href) is currently being drag-and-dropped, if any - not
+  // about the split itself, but shared here (rather than a separate
+  // context) since the only consumers are TabBar (sets it on drag
+  // start/end) and SplitDropZone (reads it to know whether to render its
+  // overlay at all, see that component). null outside of an active drag.
+  draggingHref: string | null;
+  setDraggingHref: (href: string | null) => void;
 };
 
 const SplitViewContext = createContext<SplitViewContextValue | null>(null);
@@ -21,12 +28,15 @@ const SplitViewContext = createContext<SplitViewContextValue | null>(null);
 // any of the current route's params/data threaded in manually).
 export function SplitViewProvider({ children }: { children: ReactNode }) {
   const [splitHref, setSplitHref] = useState<string | null>(null);
+  const [draggingHref, setDraggingHref] = useState<string | null>(null);
 
   const openSplit = useCallback((href: string) => setSplitHref(href), []);
   const closeSplit = useCallback(() => setSplitHref(null), []);
 
   return (
-    <SplitViewContext.Provider value={{ splitHref, openSplit, closeSplit }}>{children}</SplitViewContext.Provider>
+    <SplitViewContext.Provider value={{ splitHref, openSplit, closeSplit, draggingHref, setDraggingHref }}>
+      {children}
+    </SplitViewContext.Provider>
   );
 }
 

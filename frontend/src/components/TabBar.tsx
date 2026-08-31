@@ -29,7 +29,7 @@ const ICONS: Record<TabIconKey, (props: { className?: string }) => React.JSX.Ele
 export function TabBar() {
   const pathname = usePathname();
   const { tabs, closeTab } = useTabs();
-  const { splitHref, openSplit, closeSplit } = useSplitView();
+  const { splitHref, closeSplit, setDraggingHref } = useSplitView();
 
   // The split tab's chip renders in its own half of this same row (right
   // of the divider, see below) instead of the shared scroll region -
@@ -69,6 +69,26 @@ export function TabBar() {
                 e.stopPropagation();
                 closeTab(tab.href);
               }}
+              // Opening a tab in split view used to be a dedicated hover
+              // button - replaced with plain HTML5 drag-and-drop (native
+              // anchor dragging, no dnd-kit needed - that's for the
+              // sortable dashboard widgets, a different interaction shape)
+              // so dragging the tab chip itself onto SplitDropZone's
+              // right-half overlay is what opens it there now. `dataTransfer`
+              // carries the href rather than reading component state in the
+              // drop handler, since the drop target has no other way to know
+              // which tab was dragged. `draggingHref` (context, not local
+              // state) is what SplitDropZone reads to know whether to render
+              // its overlay at all - reset in onDragEnd unconditionally so a
+              // drag cancelled outside any valid drop target (e.g. Escape)
+              // doesn't leave the overlay stuck mounted.
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.setData("text/plain", tab.href);
+                e.dataTransfer.effectAllowed = "move";
+                setDraggingHref(tab.href);
+              }}
+              onDragEnd={() => setDraggingHref(null)}
               className={`group flex w-fit max-w-[180px] shrink-0 items-center gap-1.5 rounded-t-control border border-b-0 px-3 py-1.5 text-xs transition-colors ${
                 active
                   ? "border-line bg-surface text-ink"
@@ -77,18 +97,6 @@ export function TabBar() {
             >
               <Icon className="h-3.5 w-3.5 shrink-0" />
               <span className="truncate">{tab.label}</span>
-              <button
-                type="button"
-                aria-label={`Open ${tab.label} in split view`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openSplit(tab.href);
-                }}
-                className="-mr-0.5 shrink-0 rounded-control p-0.5 opacity-0 transition-opacity hover:bg-clay-soft/60 group-hover:opacity-100"
-              >
-                <DockRightIcon className="h-3 w-3" />
-              </button>
               {tab.href !== "/" && (
                 <button
                   type="button"
