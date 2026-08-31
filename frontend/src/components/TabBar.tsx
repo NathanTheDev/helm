@@ -41,6 +41,21 @@ export function TabBar() {
           <Link
             key={tab.href}
             href={tab.href}
+            // Browsers treat a middle click on an <a> as "open in new tab"
+            // by default (auxclick fires, then that default action) - for
+            // this app's own tab strip that reads as broken (a duplicate
+            // tab, or literally a new browser tab, for what every other
+            // tabbed UI treats as "close"). preventDefault on auxclick for
+            // button 1 (middle) suppresses that browser default; closeTab
+            // already no-ops on the permanent "/" Home tab, so no need to
+            // special-case it here the way the close button does.
+            onAuxClick={(e) => {
+              if (e.button !== 1) return;
+              e.preventDefault();
+              e.stopPropagation();
+              if (inSplit) closeSplit();
+              closeTab(tab.href);
+            }}
             className={`group flex w-fit max-w-[180px] shrink-0 items-center gap-1.5 rounded-t-control border border-b-0 px-3 py-1.5 text-xs transition-colors ${
               active
                 ? "border-line bg-surface text-ink"
