@@ -11,6 +11,13 @@ import { useSplitView } from "@/lib/split-view-context";
 // SplitPane if one's already open) - dropping here always calls
 // `openSplit`, so dragging a new tab onto an already-open split replaces
 // it, same as the old dock button did.
+//
+// `hidden sm:flex` on top of the `draggingHref` check: dragging is
+// initiated from TabBar, which is itself `hidden sm:flex` (still mounted
+// below that breakpoint, just not displayed), and most mobile browsers
+// don't fire HTML5 drag events from touch anyway - but side-by-side has
+// to be flatly impossible below `sm`, not just impossible-in-practice, so
+// this is a belt-and-suspenders CSS guard rather than relying on that.
 export function SplitDropZone() {
   const { draggingHref, openSplit, setDraggingHref } = useSplitView();
   const [isOver, setIsOver] = useState(false);
@@ -32,7 +39,7 @@ export function SplitDropZone() {
         setIsOver(false);
         setDraggingHref(null);
       }}
-      className={`absolute inset-y-0 right-0 z-20 flex w-1/2 items-center justify-center border-l-2 border-dashed transition-colors ${
+      className={`absolute inset-y-0 right-0 z-20 hidden w-1/2 items-center justify-center border-l-2 border-dashed transition-colors sm:flex ${
         isOver ? "border-clay bg-clay-soft/40" : "border-clay/40 bg-clay-soft/15"
       }`}
     >

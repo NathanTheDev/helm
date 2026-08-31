@@ -16,6 +16,15 @@ import type { ReactNode } from "react";
 // split by the same ratio as this component's two panes, so the chip sits
 // level with the rest of the tab strip rather than on a row below it. See
 // TabBar.tsx's `splitTab` branch.
+//
+// The iframe pane is `hidden sm:flex` - side-by-side never makes sense at
+// phone width (nowhere to put two panes), matching TabBar's own `sm:`-only
+// visibility and the drag gesture that opens a split being desktop-only to
+// begin with. This is a CSS-only guard, not a JS breakpoint check, so it
+// also covers `splitHref` surviving a live window resize down from desktop
+// (state isn't reset just because the viewport shrank) - the iframe pane
+// disappears and `mainChildren` reclaims the full width automatically via
+// its own `flex-1`, no JS needed to notice the breakpoint changed.
 export function SplitPane({ mainChildren, splitHref }: {
   mainChildren: ReactNode;
   splitHref: string;
@@ -23,7 +32,7 @@ export function SplitPane({ mainChildren, splitHref }: {
   return (
     <div className="flex min-h-0 flex-1">
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">{mainChildren}</div>
-      <div className="flex min-h-0 flex-1 flex-col border-l border-line/70">
+      <div className="hidden min-h-0 flex-1 flex-col border-l border-line/70 sm:flex">
         <iframe src={splitHref} title="Split view" className="h-full w-full flex-1 border-0 bg-paper" />
       </div>
     </div>
