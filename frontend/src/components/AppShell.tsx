@@ -128,6 +128,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   // ref (not state) so the onResize handler below always reads the latest
   // value without needing to be re-subscribed on every breakpoint change.
   const isDesktopRef = useRef(true);
+  // Mirrors `railCollapsed` for the same reason - onResize (below) needs the
+  // current value without re-subscribing, and closing over `railCollapsed`
+  // directly would see whatever it was when the Panel's onResize prop was
+  // last created, not the latest.
+  const railCollapsedRef = useRef(false);
+  useEffect(() => {
+    railCollapsedRef.current = railCollapsed;
+  }, [railCollapsed]);
   const { splitHref, closeSplit } = useSplitView();
   // Whether *this* document is a split-view pane's iframe. Starts false
   // (matches SSR, which has no `window`) and flips after mount if true -
@@ -267,11 +275,24 @@ export function AppShell({ children }: { children: ReactNode }) {
           // drag reads as "collapsed to icons" instead of "vanished". Mobile
           // hides via this exact same 0 target, but isDesktopRef is false
           // by the time that resize fires, so it's excluded here.
+          // The inverse also has to be handled here: a manual drag back
+          // open while `railCollapsed` is true previously left `collapsed`
+          // stuck true regardless of the panel's actual pixel width (only
+          // the toggle button itself cleared it) - Sidebar renders icon-
+          // only off that stale prop, so a full-width drag still showed
+          // just icons and the real "Collapse" button (which only renders
+          // when `!collapsed`) never came back. Any resize meaningfully
+          // past the rail width while collapsed is therefore a real drag
+          // open, not the toggle's own snap-to-rail, so clear it.
           onResize={(size) => {
-            if (isDesktopRef.current && size.inPixels < 1) {
+            if (!isDesktopRef.current) return;
+            if (size.inPixels < 1) {
               resizeUntilApplied(() => sidebarPanelRef.current, SIDEBAR_RAIL_WIDTH, { current: false });
               setRailCollapsed(true);
               writeRailCollapsed(true);
+            } else if (railCollapsedRef.current && size.inPixels > SIDEBAR_RAIL_WIDTH + 1) {
+              setRailCollapsed(false);
+              writeRailCollapsed(false);
             }
           }}
           className="border-r border-line/70"
