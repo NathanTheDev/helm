@@ -136,7 +136,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     railCollapsedRef.current = railCollapsed;
   }, [railCollapsed]);
-  const { splitHref, closeSplit } = useSplitView();
+  const { splitHref } = useSplitView();
   // Whether *this* document is a split-view pane's iframe. Starts false
   // (matches SSR, which has no `window`) and flips after mount if true -
   // same "server doesn't know, client does" shape as `mounted` below, just
@@ -309,7 +309,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AuthGate>
             <TabBar />
             {splitHref ? (
-              <SplitPane mainChildren={children} splitHref={splitHref} onCloseSplit={closeSplit} />
+              <SplitPane mainChildren={children} splitHref={splitHref} />
             ) : (
               <div className="flex flex-1 flex-col overflow-y-auto">{children}</div>
             )}
