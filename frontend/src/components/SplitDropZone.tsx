@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useSplitView } from "@/lib/split-view-context";
+import { useTabs } from "@/lib/tabs-context";
 
 // Covers the right half of the content area, but only while a tab chip is
 // actually being dragged (`draggingHref` set by TabBar's onDragStart) -
@@ -20,6 +22,9 @@ import { useSplitView } from "@/lib/split-view-context";
 // this is a belt-and-suspenders CSS guard rather than relying on that.
 export function SplitDropZone() {
   const { draggingHref, openSplit, setDraggingHref } = useSplitView();
+  const { tabs } = useTabs();
+  const pathname = usePathname();
+  const router = useRouter();
   const [isOver, setIsOver] = useState(false);
 
   if (!draggingHref) return null;
@@ -35,7 +40,21 @@ export function SplitDropZone() {
       onDrop={(e) => {
         e.preventDefault();
         const href = e.dataTransfer.getData("text/plain");
-        if (href) openSplit(href);
+        if (href) {
+          openSplit(href);
+          // The main pane isn't a snapshot of "the tab that was there" - it's
+          // just whatever `pathname` the router is on. Dropping the tab that
+          // IS the current pathname would otherwise leave that same page
+          // rendered in both panes, since nothing tells the main pane to move
+          // off it. Reroute it to a neighbor, same idx-1/idx fallback closeTab
+          // uses when closing the active tab out from under the main pane.
+          if (href === pathname) {
+            const idx = tabs.findIndex((t) => t.href === href);
+            const remaining = tabs.filter((t) => t.href !== href);
+            const neighbor = remaining[idx - 1] ?? remaining[idx];
+            if (neighbor) router.push(neighbor.href);
+          }
+        }
         setIsOver(false);
         setDraggingHref(null);
       }}
